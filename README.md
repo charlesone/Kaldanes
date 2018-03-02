@@ -141,37 +141,37 @@ Three different string types, identical in content and sorting logic, but not in
  Remember to use release builds if you are analyzing performance, otherwise Symbionts very slow!
  Remember to set the "ulimit -s" soft and hard stack limits to unlimited, otherwise it dies!]
 
-Quick Sort 100 10-byte strings
+Quick Sort 100 10-byte strings                                                                    
 Direct: 13.945 microseconds, 262 swaps, 910 compares
 Symbiont: 13.566 microseconds, 262 swaps, 910 compares
 std::string: 18.627 microseconds, 262 swaps, 910 compares
 
-Merge Sort 100 10-byte strings
+Merge Sort 100 10-byte strings                                                                    
 Direct: 13.295 microseconds, 612 swaps, 546 compares
 Symbiont: 11.374 microseconds, 612 swaps, 546 compares
 std::string: 30.876 microseconds, 612 swaps, 546 compares
 
-Quick Sort 100 100-byte strings
+Quick Sort 100 100-byte strings                                                                    
 Direct: 19.324 microseconds, 271 swaps, 828 compares
 Symbiont: 14.759 microseconds, 271 swaps, 828 compares
 std::string: 17.559 microseconds, 271 swaps, 828 compares
 
-Merge Sort 100 100-byte strings
+Merge Sort 100 100-byte strings                                                                    
 Direct: 20.988 microseconds, 627 swaps, 551 compares
 Symbiont: 14.219 microseconds, 627 swaps, 551 compares
 std::string: 30.593 microseconds, 627 swaps, 551 compares
 
-Quick Sort 100 1000-byte strings
+Quick Sort 100 1000-byte strings                                                                    
 Direct: 66.416 microseconds, 275 swaps, 836 compares
 Symbiont: 14.65 microseconds, 275 swaps, 836 compares
 std::string: 24.89 microseconds, 275 swaps, 836 compares
 
-Merge Sort 100 1000-byte strings
+Merge Sort 100 1000-byte strings                                                                    
 Direct: 101.646 microseconds, 624 swaps, 540 compares
 Symbiont: 13.982 microseconds, 624 swaps, 540 compares
 std::string: 31.666 microseconds, 624 swaps, 540 compares
 
-Quick Sort 10000 10-byte strings
+Quick Sort 10000 10-byte strings                                                                    
 Direct: 1971.42 microseconds, 42754 swaps, 168606 compares                                            
 Symbiont: 1715.71 microseconds, 42754 swaps, 168606 compares                                          
 std::string: 3292.99 microseconds, 42754 swaps, 168606 compares                                       
