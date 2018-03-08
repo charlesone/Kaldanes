@@ -153,28 +153,28 @@ Note that the number of swaps and compares for identical arrays,
 
 
 Quick Sort 100 10-byte strings
-Direct: 14.423 microseconds, 277.000 swaps, 925.000 compares
-Symbiont: 14.271 microseconds, 277.000 swaps, 925.000 compares
+Direct: 14.423 microseconds, 277.000 swaps, 925.000 compares                            
+Symbiont: 14.271 microseconds, 277.000 swaps, 925.000 compares                        
 std::string: 20.447 microseconds, 277.000 swaps, 925.000 compares
 
 Merge Sort 100 10-byte strings
-Direct: 14.308 microseconds, 622.000 swaps, 541.000 compares
-Symbiont: 11.880 microseconds, 622.000 swaps, 541.000 compares
+Direct: 14.308 microseconds, 622.000 swaps, 541.000 compares                               
+Symbiont: 11.880 microseconds, 622.000 swaps, 541.000 compares                           
 std::string: 33.805 microseconds, 622.000 swaps, 541.000 compares
 
 Quick Sort 100 100-byte strings
-Direct: 19.929 microseconds, 272.000 swaps, 886.000 compares
-Symbiont: 15.597 microseconds, 272.000 swaps, 886.000 compares
+Direct: 19.929 microseconds, 272.000 swaps, 886.000 compares                                 
+Symbiont: 15.597 microseconds, 272.000 swaps, 886.000 compares                             
 std::string: 17.052 microseconds, 272.000 swaps, 886.000 compares
 
 Merge Sort 100 100-byte strings
-Direct: 19.594 microseconds, 616.000 swaps, 531.000 compares
-Symbiont: 12.845 microseconds, 616.000 swaps, 531.000 compares
+Direct: 19.594 microseconds, 616.000 swaps, 531.000 compares                                    
+Symbiont: 12.845 microseconds, 616.000 swaps, 531.000 compares                                   
 std::string: 30.176 microseconds, 616.000 swaps, 531.000 compares
 
 Quick Sort 100 1000-byte strings
-Direct: 66.896 microseconds, 272.000 swaps, 835.000 compares
-Symbiont: 24.631 microseconds, 272.000 swaps, 835.000 compares
+Direct: 66.896 microseconds, 272.000 swaps, 835.000 compares                                
+Symbiont: 24.631 microseconds, 272.000 swaps, 835.000 compares                                   
 std::string: 21.628 microseconds, 272.000 swaps, 835.000 compares
 
 Merge Sort 100 1000-byte strings                                                                                                                                                                                                                                                         
