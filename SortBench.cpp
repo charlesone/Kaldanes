@@ -1125,7 +1125,7 @@ int main()
 
         Numeric<double> numericsMS;
         numericsMS.mergeSort(0.0, 10000000.0); // min, max of random generation
-
+        */
         DString<char> dstringsQS;
         dstringsQS.quickSort();
 
@@ -1137,7 +1137,7 @@ int main()
 
         Kaldane kstringsMS;
         kstringsMS.mergeSort();
-*/
+
         PString<string> pstringsQS;
         pstringsQS.quickSort(2, 1024); // initial, maximum string length by doubling
 
