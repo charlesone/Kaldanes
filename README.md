@@ -22,6 +22,12 @@ Kaldanes are a set of families of data structures and programming methods for a 
     added to the Application during this compilation process under terms of your choice,
     provided you also meet the terms and conditions of the Application license.
 
+This is research code and not production code: the intent is to find out just how fast string
+types could be made to run. When you build a dragster, you start out by throwing out the back seat,
+the spare tire, the upholstery, etc.: everything excess must go. In production code, you would add
+back those frills that make programming easier without slowing things down too much, and refactor
+it all to satisfy const, data hiding, and code maintenance concerns in general.
+
 There are currently three C++ source code files and three C++ header files in this collection:
 
 1. SortBench.cpp - a benchmark application for measuring the performance (clock time) of
