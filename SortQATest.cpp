@@ -30,6 +30,7 @@
 #include <algorithm>
 #include "Direct.h"
 #include "Symbiont.h"
+#include "Head.h"
 #include "Sorts.h"
 
 using namespace std;
@@ -133,6 +134,17 @@ void throwExceptionIfNotBoolian(T arr[], int size)
     }
 }
 
+template<typename T>
+void display(T arr[], int size)
+{
+    cout.precision(1);
+    for (int i = 0; i < size; ++i)
+    {
+        cout << arr[i] << " ";
+    }
+    cout << endl << endl;
+}
+
 const int shortStrings = 10;
 const int mediumStrings = 100;
 const int longStrings = 1000;
@@ -141,12 +153,17 @@ const int smallArrays = 100;
 const int largeArrays = 10000;
 const int giantArrays = 1000000;
 
-const std::size_t pmnkSize = 1;
+const std::size_t pmnkSize = 1; // Guarantees running off to the tail string a lot.
+const std::size_t switchoverPmnkSize = 1; // Guarantees running off to the tail string a lot.
 
 template<typename T>
 void doQuick(T arr[], int size, string type)
 {
+    llCompares = lCompares;
+    lCompares = compares;
     compares = 0;
+    llSwaps = lSwaps;
+    lSwaps = swaps;
     swaps = 0;
     duration<double, nano> sortTime = duration<double, nano> (0);
     high_resolution_clock::time_point start = high_resolution_clock::now();
@@ -156,16 +173,16 @@ void doQuick(T arr[], int size, string type)
     cout.precision(3);
     cout << fixed << type << ": " << chrono::duration <double, micro> (sortTime).count() << " microseconds, "
          << swaps << " swaps, " << compares << " compares" << endl;
-    llCompares = compares;
-    lCompares = compares;
-    llSwaps = swaps;
-    lSwaps = swaps;
 }
 
 template<typename T>
 void doMerge(T arr[], int size, string type)
 {
+    llCompares = lCompares;
+    lCompares = compares;
     compares = 0;
+    llSwaps = lSwaps;
+    lSwaps = swaps;
     swaps = 0;
     duration<double, nano> sortTime = duration<double, nano> (0);
     high_resolution_clock::time_point start = high_resolution_clock::now();
@@ -175,117 +192,156 @@ void doMerge(T arr[], int size, string type)
     cout.precision(3);
     cout << fixed << type << ": " << chrono::duration <double, micro> (sortTime).count() << " microseconds, "
          << swaps << " swaps, " << compares << " compares" << endl << flush;
-    llCompares = compares;
-    lCompares = compares;
-    llSwaps = swaps;
-    lSwaps = swaps;
 }
 
 class Sort_Comparator_Failure : public runtime_error
 {
 public:
     Sort_Comparator_Failure() :
-        runtime_error("identical Direct, Symbiont and std::string arrays should sort identically") {}
+        runtime_error("identical Direct, Symbiont and Head arrays should sort identically") {}
 };
 
 void doThreeShortQuick(int size)
 {
-    string strArr[size];
-    typedef Direct<char, shortStrings> direct;
-    direct dirArr[size];
-    typedef Symbiont<shortStrings, pmnkSize> symbiont;
-    symbiont symArr[size];
+    //string strArr[size];
+    Direct<char, shortStrings> dirArr[size];
+
+    Symbiont<shortStrings, pmnkSize, switchoverPmnkSize> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, shortStrings);
+
+    typedef Head<shortStrings, pmnkSize, switchoverPmnkSize> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+
+    generateRandomStrings(dirArr, symArr, headArr, size, shortStrings);
     throwExceptionIfNotBoolian(symArr, size);
+    throwExceptionIfNotBoolian(headArr, size);
     cout << endl << "Quick Sort " << size << " short strings (10 bytes)" << endl;
     doQuick(dirArr, size, "Direct");
     doQuick(symArr, size, "Symbiont");
+    doQuick(headArr, size, "Head");
     //doQuick(strArr, size, "<string>");
     if (!(compares == lCompares && lCompares == llCompares && swaps == lSwaps && lSwaps == llSwaps)) throw Sort_Comparator_Failure();
 }
 
 void doThreeShortMerge(int size)
 {
-    string strArr[size];
-    typedef Direct<char, shortStrings> direct;
-    direct dirArr[size];
-    typedef Symbiont<shortStrings, pmnkSize> symbiont;
-    symbiont symArr[size];
+    //string strArr[size];
+    Direct<char, shortStrings> dirArr[size];
+
+    Symbiont<shortStrings, pmnkSize, switchoverPmnkSize> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, shortStrings);
+
+    typedef Head<shortStrings, pmnkSize, switchoverPmnkSize> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    generateRandomStrings(dirArr, symArr, headArr, size, shortStrings);
     throwExceptionIfNotBoolian(symArr, size);
+    throwExceptionIfNotBoolian(headArr, size);
     cout << endl << "Merge Sort " << size << " short strings (10 bytes)" << endl;
     doMerge(dirArr, size, "Direct");
     doMerge(symArr, size, "Symbiont");
+    doMerge(headArr, size, "Head");
     //doMerge(strArr, size, "<string>");
     if (!(compares == lCompares && lCompares == llCompares && swaps == lSwaps && lSwaps == llSwaps)) throw Sort_Comparator_Failure();
 }
 
 void doThreeMediumQuick(int size)
 {
-    string strArr[size];
-    typedef Direct<char, mediumStrings> direct;
-    direct dirArr[size];
-    typedef Symbiont<mediumStrings, pmnkSize> symbiont;
-    symbiont symArr[size];
+    //string strArr[size];
+    Direct<char, mediumStrings> dirArr[size];
+
+    Symbiont<mediumStrings, pmnkSize, switchoverPmnkSize> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, mediumStrings);
+
+    typedef Head<mediumStrings, pmnkSize, switchoverPmnkSize> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    generateRandomStrings(dirArr, symArr, headArr, size, mediumStrings);
     throwExceptionIfNotBoolian(symArr, size);
+    throwExceptionIfNotBoolian(headArr, size);
     cout << endl << "Quick Sort " << size << " medium strings (100 bytes)" << endl;
     doQuick(dirArr, size, "Direct");
     doQuick(symArr, size, "Symbiont");
+    doQuick(headArr, size, "Head");
     //doQuick(strArr, size, "<string>");
     if (!(compares == lCompares && lCompares == llCompares && swaps == lSwaps && lSwaps == llSwaps)) throw Sort_Comparator_Failure();
 }
 
 void doThreeMediumMerge(int size)
 {
-    string strArr[size];
-    typedef Direct<char, mediumStrings> direct;
-    direct dirArr[size];
-    typedef Symbiont<mediumStrings, pmnkSize> symbiont;
-    symbiont symArr[size];
+    //string strArr[size];
+    Direct<char, mediumStrings> dirArr[size];
+
+    Symbiont<mediumStrings, pmnkSize, switchoverPmnkSize> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, mediumStrings);
+
+    typedef Head<mediumStrings, pmnkSize, switchoverPmnkSize> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    generateRandomStrings(dirArr, symArr, headArr, size, mediumStrings);
     throwExceptionIfNotBoolian(symArr, size);
+    throwExceptionIfNotBoolian(headArr, size);
     cout << endl << "Merge Sort " << size << " medium strings (100 bytes)" << endl;
     doMerge(dirArr, size, "Direct");
     doMerge(symArr, size, "Symbiont");
+    doMerge(headArr, size, "Head");
     //doMerge(strArr, size, "<string>");
     if (!(compares == lCompares && lCompares == llCompares && swaps == lSwaps && lSwaps == llSwaps)) throw Sort_Comparator_Failure();
 }
 
 void doThreeLongQuick(int size)
 {
-    string strArr[size];
-    typedef Direct<char, longStrings> direct;
-    direct dirArr[size];
-    typedef Symbiont<longStrings, pmnkSize> symbiont;
-    symbiont symArr[size];
+    //string strArr[size];
+    Direct<char, longStrings> dirArr[size];
+
+    Symbiont<longStrings, pmnkSize, switchoverPmnkSize> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, longStrings);
+
+    typedef Head<longStrings, pmnkSize, switchoverPmnkSize> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    generateRandomStrings(dirArr, symArr, headArr, size, longStrings);
     throwExceptionIfNotBoolian(symArr, size);
+    throwExceptionIfNotBoolian(headArr, size);
     cout << endl << "Quick Sort " << size << " long strings (1000 bytes)" << endl;
     doQuick(dirArr, size, "Direct");
     doQuick(symArr, size, "Symbiont");
+    doQuick(headArr, size, "Head");
     //doQuick(strArr, size, "<string>");
     if (!(compares == lCompares && lCompares == llCompares && swaps == lSwaps && lSwaps == llSwaps)) throw Sort_Comparator_Failure();
 }
 
 void doThreeLongMerge(int size)
 {
-    string strArr[size];
-    typedef Direct<char, longStrings> direct;
-    direct dirArr[size];
-    typedef Symbiont<longStrings, pmnkSize> symbiont;
-    symbiont symArr[size];
+    //string strArr[size];
+    Direct<char, longStrings> dirArr[size];
+
+    Symbiont<longStrings, pmnkSize, switchoverPmnkSize> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, longStrings);
+
+    typedef Head<longStrings, pmnkSize, switchoverPmnkSize> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    generateRandomStrings(dirArr, symArr, headArr, size, longStrings);
     throwExceptionIfNotBoolian(symArr, size);
+    throwExceptionIfNotBoolian(headArr, size);
     cout << endl << "Merge Sort " << size << " long strings (1000 bytes)" << endl;
     doMerge(dirArr, size, "Direct");
     doMerge(symArr, size, "Symbiont");
+    doMerge(headArr, size, "Head");
     //doMerge(strArr, size, "<string>");
     if (!(compares == lCompares && lCompares == llCompares && swaps == lSwaps && lSwaps == llSwaps)) throw Sort_Comparator_Failure();
 }

@@ -52,6 +52,7 @@
 #include <iterator>
 #include "Direct.h"
 #include "Symbiont.h"
+#include "Head.h"
 #include "Sorts.h"
 
 #ifdef __GNUG__
@@ -240,8 +241,8 @@ public:
         else throw Enum_Genus_Not_Initialized();
 #ifdef checkSorted
         cout << "Statistics are not displayed when array checking is selected." << endl;
-#else // if not checkSorted
-#ifdef semicolonSeparated
+#endif
+#if defined (semicolonSeparated) && ! defined (checkSorted)
         cout.precision(3);
         cout << arraySize << " " << genusName << " array" << "; ";
         cout << fixed << chrono::duration <double, micro> (testTimes / (double) iterations).count() << " sort \u03BCs; ";
@@ -250,7 +251,8 @@ public:
         cout << chrono::duration <double, micro> (totalTimes / (double) iterations).count() << " total \u03BCs; ";
         cout << (double) swaps/ (double) iterations << " swaps; ";
         cout << (double) compares/ (double) iterations << " compares";
-#else // if not semicolonSeparated
+#endif // if defined (semicolonSeparated) && ! defined (checkSorted)
+#if ! defined (semicolonSeparated) && ! defined (checkSorted)
         cout.precision(3);
         cout << "Average swaps, per sort: " << fixed << (double) swaps/ (double) iterations << endl;
         cout << "Average compares, per sort: " << fixed << (double) compares/ (double) iterations << endl;
@@ -267,8 +269,7 @@ public:
              << arraySize << " " << genusName << ", per sort: " << endl
              << chrono::duration <double, micro> (overheadTimes / (double) iterations).count() << endl;
         cout << "____________________________________________________________" << endl;
-#endif // if not semicolonSeparated
-#endif // if not checkSorted
+#endif // if ! defined (semicolonSeparated) && ! defined (checkSorted)
     }
 
     class Random_String_Too_Long : public runtime_error
@@ -861,7 +862,7 @@ public:
 
 };
 
-// Measure scale up against a Kaldane Symbiont string, which are variable-length (with an upper bound)
+// Measure scale up against a Hybrid Symbiont string, which are variable-length (with an upper bound)
 // null-terminated byte strings that have their indexes and a "poor man's normalized key" (pmnk) moved
 // when they are swapped, without moving their tail strings (ignoring the Sort Benchmark rules).
 // Symbiont has "value-string semantics" as Stroustrup defined for his String type (C++11, chapter 19.3)
@@ -877,21 +878,22 @@ public:
 // only array indices, the slab data structure is base+offset and can be mmapped to a file or /dev/shm and
 // shared locally or across a memory fabric such as Gen-Z, or stored and transmitted, or mmapped over
 // an NFS: consistency considerations are an issue for sharing, of course (caveat participem).
-class Kaldane: public SortBench
+class Hybrid: public SortBench
 {
 
 private:
     // can't increase lengths on these dynamically, requires separate types and expansions (sigh)
-    typedef Symbiont<2, 3> s2;
-    typedef Symbiont<4, 3> s4;
-    typedef Symbiont<8, 3> s8;
-    typedef Symbiont<16, 3> s16;
-    typedef Symbiont<32, 3> s32;
-    typedef Symbiont<64, 3> s64;
-    typedef Symbiont<128, 3> s128;
-    typedef Symbiont<256, 3> s256;
-    typedef Symbiont<512, 3> s512;
-    typedef Symbiont<1024, 3> s1024Max;
+
+    typedef Symbiont<2> s2;
+    typedef Symbiont<4> s4;
+    typedef Symbiont<8> s8;
+    typedef Symbiont<16> s16;
+    typedef Symbiont<32> s32;
+    typedef Symbiont<64> s64;
+    typedef Symbiont<128> s128;
+    typedef Symbiont<256> s256;
+    typedef Symbiont<512> s512;
+    typedef Symbiont<1024> s1024Max;
     std::function<void(s2[], int)> f2;
     std::function<void(s4[], int)> f4;
     std::function<void(s8[], int)> f8;
@@ -1099,6 +1101,246 @@ public:
     }
 };
 
+// Measure scale up against Isolate Head and tail strings, which are variable-length (with an upper
+// bound) null-terminated byte strings that have their indexes and a "poor man's normalized key" (pmnk)
+// moved when they are swapped, without moving their tail strings (ignoring the Sort Benchmark rules).
+// Head has "value-string semantics" as Stroustrup defined for his String type (C++11, chapter 19.3)
+// These might be a candidate for the Indy Sort. Head strings behave like Direct (DString) strings
+// for short lengths (32 bytes or less, by internally equating the pmnk length with the string length.)
+// This allows Head strings to almost match Direct strings in performance for short strings and
+// still have constant time complexity for string length: they are a candidate for general purpose
+// string programming with stack slab allocation/deallocation as opposed to the fine-grained allocators,
+// which are necessary for pointer strings like <string>. Head strings are quadratic in the debug build
+// and linear in the release build for both quick sort and merge sort, so remember to use the release build
+// for performance analysis. They are designed to be used  with with slab allocation/deallocation on the
+// stack, as opposed to fine-grained allocators. Since the allocated slab never needs to contain pointers,
+// only array indices, the slab data structure is base+offset and can be mmapped to a file or /dev/shm and
+// shared locally or across a memory fabric such as Gen-Z, or stored and transmitted, or mmapped over
+// an NFS: consistency considerations are an issue for sharing, of course (caveat participem).
+class Isolate: public SortBench
+{
+
+private:
+    // can't increase lengths on these dynamically, requires separate types and expansions (sigh)
+
+    typedef Head<2> h2;
+    typedef Head<4> h4;
+    typedef Head<8> h8;
+    typedef Head<16> h16;
+    typedef Head<32> h32;
+    typedef Head<64> h64;
+    typedef Head<128> h128;
+    typedef Head<256> h256;
+    typedef Head<512> h512;
+    typedef Head<1024> h1024Max;
+    std::function<void(h2[], int)> f2;
+    std::function<void(h4[], int)> f4;
+    std::function<void(h8[], int)> f8;
+    std::function<void(h16[], int)> f16;
+    std::function<void(h32[], int)> f32;
+    std::function<void(h64[], int)> f64;
+    std::function<void(h128[], int)> f128;
+    std::function<void(h256[], int)> f256;
+    std::function<void(h512[], int)> f512;
+    std::function<void(h1024Max[], int)> f1024Max;
+
+public:
+
+    template<typename U>
+    void test(U items[], int stringLength, std::function<void(U[], int)> sortFunction)
+    {
+        high_resolution_clock::time_point startRandomStringGeneration = high_resolution_clock::now();
+        generateRandomStrings(items, arraySize, stringLength);
+        randomGenerationTimes += duration_cast<duration<double>> (high_resolution_clock::now() - startRandomStringGeneration);
+
+#if defined (printInput) && ! defined (semicolonSeparated)
+        cout << "Input: ";
+        for (int i = 0; i < arraySize; ++i)
+        {
+            cout << items[i] << " ";
+            // before sorting, no k-values have moved, so the symbiont's head and tail are aligned
+        }
+        cout << endl << endl;
+#endif
+        high_resolution_clock::time_point start = high_resolution_clock::now();
+        sortFunction(items, arraySize);
+        testTimes += duration_cast<duration<double>> (high_resolution_clock::now() - start);
+
+#if defined (printSorted) && ! defined (semicolonSeparated)
+        cout << "Sorted: ";
+        for (int i = 0; i < arraySize; ++i)
+        {
+            cout << items[i] << " ";
+            // after sorting, all of the k-values have moved away from their tail strings (if tails nonempty)
+        }
+        cout << endl << endl;
+#endif
+
+        return;
+    }
+
+    template<typename U, typename V>
+    void testloop(std::function<void(U[], int)> sortFunction)
+    {
+        genus = strings;
+        resetStats();
+        high_resolution_clock::time_point start = high_resolution_clock::now();
+        for (int i = 0; i < iterations; ++i)
+        {
+            U heads[arraySize];
+            V tails[arraySize];
+            heads[0].dropAnchorKInit(heads, tails, arraySize);
+            checkStringLength(heads[0].size());
+            if (i == 0) // only display type information before first iteration
+            {
+                displayArrayTypeName(heads);
+#ifdef semicolonSeparated
+                cout << heads[0].size() << " byte length; " << iterations << " iteration; ";
+#else // if not semicolonSeparated
+                cout << endl;
+                cout << iterations << " iteration";
+                if (iterations > 1) cout << "s";
+                cout << endl;
+#endif // if not semicolonSeparated
+            }
+            test(heads, heads[0].size(), sortFunction);
+#ifdef checkSorted
+            throwExceptionIfUnsorted(heads, arraySize);
+#endif
+        }
+        totalTimes = duration_cast<duration<double>> (high_resolution_clock::now() - start);
+        displayStats();
+#ifdef justPrompt
+        string s;
+        getline(cin, s);
+#endif
+        return;
+    }
+
+    void driver()
+    {
+        resetVars();
+        while (arraySize <= arrayMax)
+        {
+            testloop<h2, h2::tail>(f2);
+            testloop<h4, h4::tail>(f4);
+            testloop<h8, h8::tail>(f8);
+            testloop<h16, h16::tail>(f16);
+            testloop<h32, h32::tail>(f32);
+            testloop<h64, h64::tail>(f64);
+            testloop<h128, h128::tail>(f128);
+            testloop<h256, h256::tail>(f256);
+            testloop<h512, h512::tail>(f512);
+            testloop<h1024Max, h1024Max::tail>(f1024Max);
+            arraySize <<= 1; // double the array size for the next dataset
+        }
+        return;
+    }
+
+    void selectionSort()
+    {
+        // can't increase lengths on these dynamically, requires separate types and expansions (sigh)
+        sortType = "Selection Sort";
+        f2 = selectionSortInvoke<h2>;
+        f4 = selectionSortInvoke<h4>;
+        f8 = selectionSortInvoke<h8>;
+        f16 = selectionSortInvoke<h16>;
+        f32 = selectionSortInvoke<h32>;
+        f64 = selectionSortInvoke<h64>;
+        f128 = selectionSortInvoke<h128>;
+        f256 = selectionSortInvoke<h256>;
+        f512 = selectionSortInvoke<h512>;
+        f1024Max = selectionSortInvoke<h1024Max>;
+        driver();
+    }
+
+    void shellSort()
+    {
+        // can't increase lengths on these dynamically, requires separate types and expansions (sigh)
+        sortType = "Shell Sort";
+        f2 = shellSortInvoke<h2>;
+        f4 = shellSortInvoke<h4>;
+        f8 = shellSortInvoke<h8>;
+        f16 = shellSortInvoke<h16>;
+        f32 = shellSortInvoke<h32>;
+        f64 = shellSortInvoke<h64>;
+        f128 = shellSortInvoke<h128>;
+        f256 = shellSortInvoke<h256>;
+        f512 = shellSortInvoke<h512>;
+        f1024Max = shellSortInvoke<h1024Max>;
+        driver();
+    }
+
+    void insertionSort()
+    {
+        // can't increase lengths on these dynamically, requires separate types and expansions (sigh)
+        sortType = "Insertion Sort";
+        f2 = insertionSortInvoke<h2>;
+        f4 = insertionSortInvoke<h4>;
+        f8 = insertionSortInvoke<h8>;
+        f16 = insertionSortInvoke<h16>;
+        f32 = insertionSortInvoke<h32>;
+        f64 = insertionSortInvoke<h64>;
+        f128 = insertionSortInvoke<h128>;
+        f256 = insertionSortInvoke<h256>;
+        f512 = insertionSortInvoke<h512>;
+        f1024Max = insertionSortInvoke<h1024Max>;
+        driver();
+    }
+
+    void mergeSort()
+    {
+        // can't increase lengths on these dynamically, requires separate types and expansions (sigh)
+        sortType = "Merge Sort";
+        f2 = mergeSortInvoke<h2>;
+        f4 = mergeSortInvoke<h4>;
+        f8 = mergeSortInvoke<h8>;
+        f16 = mergeSortInvoke<h16>;
+        f32 = mergeSortInvoke<h32>;
+        f64 = mergeSortInvoke<h64>;
+        f128 = mergeSortInvoke<h128>;
+        f256 = mergeSortInvoke<h256>;
+        f512 = mergeSortInvoke<h512>;
+        f1024Max = mergeSortInvoke<h1024Max>;
+        driver();
+    }
+
+    void quickSort()
+    {
+        // can't increase lengths on these dynamically, requires separate types and expansions (sigh)
+        sortType = "Quick Sort";
+        f2 = quickSortInvoke<h2>;
+        f4 = quickSortInvoke<h4>;
+        f8 = quickSortInvoke<h8>;
+        f16 = quickSortInvoke<h16>;
+        f32 = quickSortInvoke<h32>;
+        f64 = quickSortInvoke<h64>;
+        f128 = quickSortInvoke<h128>;
+        f256 = quickSortInvoke<h256>;
+        f512 = quickSortInvoke<h512>;
+        f1024Max = quickSortInvoke<h1024Max>;
+        driver();
+    }
+
+    void stlSort()
+    {
+        // can't increase lengths on these dynamically, requires separate types and expansions (sigh)
+        throw Not_Working_Yet();
+        sortType = "STL Sort";
+        f2 = stlSortInvoke<h2>;
+        f4 = stlSortInvoke<h4>;
+        f8 = stlSortInvoke<h8>;
+        f16 = stlSortInvoke<h16>;
+        f32 = stlSortInvoke<h32>;
+        f64 = stlSortInvoke<h64>;
+        f128 = stlSortInvoke<h128>;
+        f256 = stlSortInvoke<h256>;
+        f512 = stlSortInvoke<h512>;
+        f1024Max = stlSortInvoke<h1024Max>;
+        driver();
+    }
+};
+
 int main()
 {
 // Remember to set the C++11 switch in the IDE or compiler!
@@ -1107,7 +1349,7 @@ int main()
 //    permanently, otherwise these tests won't get very far!
 
     SortBench m;
-    m.initializeVars(16, 65536, 10); // initial array size, doubling maximum, and iterations per size (precision)
+    m.initializeVars(16, 65536, 5); // initial array size, doubling maximum, and iterations per size (precision)
     try
     {
         /*
@@ -1132,11 +1374,17 @@ int main()
         DString<char> dstringsMS;
         dstringsMS.mergeSort();
 
-        Kaldane kstringsQS;
-        kstringsQS.quickSort();
+        Hybrid hstringsQS;
+        hstringsQS.quickSort();
 
-        Kaldane kstringsMS;
-        kstringsMS.mergeSort();
+        Hybrid hstringsMS;
+        hstringsMS.mergeSort();
+
+        Isolate istringsQS;
+        istringsQS.quickSort();
+
+        Isolate istringsMS;
+        istringsMS.mergeSort();
 
         PString<string> pstringsQS;
         pstringsQS.quickSort(2, 1024); // initial, maximum string length by doubling

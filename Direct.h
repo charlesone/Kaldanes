@@ -77,6 +77,11 @@ public:
         return length;
     }
 
+    size_t structSize() const noexcept
+    {
+        return sizeof(r);
+    }
+
     void checkUnitLength(std::size_t size) // parameter size should be (array length/array count)
     {
         if (sizeof(r) != size) throw Item_Size_Mismatch();

@@ -1,5 +1,5 @@
-#ifndef SYMBIONT_H_INCLUDED
-#define SYMBIONT_H_INCLUDED
+#ifndef HEAD_H_INCLUDED
+#define HEAD_H_INCLUDED
 
 /*
     [Valverde Computing copyright notice]
@@ -23,17 +23,17 @@
     added to the Application during this compilation process under terms of your choice,
     provided you also meet the terms and conditions of the Application license.
 
-Symbiont.h - header file for Kaldane Symbiont string, which are variable-length (with an upper
+Head.h - header file for Kaldane Head string, which are variable-length (with an upper
   bound) null-terminated byte strings that have their indexes and a "poor man's normalized key"
   (pmnk) moved when they are swapped, without moving their tail strings (ignoring the Sort Benchmark
-  rules). Symbiont has "value-string semantics" as Stroustrup defined for his String type (C++11,
-  chapter 19.3) These might be a candidate for the Indy Sort. Symbiont strings behave like Direct
+  rules). Head has "value-string semantics" as Stroustrup defined for his String type (C++11,
+  chapter 19.3) These might be a candidate for the Indy Sort. Head strings behave like Direct
   strings for short lengths (32 bytes or less, by internally equating the pmnk length with the
-  string length.) This allows Symbiont strings to match Direct strings in performance for short
+  string length.) This allows Head strings to match Direct strings in performance for short
   strings and still have constant time complexity for any string length: they are a candidate
   for general purpose string programming with stack slab allocation/deallocation as opposed to
-  the fine-grained allocators, which are necessary for pointer strings like <string>. Symbiont
-  strings are quadratic in the debug build for  merge sort, and linear in the release build for
+  the fine-grained allocators, which are necessary for pointer strings like <string>. Head
+  strings are quadratic in the debug build for merge sort, and linear in the release build for
   both quick sort and merge sort, so remember to use the release build for performance analysis.
   They are designed to be used  with with slab allocation/deallocation on the stack, as opposed
   to fine-grained allocators. Since the allocated slab never needs to contain pointers, only
@@ -49,13 +49,16 @@ Symbiont.h - header file for Kaldane Symbiont string, which are variable-length 
 */
 
 #include <iostream>
+#include "Direct.h"
 
 using namespace std;
 
-static char *strAnchor = 0;
+static char *tailAnchor = 0;
+static std::size_t tailElementSize = -1;
+static std::size_t tailStructSize = -1;
 
-template <std::size_t maxStringSize, std::size_t maxPmnkSize = 3, std::size_t switchoverPmnkSize = 32>
-class Symbiont
+template <std::size_t maxStringSize, std::size_t maxPmnkSize = 7, std::size_t switchoverPmnkSize = 16>
+class Head
 {
 private:
 
@@ -70,16 +73,17 @@ private:
     // The mechanism is driven from the maxPmnkSize choice, see the quote below. If prefix truncation cannot
     // be done reasonably, then increase this to minimize the occurrence of going to the tail string.
     // Try to make the PMNK string + null fit in an integer (4-byte) package, struct round-off by the compiler
-    // will take that space anyway: Optimal sizes are 3,7,11,15,19 ...
-    // Also, through looking at the performance of Direct strings (moving all of it, not just the head),
-    // it turns out to be faster, for strings 32 bytes or less, to make the pmnk the size of the string and
-    // have an empty tail: hence the optimalMaxPmnkSize. This is possibly due to striding pre-fetch, I think.
+    // will take that space anyway: Optimal sizes for maxPmnkSize are 3,7,11,15,19 ..., the default is 7,
+    // which is a little slower than 3 at the small scale (when it doesn't matter), but much faster than
+    // three at enormous scale, due to the greater number of identical pmnk at that scale. The
+    // switchoverPmnkSize parameter overrides that size at the small scale and seems to optimize that nicely.
     static const std::size_t pmnkSize = (headPlusTailLen <= optimalMaxPmnkSize)
                                         ? headPlusTailLen : optimalMaxPmnkSize; // if small, pmnk == str
+
     static const std::size_t tailSize = (headPlusTailLen <= optimalMaxPmnkSize)
                                         ? 0 : headPlusTailLen - (optimalMaxPmnkSize);
 
-    struct Head // Movable, references the torso with an index offset from the strAnchor
+    struct HeadStruct // Movable, references the torso with an index offset from the tailAnchor
     {
         int k;
         char pmnk[pmnkSize + 1]; // Poor Man's Normalized Key, see below. Null-terminated.
@@ -99,20 +103,11 @@ private:
         leaves.
     */
 
-    struct Torso // Should be immutable and immobile
-    {
-        char tail[tailSize + 1]; // Null-terminated.
-    };
-
-    struct Unity
-    {
-        Head h;
-        Torso t;
-    };
-
-    Unity s;
+    HeadStruct h;
 
 public:
+
+    typedef Direct<char, tailSize> tail;
 
     class Item_Size_Mismatch : public runtime_error
     {
@@ -132,14 +127,14 @@ public:
     {
     public:
         Bad_Array_Anchor_Or_K_Init() :
-            runtime_error("after allocating the array, you MUST call array[0].dropAnchorKInit(array, WITH_A_CORRECT_arrayCount)") {}
+            runtime_error("after allocation, you MUST call array[0].dropAnchorKInit(headArray, tailArray, correct_arrayCount)") {}
     };
 
     class Already_Array_Anchor : public runtime_error
     {
     public:
         Already_Array_Anchor() :
-            runtime_error("you must ONLY ONCE call array[0].dropAnchor(arrayByteLength/arrayCount)") {}
+            runtime_error("you must ONLY ONCE call array[0].dropAnchorKInit(headArray, tailArray, correct_arrayCount)") {}
     };
 
     class Should_Not_Execute_Here : public runtime_error
@@ -149,36 +144,38 @@ public:
             runtime_error("program should not execute here (performance debugging)") {}
     };
 
-    Symbiont()
+    Head()
     {
     }
 
-    Symbiont(const Symbiont& rhs)
+    Head(const Head& rhs)
     {
-        s.h = rhs.s.h; // heads only move
+        h = rhs.h; // heads only move
     }
 
-    Symbiont& operator = (const Symbiont& rhs)
+    Head& operator = (const Head& rhs)
     {
-        s.h = rhs.s.h; // heads only move
+        h = rhs.h; // heads only move
         return *this;
     }
 
-    Symbiont& assign(const char* str)
+    Head& assign(const char* str)
     {
         int len = strlen(str);
         if (len > headPlusTailLen) throw Assign_String_Too_Long();
-        s.h.pmnk[0] = 0;
-        s.t.tail[0] = 0;
+        h.pmnk[0] = 0;
+        // Now we get our (Head) array index and index into the Tail array
+        char *tailStr = tailAnchor + (h.k * tailStructSize); // = tailArray[h.k].r.arr : Direct co-array string
+        tailStr[0] = 0;
         if (len > pmnkSize)
         {
-            strncpy(s.h.pmnk, str, pmnkSize);
-            s.h.pmnk[pmnkSize] = 0;
-            strcpy(s.t.tail, str+pmnkSize);
+            strncpy(h.pmnk, str, pmnkSize);
+            h.pmnk[pmnkSize] = 0;
+            strcpy(tailStr, str+pmnkSize);
         }
         else
         {
-            strcpy(s.h.pmnk, str);
+            strcpy(h.pmnk, str);
         }
         return *this;
     }
@@ -190,130 +187,134 @@ public:
 
     size_t structSize() const noexcept
     {
-        return sizeof(s);
+        return sizeof(h);
     }
 
-    bool operator < (const Symbiont& rhs)
+    bool operator < (const Head& rhs)
     {
-        if (s.h.k == rhs.s.h.k) return false; // pivot, temp or external array identity optimization
-        int pmnkCompare = strcmp(s.h.pmnk, rhs.s.h.pmnk);
+        if (h.k == rhs.h.k) return false; // pivot, temp or external array identity optimization
+        int pmnkCompare = strcmp(h.pmnk, rhs.h.pmnk);
         if (pmnkCompare < 0) return true; // independent of the tail
         else if (pmnkCompare > 0 || (pmnkCompare == 0 && tailSize == 0)) return false; // don't check tail
-        // the pmnk are identical, need to look at tails
-        else
+        else // the pmnk are identical, need to look at tails
         {
-            if (strAnchor == 0 || s.h.k < 0 || rhs.s.h.k < 0) throw Bad_Array_Anchor_Or_K_Init();
+            if (tailAnchor == 0 || tailElementSize == -1 || tailStructSize == -1 || h.k < 0 || rhs.h.k < 0)
+                throw Bad_Array_Anchor_Or_K_Init();
             // throw Should_Not_Execute_Here(); // performance debugging
-            char *lhsStr = strAnchor + (s.h.k * sizeof(s)); // *array[s.h.k].s.t.tail
-            char *rhsStr = strAnchor + (rhs.s.h.k * sizeof(s)); // *array[rhs.s.h.k].s.t.tail
+            char *lhsStr = tailAnchor + (h.k * tailStructSize); // = tailArray[h.k].r.arr : Direct co-array string
+            char *rhsStr = tailAnchor + (rhs.h.k * tailStructSize); // = tailArray[rhs.h.k].r.arr : Direct co-array string
             bool state = (strcmp(lhsStr, rhsStr) < 0);
             return state;
         }
     }
 
-    bool operator <= (const Symbiont& rhs)
+    bool operator <= (const Head& rhs)
     {
-        if (s.h.k == rhs.s.h.k) return true; // pivot, temp or external array identity optimization
-        int pmnkCompare = strcmp(s.h.pmnk, rhs.s.h.pmnk);
+        if (h.k == rhs.h.k) return true; // pivot, temp or external array identity optimization
+        int pmnkCompare = strcmp(h.pmnk, rhs.h.pmnk);
         if (pmnkCompare < 0 || (pmnkCompare == 0 && tailSize == 0)) return true; // independent of the tail
         else if (pmnkCompare > 0) return false; // don't check tail
-        // the pmnk are identical, need to look at tails
-        else
+        else // the pmnk are identical, need to look at tails
         {
-            if (strAnchor == 0 || s.h.k < 0 || rhs.s.h.k < 0) throw Bad_Array_Anchor_Or_K_Init();
+            if (tailAnchor == 0 || tailElementSize == -1 || tailStructSize == -1 || h.k < 0 || rhs.h.k < 0)
+                throw Bad_Array_Anchor_Or_K_Init();
             // throw Should_Not_Execute_Here(); // performance debugging
-            char *lhsStr = strAnchor + (s.h.k * sizeof(s)); // *array[s.h.k].s.t.tail
-            char *rhsStr = strAnchor + (rhs.s.h.k * sizeof(s)); // *array[rhs.s.h.k].s.t.tail
+            char *lhsStr = tailAnchor + (h.k * tailStructSize); // = tailArray[h.k].r.arr : Direct co-array string
+            char *rhsStr = tailAnchor + (rhs.h.k * tailStructSize); // = tailArray[rhs.h.k].r.arr : Direct co-array string
             bool state = (strcmp(lhsStr, rhsStr) < 1);
             return state;
         }
     }
 
-    bool operator == (const Symbiont& rhs)
+    bool operator == (const Head& rhs)
     {
-        if (s.h.k == rhs.s.h.k) return true; // pivot, temp or external array identity optimization
-        int pmnkCompare = strcmp(s.h.pmnk, rhs.s.h.pmnk);
+        if (h.k == rhs.h.k) return true; // pivot, temp or external array identity optimization
+        int pmnkCompare = strcmp(h.pmnk, rhs.h.pmnk);
         if (pmnkCompare == 0 && tailSize == 0) return true; // independent of the tail
         else if (pmnkCompare != 0) return false; // don't check tail
-        // the pmnk are identical, need to look at tails
-        else
+        else // the pmnk are identical, need to look at tails
         {
-            if (strAnchor == 0 || s.h.k < 0 || rhs.s.h.k < 0) throw Bad_Array_Anchor_Or_K_Init();
+            if (tailAnchor == 0 || tailElementSize == -1 || tailStructSize == -1 || h.k < 0 || rhs.h.k < 0)
+                throw Bad_Array_Anchor_Or_K_Init();
             // throw Should_Not_Execute_Here(); // performance debugging
-            char *lhsStr = strAnchor + (s.h.k * sizeof(s)); // *array[s.h.k].s.t.tail
-            char *rhsStr = strAnchor + (rhs.s.h.k * sizeof(s)); // *array[rhs.s.h.k].s.t.tail
+            char *lhsStr = tailAnchor + (h.k * tailStructSize); // = tailArray[h.k].r.arr : Direct co-array string
+            char *rhsStr = tailAnchor + (rhs.h.k * tailStructSize); // = tailArray[rhs.h.k].r.arr : Direct co-array string
             bool state = (strcmp(lhsStr, rhsStr) == 0);
             return state;
         }
     }
 
-    bool operator != (const Symbiont& rhs)
+    bool operator != (const Head& rhs)
     {
-        if (s.h.k == rhs.s.h.k) return false; // pivot, temp or external array identity optimization
-        int pmnkCompare = strcmp(s.h.pmnk, rhs.s.h.pmnk);
+        if (h.k == rhs.h.k) return false; // pivot, temp or external array identity optimization
+        int pmnkCompare = strcmp(h.pmnk, rhs.h.pmnk);
         if (pmnkCompare == 0 && tailSize == 0) return false; // independent of the tail
         else if (pmnkCompare != 0) return true; // don't check tail
-        // the pmnk are identical, need to look at tails
-        else
+        else // the pmnk are identical, need to look at tails
         {
-            if (strAnchor == 0 || s.h.k < 0 || rhs.s.h.k < 0) throw Bad_Array_Anchor_Or_K_Init();
+            if (tailAnchor == 0 || tailElementSize == -1 || tailStructSize == -1 || h.k < 0 || rhs.h.k < 0)
+                throw Bad_Array_Anchor_Or_K_Init();
             // throw Should_Not_Execute_Here(); // performance debugging
-            char *lhsStr = strAnchor + (s.h.k * sizeof(s)); // *array[s.h.k].s.t.tail
-            char *rhsStr = strAnchor + (rhs.s.h.k * sizeof(s)); // *array[rhs.s.h.k].s.t.tail
+            char *lhsStr = tailAnchor + (h.k * tailStructSize); // = tailArray[h.k].r.arr : Direct co-array string
+            char *rhsStr = tailAnchor + (rhs.h.k * tailStructSize); // = tailArray[rhs.h.k].r.arr : Direct co-array string
             bool state = (strcmp(lhsStr, rhsStr) != 0);
             return state;
         }
     }
 
-    bool operator >= (const Symbiont& rhs)
+    bool operator >= (const Head& rhs)
     {
-        if (s.h.k == rhs.s.h.k) return true; // pivot, temp or external array identity optimization
-        int pmnkCompare = strcmp(s.h.pmnk, rhs.s.h.pmnk);
+        if (h.k == rhs.h.k) return true; // pivot, temp or external array identity optimization
+        int pmnkCompare = strcmp(h.pmnk, rhs.h.pmnk);
         if (pmnkCompare > 0 || (pmnkCompare == 0 && tailSize == 0)) return true; // independent of the tail
         else if (pmnkCompare < 0 ) return false; // don't check tail
-        // the pmnk are identical, need to look at tails
-        else
+        else // the pmnk are identical, need to look at tails
         {
-            if (strAnchor == 0 || s.h.k < 0 || rhs.s.h.k < 0) throw Bad_Array_Anchor_Or_K_Init();
+            if (tailAnchor == 0 || tailElementSize == -1 || tailStructSize == -1 || h.k < 0 || rhs.h.k < 0)
+                throw Bad_Array_Anchor_Or_K_Init();
             // throw Should_Not_Execute_Here(); // performance debugging
-            char *lhsStr = strAnchor + (s.h.k * sizeof(s)); // *array[s.h.k].s.t.tail
-            char *rhsStr = strAnchor + (rhs.s.h.k * sizeof(s)); // *array[rhs.s.h.k].s.t.tail
+            char *lhsStr = tailAnchor + (h.k * tailStructSize); // = tailArray[h.k].r.arr : Direct co-array string
+            char *rhsStr = tailAnchor + (rhs.h.k * tailStructSize); // = tailArray[rhs.h.k].r.arr : Direct co-array string
             bool state = (strcmp(lhsStr, rhsStr) > -1);
             return state;
         }
     }
 
-    bool operator > (const Symbiont& rhs)
+    bool operator > (const Head& rhs)
     {
-        if (s.h.k == rhs.s.h.k) return false; // pivot, temp or external array identity optimization
-        int pmnkCompare = strcmp(s.h.pmnk, rhs.s.h.pmnk);
+        if (h.k == rhs.h.k) return false; // pivot, temp or external array identity optimization
+        int pmnkCompare = strcmp(h.pmnk, rhs.h.pmnk);
         if (pmnkCompare > 0) return true; // independent of the tail
         else if (pmnkCompare < 0 || (pmnkCompare == 0 && tailSize == 0)) return false; // don't check tail
-        // the pmnk are identical, need to look at tails
-        else
+        else // the pmnk are identical, need to look at tails
         {
-            if (strAnchor == 0 || s.h.k < 0 || rhs.s.h.k < 0) throw Bad_Array_Anchor_Or_K_Init();
+            if (tailAnchor == 0 || tailElementSize == -1 || tailStructSize == -1 || h.k < 0 || rhs.h.k < 0)
+                throw Bad_Array_Anchor_Or_K_Init();
             // throw Should_Not_Execute_Here(); // performance debugging
-            char *lhsStr = strAnchor + (s.h.k * sizeof(s)); // *array[s.h.k].s.t.tail
-            char *rhsStr = strAnchor + (rhs.s.h.k * sizeof(s)); // *array[rhs.s.h.k].s.t.tail
+            char *lhsStr = tailAnchor + (h.k * tailStructSize); // = tailArray[h.k].r.arr : Direct co-array string
+            char *rhsStr = tailAnchor + (rhs.h.k * tailStructSize); // = tailArray[rhs.h.k].r.arr : Direct co-array string
             bool state = (strcmp(lhsStr, rhsStr) > 0);
             return state;
         }
     }
 
-    void dropAnchorKInit(Symbiont symbArr[], std::size_t size) // parameters should look like (array, array count)
+    void dropAnchorKInit(Head headArr[], Direct<char, tailSize> tailArr[], std::size_t size)
+    // parameters should look like (headArray, tailArray, array count)
     {
-        // if (strAnchor != 0) throw Already_Array_Anchor();
-        //if (sizeof(symbArr[0]) != sizeof(symbArr)/size) throw Item_Size_Mismatch();
-        strAnchor = symbArr[0].s.t.tail;
-        for (int i = 0; i < size; ++i) symbArr[i].s.h.k = i;
+        // if (tailAnchor != 0) throw Already_Array_Anchor();
+        // if (sizeof(headArray[0]) != sizeof(headArray)/size) throw Item_Size_Mismatch();
+        tailAnchor = (char*)tailArr;
+        tailElementSize = tailArr[0].size();
+        tailStructSize = tailArr[0].structSize();
+        for (int i = 0; i < size; ++i) headArr[i].h.k = i;
     }
 
-    friend ostream& operator<< (ostream &os, const Symbiont& rhs)
+    friend ostream& operator<< (ostream &os, const Head& rhs)
     {
-        if (strAnchor == 0 || rhs.s.h.k < 0) throw Bad_Array_Anchor_Or_K_Init();
-        os << rhs.s.h.pmnk;
-        char *tailStr = strAnchor + (rhs.s.h.k * sizeof(s));
+        if (tailAnchor == 0 || tailElementSize == -1 || tailStructSize == -1 || rhs.h.k < 0)
+            throw Bad_Array_Anchor_Or_K_Init();
+        os << rhs.h.pmnk;
+        char *tailStr = tailAnchor + (rhs.h.k * tailStructSize);
         os << tailStr;
         return os;
     }
@@ -323,6 +324,6 @@ public:
 
 };
 
-#endif // SYMBIONT_H_INCLUDED
+#endif // HEAD_H_INCLUDED
 
 

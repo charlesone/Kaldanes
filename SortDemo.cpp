@@ -30,6 +30,7 @@
 #include <algorithm>
 #include "Direct.h"
 #include "Symbiont.h"
+#include "Head.h"
 #include "Sorts.h"
 
 using namespace std;
@@ -37,8 +38,8 @@ using namespace std::chrono;
 
 // Only calls distribution(generator) on the average, one time for every four characters.
 // Should be faster than calling it on every character, I think
-template<typename T, typename U, typename V>
-void generateRandomStrings(T tArr[], U uArr[], V vArr[], int sizeArray, int sizeString)
+template<typename T, typename U, typename V, typename W>
+void generateRandomStrings(T tArr[], U uArr[], V vArr[], W wArr, int sizeArray, int sizeString)
 {
     char radixString[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const int radixLen = sizeof(radixString) - 1; // it's null-terminated
@@ -56,6 +57,7 @@ void generateRandomStrings(T tArr[], U uArr[], V vArr[], int sizeArray, int size
     };
     byteRand overlay;
 
+    // This loop should create four identical string arrays of different types
     for (int i = 0; i < sizeArray; ++i)
     {
         for (int j = 0; j < uint64Length; ++j)
@@ -73,6 +75,8 @@ void generateRandomStrings(T tArr[], U uArr[], V vArr[], int sizeArray, int size
         uArr[i].assign(overlay.charRand);
         vArr[i].reserve(sizeString);
         vArr[i].assign(overlay.charRand);
+        wArr[i].reserve(sizeString);
+        wArr[i].assign(overlay.charRand);
     }
 }
 
@@ -83,8 +87,6 @@ const int string1K = 1000;
 const int array100 = 100;
 const int array10K = 10000;
 const int array1M = 1000000;
-
-const std::size_t pmnkSize = 1;
 
 template<typename T>
 void doQuick(T arr[], int size, string type)
@@ -116,99 +118,141 @@ void doMerge(T arr[], int size, string type)
          << swaps << " swaps, " << compares << " compares" << endl << flush;
 }
 
-void doThree10ByteQuick(int size)
+void doFour10ByteQuick(int size)
 {
     // Create three different string type arrays with identical contents and quick sort them
-    string strArr[size];
-    typedef Direct<char, string10> direct;
-    direct dirArr[size];
-    typedef Symbiont<string10, pmnkSize> symbiont;
-    symbiont symArr[size];
+    Direct<char, string10> dirArr[size];
+
+    Symbiont<string10> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, string10);
+
+    typedef Head<string10> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    string strArr[size];
+
+    generateRandomStrings(dirArr, symArr, headArr, strArr, size, string10);
     cout << endl << "Quick Sort " << size << " " << string10 << "-byte strings" << endl;
     doQuick(dirArr, size, "Direct");
     doQuick(symArr, size, "Symbiont");
+    doQuick(headArr, size, "Head");
     doQuick(strArr, size, "std::string");
 }
 
-void doThree10ByteMerge(int size)
+void doFour10ByteMerge(int size)
 {
-    // Create three different string type arrays with identical contents and merge sort them
-    string strArr[size];
-    typedef Direct<char, string10> direct;
-    direct dirArr[size];
-    typedef Symbiont<string10, pmnkSize> symbiont;
-    symbiont symArr[size];
+    // Create three different string type arrays with identical contents and quick sort them
+    Direct<char, string10> dirArr[size];
+
+    Symbiont<string10> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, string10);
+
+    typedef Head<string10> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    string strArr[size];
+
+    generateRandomStrings(dirArr, symArr, headArr, strArr, size, string10);
     cout << endl << "Merge Sort " << size << " " << string10 << "-byte strings" << endl;
     doMerge(dirArr, size, "Direct");
     doMerge(symArr, size, "Symbiont");
+    doMerge(headArr, size, "Head");
     doMerge(strArr, size, "std::string");
 }
 
-void doThree100ByteQuick(int size)
+void doFour100ByteQuick(int size)
 {
     // Create three different string type arrays with identical contents and quick sort them
-    string strArr[size];
-    typedef Direct<char, string100> direct;
-    direct dirArr[size];
-    typedef Symbiont<string100, pmnkSize> symbiont;
-    symbiont symArr[size];
+    Direct<char, string100> dirArr[size];
+
+    Symbiont<string100> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, string100);
+
+    typedef Head<string100> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    string strArr[size];
+
+    generateRandomStrings(dirArr, symArr, headArr, strArr, size, string100);
     cout << endl << "Quick Sort " << size << " " << string100 << "-byte strings" << endl;
     doQuick(dirArr, size, "Direct");
     doQuick(symArr, size, "Symbiont");
+    doQuick(headArr, size, "Head");
     doQuick(strArr, size, "std::string");
 }
 
-void doThree100ByteMerge(int size)
+void doFour100ByteMerge(int size)
 {
-    // Create three different string type arrays with identical contents and merge sort them
-    string strArr[size];
-    typedef Direct<char, string100> direct;
-    direct dirArr[size];
-    typedef Symbiont<string100, pmnkSize> symbiont;
-    symbiont symArr[size];
+    // Create three different string type arrays with identical contents and quick sort them
+    Direct<char, string100> dirArr[size];
+
+    Symbiont<string100> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, string100);
+
+    typedef Head<string100> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    string strArr[size];
+
+    generateRandomStrings(dirArr, symArr, headArr, strArr, size, string100);
     cout << endl << "Merge Sort " << size << " " << string100 << "-byte strings" << endl;
     doMerge(dirArr, size, "Direct");
     doMerge(symArr, size, "Symbiont");
+    doMerge(headArr, size, "Head");
     doMerge(strArr, size, "std::string");
 }
 
-void doThree1KByteQuick(int size)
+void doFour1KByteQuick(int size)
 {
-     // Create three different string type arrays with identical contents and quick sort them
-   string strArr[size];
-    typedef Direct<char, string1K> direct;
-    direct dirArr[size];
-    typedef Symbiont<string1K, pmnkSize> symbiont;
-    symbiont symArr[size];
+    // Create three different string type arrays with identical contents and quick sort them
+    Direct<char, string1K> dirArr[size];
+
+    Symbiont<string1K> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, string1K);
+
+    typedef Head<string1K> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    string strArr[size];
+
+    generateRandomStrings(dirArr, symArr, headArr, strArr, size, string1K);
     cout << endl << "Quick Sort " << size << " " << string1K << "-byte strings" << endl;
     doQuick(dirArr, size, "Direct");
     doQuick(symArr, size, "Symbiont");
+    doQuick(headArr, size, "Head");
     doQuick(strArr, size, "std::string");
 }
 
-void doThree1KByteMerge(int size)
+void doFour1KByteMerge(int size)
 {
-    // Create three different string type arrays with identical contents and merge sort them
-    string strArr[size];
-    typedef Direct<char, string1K> direct;
-    direct dirArr[size];
-    typedef Symbiont<string1K, pmnkSize> symbiont;
-    symbiont symArr[size];
+    // Create three different string type arrays with identical contents and quick sort them
+    Direct<char, string1K> dirArr[size];
+
+    Symbiont<string1K> symArr[size];
     symArr[0].dropAnchorKInit(symArr, size); // Extra work for Kaldane Symbiont
-    generateRandomStrings(strArr, dirArr, symArr, size, string1K);
+
+    typedef Head<string1K> head;
+    head headArr[size];
+    head::tail tailArr[size];
+    headArr[0].dropAnchorKInit(headArr, tailArr, size); // Extra work for Kaldane Head and Direct tail
+
+    string strArr[size];
+
+    generateRandomStrings(dirArr, symArr, headArr, strArr, size, string1K);
     cout << endl << "Merge Sort " << size << " " << string1K << "-byte strings" << endl;
     doMerge(dirArr, size, "Direct");
     doMerge(symArr, size, "Symbiont");
+    doMerge(headArr, size, "Head");
     doMerge(strArr, size, "std::string");
 }
 
@@ -225,27 +269,27 @@ int main()
          << "otherwise it can die!]" << endl << endl;
     try // so you can see the exception names in release code execution
     {
-        doThree10ByteQuick(array100);
-        doThree10ByteMerge(array100);
-        doThree100ByteQuick(array100);
-        doThree100ByteMerge(array100);
-        doThree1KByteQuick(array100);
-        doThree1KByteMerge(array100);
-        doThree10ByteQuick(array10K);
-        doThree10ByteMerge(array10K);
-        doThree100ByteQuick(array10K);
-        doThree100ByteMerge(array10K);
-        doThree1KByteQuick(array10K);
-        doThree1KByteMerge(array10K);
-        doThree10ByteQuick(array1M);
-        cout << endl << endl << "warning: the std:string merge sorts of 1 million"
-             << " records take 6400 times longer!"
+        doFour10ByteQuick(array100);
+        doFour10ByteMerge(array100);
+        doFour100ByteQuick(array100);
+        doFour100ByteMerge(array100);
+        doFour1KByteQuick(array100);
+        doFour1KByteMerge(array100);
+        doFour10ByteQuick(array10K);
+        doFour10ByteMerge(array10K);
+        doFour100ByteQuick(array10K);
+        doFour100ByteMerge(array10K);
+        doFour1KByteQuick(array10K);
+        doFour1KByteMerge(array10K);
+        doFour10ByteQuick(array1M);
+        cout << endl << endl << "warning: the std::string merge sorts of 1 million"
+             << " records can take 6740 times longer!"
              << endl << "(30 minutes or so on my i5-3570 CPU)" << endl << endl;
-        doThree10ByteMerge(array1M);
-        doThree100ByteQuick(array1M);
-        doThree100ByteMerge(array1M);
-        doThree1KByteQuick(array1M);
-        doThree1KByteMerge(array1M);
+        doFour10ByteMerge(array1M);
+        doFour100ByteQuick(array1M);
+        doFour100ByteMerge(array1M);
+        doFour1KByteQuick(array1M);
+        doFour1KByteMerge(array1M);
     }
     catch (...)
     {
