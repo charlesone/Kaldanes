@@ -28,16 +28,22 @@ Head.h - header file for Kaldane Head string, which are variable-length (with an
   (pmnk) moved when they are swapped, without moving their tail strings (ignoring the Sort Benchmark
   rules). Head has "value-string semantics" as Stroustrup defined for his String type (C++11,
   chapter 19.3) These might be a candidate for the Indy Sort. Head strings behave like Direct
-  strings for short lengths (32 bytes or less, by internally equating the pmnk length with the
+  strings for short lengths (16 bytes or less, by internally equating the pmnk length with the
   string length.) This allows Head strings to match Direct strings in performance for short
   strings and still have constant time complexity for any string length: they are a candidate
   for general purpose string programming with stack slab allocation/deallocation as opposed to
-  the fine-grained allocators, which are necessary for pointer strings like <string>. Head
-  strings are quadratic in the debug build for merge sort, and linear in the release build for
-  both quick sort and merge sort, so remember to use the release build for performance analysis.
+  the fine-grained allocators, which are necessary for pointer strings like std::string. Head
+  strings isolate the head (index + pmnk) from the tail, which deploys a Direct string with a
+  typedef called "tail". At scale, Head strings sort faster than Direct or Symbiont strings
+  and much, much faster than std::strings, which require much more space as well (probably due
+  to fine-grainied allocation.) The differences are smaller for short strings but become more
+  pronounced for longer strings and  especially for merge sorts, where std:string is quadratic
+  in the release build. Both merge and quick sorts are effectively linear for Head strings and
+  constant for string length. Head strings, like Symbiont strings are quadratic in the debug
+  build for  merge sort, so remember to use the release build for performance analysis.
   They are designed to be used  with with slab allocation/deallocation on the stack, as opposed
-  to fine-grained allocators. Since the allocated slab never needs to contain pointers, only
-  array indices, the slab data structure is base+offset and can be mmapped to a file or /dev/shm
+  to fine-grained allocators. Since the two allocated slabs never need to contain pointers, only
+  array indices, the slab data structures are base+offset and can be mmapped to a file or /dev/shm
   and shared locally or across a memory fabric such as Gen-Z, or stored and transmitted, or mmapped
   over an NFS: consistency considerations are an issue for sharing, of course (caveat participem).
 
