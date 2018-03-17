@@ -28,15 +28,13 @@ There are currently three C++ source code files and four C++ header files in thi
   various kinds of template sort methods (selection, shell, insertion, merge and quick sorts,           
   but not stl sort: I could not get past the const bug: "discards qualifiers" on two string types           
   when using simple arrays, and could not use the <array> type, because the program dynamically           
-  changes array length and template numeric veriables must be const across the compile, I believe.)           
-  
+  changes array length and template numeric veriables must be const across the compile, I believe.)       
   Different sort methods are used against different array element types (numeric, pointer strings,           
   Direct strings and Kaldane Symbiont strings (see below for descriptions of the last two.)           
   Various examples of how to operate the SortBench.cpp application are commented out in the main()           
   function. Multiple runs are sequentially executed. A catchall event handler is provided for           
   release (performance) testing, when you will need it if something goes wrong (and if it generates           
-  an exception, most of the C++ runtime is the C runtime and does not generate exceptions on failure.)           
-                  
+  an exception, most of the C++ runtime is the C runtime and does not generate exceptions on failure.)          
   SortBench is currently set up to compare Direct and Kaldane Symbiont strings with std::string type           
   that you get from #include <string>. Kaldane Symbiont stings are across the board faster and sometimes           
   thousands of times so. std::string is quadratic for merge sort, Kaldane Symbionts are almost linear.           
