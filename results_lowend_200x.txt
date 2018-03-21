@@ -1,0 +1,168 @@
+Quick Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 16 strings array; 1.060 sort μs; 1.236 rand gen μs; 0.342 overhead μs; 2.638 total μs; 32.545 swaps; 79.710 compares
+Quick Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 16 strings array; 2.775 sort μs; 14.790 rand gen μs; 0.264 overhead μs; 17.829 total μs; 32.555 swaps; 81.805 compares
+Quick Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 16 strings array; 6.753 sort μs; 111.987 rand gen μs; 0.416 overhead μs; 119.157 total μs; 32.430 swaps; 81.860 compares
+Quick Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 32 strings array; 2.776 sort μs; 2.327 rand gen μs; 0.401 overhead μs; 5.504 total μs; 72.915 swaps; 210.580 compares
+Quick Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 32 strings array; 6.558 sort μs; 29.005 rand gen μs; 0.370 overhead μs; 35.933 total μs; 73.545 swaps; 209.335 compares
+Quick Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 32 strings array; 13.848 sort μs; 218.687 rand gen μs; 0.450 overhead μs; 232.986 total μs; 73.355 swaps; 207.550 compares
+Quick Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 64 strings array; 6.209 sort μs; 4.205 rand gen μs; 0.366 overhead μs; 10.779 total μs; 162.950 swaps; 501.065 compares
+Quick Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 64 strings array; 12.876 sort μs; 56.592 rand gen μs; 0.334 overhead μs; 69.802 total μs; 162.695 swaps; 504.880 compares
+Quick Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 64 strings array; 29.227 sort μs; 432.718 rand gen μs; 0.421 overhead μs; 462.365 total μs; 163.075 swaps; 506.460 compares
+Quick Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 128 strings array; 13.968 sort μs; 8.350 rand gen μs; 0.428 overhead μs; 22.746 total μs; 356.670 swaps; 1180.205 compares
+Quick Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 128 strings array; 28.417 sort μs; 111.567 rand gen μs; 0.347 overhead μs; 140.331 total μs; 355.195 swaps; 1193.855 compares
+Quick Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 128 strings array; 64.152 sort μs; 858.204 rand gen μs; 0.498 overhead μs; 922.854 total μs; 355.755 swaps; 1185.410 compares
+Quick Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 256 strings array; 31.054 sort μs; 15.989 rand gen μs; 0.419 overhead μs; 47.461 total μs; 773.450 swaps; 2712.220 compares
+Quick Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 256 strings array; 60.729 sort μs; 216.680 rand gen μs; 0.536 overhead μs; 277.946 total μs; 773.085 swaps; 2724.165 compares
+Quick Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 256 strings array; 143.539 sort μs; 1707.976 rand gen μs; 0.803 overhead μs; 1852.318 total μs; 773.085 swaps; 2718.250 compares
+Quick Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 512 strings array; 69.409 sort μs; 32.251 rand gen μs; 0.438 overhead μs; 102.097 total μs; 1665.050 swaps; 6202.600 compares
+Quick Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 512 strings array; 132.635 sort μs; 433.852 rand gen μs; 0.609 overhead μs; 567.096 total μs; 1666.255 swaps; 6152.390 compares
+Quick Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 512 strings array; 310.667 sort μs; 3432.213 rand gen μs; 0.696 overhead μs; 3743.575 total μs; 1668.125 swaps; 6128.350 compares
+Quick Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 1024 strings array; 150.813 sort μs; 63.875 rand gen μs; 0.427 overhead μs; 215.115 total μs; 3569.755 swaps; 13659.375 compares
+Quick Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 1024 strings array; 299.301 sort μs; 883.262 rand gen μs; 0.448 overhead μs; 1183.011 total μs; 3565.615 swaps; 13759.025 compares
+Quick Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 1024 strings array; 726.208 sort μs; 6874.347 rand gen μs; 0.757 overhead μs; 7601.312 total μs; 3564.680 swaps; 13755.365 compares
+Merge Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 16 strings array; 1.006 sort μs; 1.236 rand gen μs; 0.384 overhead μs; 2.626 total μs; 54.780 swaps; 45.615 compares
+Merge Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 16 strings array; 2.299 sort μs; 13.723 rand gen μs; 0.309 overhead μs; 16.331 total μs; 54.550 swaps; 45.590 compares
+Merge Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 16 strings array; 5.436 sort μs; 107.304 rand gen μs; 0.275 overhead μs; 113.015 total μs; 55.075 swaps; 46.050 compares
+Merge Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 32 strings array; 2.461 sort μs; 2.319 rand gen μs; 0.357 overhead μs; 5.138 total μs; 141.100 swaps; 121.515 compares
+Merge Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 32 strings array; 5.850 sort μs; 28.617 rand gen μs; 0.319 overhead μs; 34.786 total μs; 140.675 swaps; 121.515 compares
+Merge Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 32 strings array; 14.187 sort μs; 215.525 rand gen μs; 0.305 overhead μs; 230.018 total μs; 140.875 swaps; 121.495 compares
+Merge Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 64 strings array; 5.809 sort μs; 4.267 rand gen μs; 0.382 overhead μs; 10.458 total μs; 344.340 swaps; 305.230 compares
+Merge Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 64 strings array; 13.934 sort μs; 55.573 rand gen μs; 0.279 overhead μs; 69.787 total μs; 344.870 swaps; 304.815 compares
+Merge Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 64 strings array; 35.612 sort μs; 433.282 rand gen μs; 0.449 overhead μs; 469.344 total μs; 344.250 swaps; 305.145 compares
+Merge Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 128 strings array; 13.104 sort μs; 8.093 rand gen μs; 0.362 overhead μs; 21.559 total μs; 815.785 swaps; 736.290 compares
+Merge Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 128 strings array; 31.871 sort μs; 108.544 rand gen μs; 0.352 overhead μs; 140.767 total μs; 816.330 swaps; 736.245 compares
+Merge Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 128 strings array; 85.316 sort μs; 852.213 rand gen μs; 0.530 overhead μs; 938.059 total μs; 815.735 swaps; 735.300 compares
+Merge Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 256 strings array; 30.297 sort μs; 16.345 rand gen μs; 0.368 overhead μs; 47.009 total μs; 1886.935 swaps; 1725.710 compares
+Merge Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 256 strings array; 73.679 sort μs; 217.134 rand gen μs; 0.472 overhead μs; 291.284 total μs; 1887.110 swaps; 1726.085 compares
+Merge Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 256 strings array; 206.684 sort μs; 1697.586 rand gen μs; 0.705 overhead μs; 1904.975 total μs; 1886.345 swaps; 1727.060 compares
+Merge Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 512 strings array; 68.313 sort μs; 32.260 rand gen μs; 0.429 overhead μs; 101.002 total μs; 4286.280 swaps; 3961.950 compares
+Merge Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 512 strings array; 168.182 sort μs; 439.502 rand gen μs; 0.594 overhead μs; 608.277 total μs; 4284.585 swaps; 3963.600 compares
+Merge Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 512 strings array; 478.442 sort μs; 3391.979 rand gen μs; 0.575 overhead μs; 3870.997 total μs; 4284.920 swaps; 3963.025 compares
+Merge Sort; Direct<char, 8ul> type; 8 byte length; 200 iteration; 1024 strings array; 151.214 sort μs; 63.747 rand gen μs; 0.375 overhead μs; 215.337 total μs; 9590.415 swaps; 8944.230 compares
+Merge Sort; Direct<char, 128ul> type; 128 byte length; 200 iteration; 1024 strings array; 366.278 sort μs; 865.353 rand gen μs; 0.511 overhead μs; 1232.142 total μs; 9592.215 swaps; 8947.940 compares
+Merge Sort; Direct<char, 1024ul> type; 1024 byte length; 200 iteration; 1024 strings array; 1113.063 sort μs; 6792.563 rand gen μs; 0.752 overhead μs; 7906.378 total μs; 9593.430 swaps; 8947.185 compares
+Quick Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 16 strings array; 1.185 sort μs; 1.260 rand gen μs; 0.399 overhead μs; 2.844 total μs; 32.345 swaps; 82.235 compares
+Quick Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 16 strings array; 1.053 sort μs; 14.044 rand gen μs; 0.321 overhead μs; 15.417 total μs; 32.620 swaps; 83.195 compares
+Quick Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 16 strings array; 1.070 sort μs; 107.227 rand gen μs; 0.337 overhead μs; 108.634 total μs; 32.440 swaps; 81.120 compares
+Quick Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 32 strings array; 2.594 sort μs; 2.342 rand gen μs; 0.358 overhead μs; 5.294 total μs; 73.185 swaps; 207.265 compares
+Quick Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 32 strings array; 2.439 sort μs; 27.640 rand gen μs; 0.338 overhead μs; 30.417 total μs; 73.550 swaps; 208.155 compares
+Quick Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 32 strings array; 2.495 sort μs; 212.464 rand gen μs; 0.349 overhead μs; 215.308 total μs; 73.345 swaps; 206.800 compares
+Quick Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 64 strings array; 6.206 sort μs; 4.307 rand gen μs; 0.386 overhead μs; 10.898 total μs; 162.890 swaps; 503.980 compares
+Quick Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 64 strings array; 5.807 sort μs; 56.597 rand gen μs; 0.362 overhead μs; 62.765 total μs; 162.440 swaps; 507.855 compares
+Quick Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 64 strings array; 5.956 sort μs; 424.920 rand gen μs; 0.437 overhead μs; 431.313 total μs; 162.655 swaps; 502.450 compares
+Quick Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 128 strings array; 13.815 sort μs; 8.286 rand gen μs; 0.426 overhead μs; 22.527 total μs; 355.485 swaps; 1188.785 compares
+Quick Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 128 strings array; 13.333 sort μs; 111.349 rand gen μs; 0.410 overhead μs; 125.092 total μs; 355.635 swaps; 1181.375 compares
+Quick Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 128 strings array; 13.666 sort μs; 857.785 rand gen μs; 0.590 overhead μs; 872.042 total μs; 356.110 swaps; 1185.130 compares
+Quick Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 256 strings array; 31.610 sort μs; 16.531 rand gen μs; 0.519 overhead μs; 48.660 total μs; 772.680 swaps; 2749.815 compares
+Quick Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 256 strings array; 29.597 sort μs; 222.720 rand gen μs; 0.666 overhead μs; 252.983 total μs; 773.480 swaps; 2734.755 compares
+Quick Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 256 strings array; 31.020 sort μs; 1740.121 rand gen μs; 0.719 overhead μs; 1771.860 total μs; 771.325 swaps; 2742.565 compares
+Quick Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 512 strings array; 70.606 sort μs; 33.014 rand gen μs; 0.677 overhead μs; 104.296 total μs; 1664.405 swaps; 6201.595 compares
+Quick Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 512 strings array; 65.127 sort μs; 446.983 rand gen μs; 1.023 overhead μs; 513.134 total μs; 1663.595 swaps; 6191.830 compares
+Quick Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 512 strings array; 67.706 sort μs; 3432.903 rand gen μs; 1.321 overhead μs; 3501.931 total μs; 1662.455 swaps; 6160.355 compares
+Quick Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 1024 strings array; 154.559 sort μs; 65.089 rand gen μs; 0.922 overhead μs; 220.570 total μs; 3568.060 swaps; 13741.250 compares
+Quick Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 1024 strings array; 144.445 sort μs; 888.186 rand gen μs; 2.065 overhead μs; 1034.697 total μs; 3566.750 swaps; 13790.145 compares
+Quick Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 1024 strings array; 145.866 sort μs; 6770.301 rand gen μs; 2.155 overhead μs; 6918.322 total μs; 3564.530 swaps; 13809.975 compares
+Merge Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 16 strings array; 0.906 sort μs; 1.249 rand gen μs; 0.373 overhead μs; 2.528 total μs; 54.675 swaps; 45.705 compares
+Merge Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 16 strings array; 0.864 sort μs; 13.977 rand gen μs; 0.313 overhead μs; 15.155 total μs; 55.200 swaps; 45.650 compares
+Merge Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 16 strings array; 0.946 sort μs; 107.071 rand gen μs; 0.279 overhead μs; 108.296 total μs; 54.800 swaps; 45.630 compares
+Merge Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 32 strings array; 2.053 sort μs; 2.323 rand gen μs; 0.338 overhead μs; 4.713 total μs; 140.590 swaps; 121.650 compares
+Merge Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 32 strings array; 2.121 sort μs; 28.001 rand gen μs; 0.323 overhead μs; 30.445 total μs; 140.725 swaps; 121.325 compares
+Merge Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 32 strings array; 2.314 sort μs; 218.823 rand gen μs; 0.350 overhead μs; 221.486 total μs; 140.805 swaps; 121.345 compares
+Merge Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 64 strings array; 4.872 sort μs; 4.254 rand gen μs; 0.335 overhead μs; 9.462 total μs; 344.760 swaps; 304.690 compares
+Merge Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 64 strings array; 4.907 sort μs; 56.160 rand gen μs; 0.302 overhead μs; 61.368 total μs; 344.625 swaps; 305.325 compares
+Merge Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 64 strings array; 5.577 sort μs; 427.355 rand gen μs; 0.384 overhead μs; 433.316 total μs; 344.655 swaps; 304.845 compares
+Merge Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 128 strings array; 11.193 sort μs; 8.129 rand gen μs; 0.442 overhead μs; 19.764 total μs; 815.750 swaps; 736.275 compares
+Merge Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 128 strings array; 11.579 sort μs; 110.820 rand gen μs; 0.415 overhead μs; 122.814 total μs; 816.050 swaps; 735.925 compares
+Merge Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 128 strings array; 13.592 sort μs; 854.225 rand gen μs; 0.716 overhead μs; 868.532 total μs; 816.295 swaps; 735.295 compares
+Merge Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 256 strings array; 26.726 sort μs; 16.863 rand gen μs; 0.525 overhead μs; 44.114 total μs; 1887.335 swaps; 1727.260 compares
+Merge Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 256 strings array; 27.517 sort μs; 223.285 rand gen μs; 0.554 overhead μs; 251.356 total μs; 1885.885 swaps; 1727.140 compares
+Merge Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 256 strings array; 30.247 sort μs; 1701.409 rand gen μs; 0.804 overhead μs; 1732.460 total μs; 1885.510 swaps; 1726.575 compares
+Merge Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 512 strings array; 58.549 sort μs; 32.323 rand gen μs; 0.651 overhead μs; 91.523 total μs; 4288.255 swaps; 3962.425 compares
+Merge Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 512 strings array; 62.385 sort μs; 440.879 rand gen μs; 0.895 overhead μs; 504.159 total μs; 4285.700 swaps; 3962.785 compares
+Merge Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 512 strings array; 72.524 sort μs; 3387.519 rand gen μs; 1.039 overhead μs; 3461.082 total μs; 4284.355 swaps; 3963.320 compares
+Merge Sort; Symbiont<8ul, 3ul, 32ul> type; 8 byte length; 200 iteration; 1024 strings array; 131.324 sort μs; 64.487 rand gen μs; 0.950 overhead μs; 196.761 total μs; 9592.935 swaps; 8946.605 compares
+Merge Sort; Symbiont<128ul, 3ul, 32ul> type; 128 byte length; 200 iteration; 1024 strings array; 140.642 sort μs; 881.810 rand gen μs; 1.905 overhead μs; 1024.357 total μs; 9592.325 swaps; 8945.495 compares
+Merge Sort; Symbiont<1024ul, 3ul, 32ul> type; 1024 byte length; 200 iteration; 1024 strings array; 172.120 sort μs; 6787.379 rand gen μs; 2.022 overhead μs; 6961.521 total μs; 9594.280 swaps; 8948.520 compares
+Quick Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 16 strings array; 0.933 sort μs; 1.280 rand gen μs; 0.383 overhead μs; 2.596 total μs; 32.485 swaps; 82.075 compares
+Quick Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 16 strings array; 1.073 sort μs; 14.142 rand gen μs; 0.305 overhead μs; 15.520 total μs; 32.615 swaps; 82.365 compares
+Quick Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 16 strings array; 1.012 sort μs; 107.123 rand gen μs; 0.270 overhead μs; 108.405 total μs; 32.325 swaps; 81.865 compares
+Quick Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 32 strings array; 2.181 sort μs; 2.367 rand gen μs; 0.386 overhead μs; 4.935 total μs; 73.180 swaps; 208.715 compares
+Quick Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 32 strings array; 2.488 sort μs; 28.347 rand gen μs; 0.282 overhead μs; 31.118 total μs; 73.625 swaps; 209.215 compares
+Quick Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 32 strings array; 2.362 sort μs; 212.984 rand gen μs; 0.331 overhead μs; 215.677 total μs; 73.635 swaps; 204.070 compares
+Quick Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 64 strings array; 4.739 sort μs; 4.285 rand gen μs; 0.383 overhead μs; 9.407 total μs; 163.445 swaps; 502.535 compares
+Quick Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 64 strings array; 5.794 sort μs; 55.758 rand gen μs; 0.348 overhead μs; 61.900 total μs; 162.575 swaps; 506.055 compares
+Quick Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 64 strings array; 5.537 sort μs; 427.549 rand gen μs; 0.327 overhead μs; 433.412 total μs; 162.405 swaps; 504.555 compares
+Quick Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 128 strings array; 10.765 sort μs; 8.175 rand gen μs; 0.419 overhead μs; 19.358 total μs; 355.880 swaps; 1188.845 compares
+Quick Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 128 strings array; 13.153 sort μs; 111.375 rand gen μs; 0.381 overhead μs; 124.908 total μs; 355.930 swaps; 1173.400 compares
+Quick Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 128 strings array; 12.565 sort μs; 845.808 rand gen μs; 0.413 overhead μs; 858.787 total μs; 355.005 swaps; 1192.825 compares
+Quick Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 256 strings array; 24.048 sort μs; 16.132 rand gen μs; 0.478 overhead μs; 40.658 total μs; 772.080 swaps; 2744.235 compares
+Quick Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 256 strings array; 29.536 sort μs; 221.811 rand gen μs; 0.452 overhead μs; 251.800 total μs; 772.555 swaps; 2711.140 compares
+Quick Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 256 strings array; 28.756 sort μs; 1709.362 rand gen μs; 0.606 overhead μs; 1738.723 total μs; 772.575 swaps; 2719.990 compares
+Quick Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 512 strings array; 55.532 sort μs; 33.330 rand gen μs; 0.686 overhead μs; 89.547 total μs; 1667.545 swaps; 6155.750 compares
+Quick Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 512 strings array; 66.015 sort μs; 443.401 rand gen μs; 0.742 overhead μs; 510.157 total μs; 1664.630 swaps; 6167.865 compares
+Quick Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 512 strings array; 63.369 sort μs; 3397.806 rand gen μs; 0.790 overhead μs; 3461.964 total μs; 1664.235 swaps; 6163.885 compares
+Quick Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 1024 strings array; 120.186 sort μs; 65.562 rand gen μs; 0.981 overhead μs; 186.729 total μs; 3565.610 swaps; 13780.030 compares
+Quick Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 1024 strings array; 146.337 sort μs; 886.490 rand gen μs; 1.219 overhead μs; 1034.045 total μs; 3565.040 swaps; 13745.695 compares
+Quick Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 1024 strings array; 139.592 sort μs; 6783.560 rand gen μs; 1.172 overhead μs; 6924.324 total μs; 3568.210 swaps; 13707.200 compares
+Merge Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 16 strings array; 0.819 sort μs; 1.222 rand gen μs; 0.417 overhead μs; 2.459 total μs; 54.975 swaps; 45.705 compares
+Merge Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 16 strings array; 0.888 sort μs; 14.033 rand gen μs; 0.304 overhead μs; 15.225 total μs; 55.055 swaps; 45.845 compares
+Merge Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 16 strings array; 0.927 sort μs; 108.191 rand gen μs; 0.285 overhead μs; 109.403 total μs; 54.815 swaps; 45.680 compares
+Merge Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 32 strings array; 1.986 sort μs; 2.314 rand gen μs; 0.352 overhead μs; 4.652 total μs; 140.405 swaps; 121.520 compares
+Merge Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 32 strings array; 2.102 sort μs; 28.251 rand gen μs; 0.322 overhead μs; 30.675 total μs; 140.130 swaps; 121.515 compares
+Merge Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 32 strings array; 2.190 sort μs; 215.129 rand gen μs; 0.367 overhead μs; 217.686 total μs; 140.990 swaps; 121.610 compares
+Merge Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 64 strings array; 4.646 sort μs; 4.325 rand gen μs; 0.412 overhead μs; 9.383 total μs; 344.285 swaps; 304.800 compares
+Merge Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 64 strings array; 4.999 sort μs; 56.048 rand gen μs; 0.321 overhead μs; 61.367 total μs; 343.985 swaps; 304.585 compares
+Merge Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 64 strings array; 5.283 sort μs; 431.173 rand gen μs; 0.469 overhead μs; 436.925 total μs; 343.920 swaps; 305.345 compares
+Merge Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 128 strings array; 10.639 sort μs; 8.597 rand gen μs; 0.416 overhead μs; 19.652 total μs; 817.150 swaps; 736.930 compares
+Merge Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 128 strings array; 11.701 sort μs; 112.595 rand gen μs; 0.381 overhead μs; 124.677 total μs; 816.340 swaps; 736.565 compares
+Merge Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 128 strings array; 11.838 sort μs; 848.286 rand gen μs; 0.457 overhead μs; 860.582 total μs; 815.995 swaps; 735.845 compares
+Merge Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 256 strings array; 23.554 sort μs; 16.191 rand gen μs; 0.490 overhead μs; 40.236 total μs; 1886.465 swaps; 1725.600 compares
+Merge Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 256 strings array; 26.231 sort μs; 222.183 rand gen μs; 0.456 overhead μs; 248.871 total μs; 1887.045 swaps; 1726.680 compares
+Merge Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 256 strings array; 27.093 sort μs; 1698.269 rand gen μs; 0.880 overhead μs; 1726.242 total μs; 1886.655 swaps; 1726.325 compares
+Merge Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 512 strings array; 54.260 sort μs; 33.025 rand gen μs; 0.698 overhead μs; 87.983 total μs; 4286.395 swaps; 3962.205 compares
+Merge Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 512 strings array; 59.892 sort μs; 445.467 rand gen μs; 0.841 overhead μs; 506.200 total μs; 4285.275 swaps; 3962.555 compares
+Merge Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 512 strings array; 61.611 sort μs; 3397.343 rand gen μs; 0.815 overhead μs; 3459.769 total μs; 4285.080 swaps; 3963.655 compares
+Merge Sort; Head<8ul, 7ul, 16ul> type; 8 byte length; 200 iteration; 1024 strings array; 120.113 sort μs; 64.694 rand gen μs; 0.956 overhead μs; 185.764 total μs; 9594.200 swaps; 8947.305 compares
+Merge Sort; Head<128ul, 7ul, 16ul> type; 128 byte length; 200 iteration; 1024 strings array; 133.451 sort μs; 883.593 rand gen μs; 1.224 overhead μs; 1018.269 total μs; 9593.350 swaps; 8945.605 compares
+Merge Sort; Head<1024ul, 7ul, 16ul> type; 1024 byte length; 200 iteration; 1024 strings array; 136.414 sort μs; 6808.650 rand gen μs; 1.167 overhead μs; 6946.231 total μs; 9596.100 swaps; 8949.405 compares
+Quick Sort; std::string type; 8 byte length; 200 iteration; 16 strings array; 1.660 sort μs; 1.884 rand gen μs; 0.610 overhead μs; 4.155 total μs; 32.320 swaps; 79.915 compares
+Quick Sort; std::string type; 8 byte length; 200 iteration; 32 strings array; 3.924 sort μs; 3.259 rand gen μs; 0.781 overhead μs; 7.964 total μs; 73.605 swaps; 208.590 compares
+Quick Sort; std::string type; 8 byte length; 200 iteration; 64 strings array; 9.082 sort μs; 6.337 rand gen μs; 1.288 overhead μs; 16.706 total μs; 162.120 swaps; 502.575 compares
+Quick Sort; std::string type; 8 byte length; 200 iteration; 128 strings array; 20.746 sort μs; 12.415 rand gen μs; 2.120 overhead μs; 35.281 total μs; 355.910 swaps; 1183.795 compares
+Quick Sort; std::string type; 8 byte length; 200 iteration; 256 strings array; 48.489 sort μs; 25.079 rand gen μs; 4.265 overhead μs; 77.833 total μs; 774.945 swaps; 2703.810 compares
+Quick Sort; std::string type; 8 byte length; 200 iteration; 512 strings array; 107.793 sort μs; 49.693 rand gen μs; 8.167 overhead μs; 165.654 total μs; 1662.605 swaps; 6186.615 compares
+Quick Sort; std::string type; 8 byte length; 200 iteration; 1024 strings array; 233.419 sort μs; 97.061 rand gen μs; 15.203 overhead μs; 345.683 total μs; 3562.420 swaps; 13809.915 compares
+Quick Sort; std::string type; 128 byte length; 200 iteration; 16 strings array; 1.715 sort μs; 14.546 rand gen μs; 0.829 overhead μs; 17.090 total μs; 32.460 swaps; 82.260 compares
+Quick Sort; std::string type; 128 byte length; 200 iteration; 32 strings array; 4.006 sort μs; 29.018 rand gen μs; 1.132 overhead μs; 34.157 total μs; 73.575 swaps; 206.675 compares
+Quick Sort; std::string type; 128 byte length; 200 iteration; 64 strings array; 9.677 sort μs; 58.328 rand gen μs; 2.035 overhead μs; 70.040 total μs; 162.460 swaps; 504.375 compares
+Quick Sort; std::string type; 128 byte length; 200 iteration; 128 strings array; 22.254 sort μs; 117.517 rand gen μs; 3.830 overhead μs; 143.601 total μs; 356.590 swaps; 1187.020 compares
+Quick Sort; std::string type; 128 byte length; 200 iteration; 256 strings array; 49.310 sort μs; 234.082 rand gen μs; 7.082 overhead μs; 290.475 total μs; 771.390 swaps; 2732.705 compares
+Quick Sort; std::string type; 128 byte length; 200 iteration; 512 strings array; 108.235 sort μs; 458.745 rand gen μs; 13.439 overhead μs; 580.419 total μs; 1663.395 swaps; 6163.365 compares
+Quick Sort; std::string type; 128 byte length; 200 iteration; 1024 strings array; 237.237 sort μs; 925.715 rand gen μs; 34.302 overhead μs; 1197.254 total μs; 3565.290 swaps; 13729.425 compares
+Quick Sort; std::string type; 1024 byte length; 200 iteration; 16 strings array; 2.546 sort μs; 110.751 rand gen μs; 0.914 overhead μs; 114.211 total μs; 32.745 swaps; 82.995 compares
+Quick Sort; std::string type; 1024 byte length; 200 iteration; 32 strings array; 5.347 sort μs; 216.949 rand gen μs; 1.324 overhead μs; 223.620 total μs; 73.310 swaps; 208.485 compares
+Quick Sort; std::string type; 1024 byte length; 200 iteration; 64 strings array; 12.184 sort μs; 431.487 rand gen μs; 2.189 overhead μs; 445.860 total μs; 162.355 swaps; 502.110 compares
+Quick Sort; std::string type; 1024 byte length; 200 iteration; 128 strings array; 28.224 sort μs; 869.643 rand gen μs; 9.790 overhead μs; 907.657 total μs; 355.575 swaps; 1187.255 compares
+Quick Sort; std::string type; 1024 byte length; 200 iteration; 256 strings array; 62.282 sort μs; 1735.620 rand gen μs; 21.201 overhead μs; 1819.103 total μs; 771.235 swaps; 2737.390 compares
+Quick Sort; std::string type; 1024 byte length; 200 iteration; 512 strings array; 151.438 sort μs; 3503.935 rand gen μs; 47.041 overhead μs; 3702.413 total μs; 1663.790 swaps; 6181.035 compares
+Quick Sort; std::string type; 1024 byte length; 200 iteration; 1024 strings array; 377.822 sort μs; 7055.497 rand gen μs; 99.459 overhead μs; 7532.778 total μs; 3565.630 swaps; 13750.320 compares
+Merge Sort; std::string type; 8 byte length; 200 iteration; 16 strings array; 2.089 sort μs; 1.734 rand gen μs; 0.615 overhead μs; 4.439 total μs; 54.600 swaps; 45.605 compares
+Merge Sort; std::string type; 8 byte length; 200 iteration; 32 strings array; 5.813 sort μs; 3.356 rand gen μs; 0.714 overhead μs; 9.884 total μs; 140.930 swaps; 121.240 compares
+Merge Sort; std::string type; 8 byte length; 200 iteration; 64 strings array; 14.959 sort μs; 6.365 rand gen μs; 1.209 overhead μs; 22.532 total μs; 345.245 swaps; 305.185 compares
+Merge Sort; std::string type; 8 byte length; 200 iteration; 128 strings array; 40.024 sort μs; 12.483 rand gen μs; 2.182 overhead μs; 54.688 total μs; 816.880 swaps; 736.525 compares
+Merge Sort; std::string type; 8 byte length; 200 iteration; 256 strings array; 117.820 sort μs; 25.501 rand gen μs; 4.162 overhead μs; 147.483 total μs; 1887.320 swaps; 1726.710 compares
+Merge Sort; std::string type; 8 byte length; 200 iteration; 512 strings array; 344.234 sort μs; 48.743 rand gen μs; 7.626 overhead μs; 400.602 total μs; 4285.670 swaps; 3962.055 compares
+Merge Sort; std::string type; 8 byte length; 200 iteration; 1024 strings array; 1137.101 sort μs; 97.932 rand gen μs; 15.237 overhead μs; 1250.270 total μs; 9597.015 swaps; 8948.060 compares
+Merge Sort; std::string type; 128 byte length; 200 iteration; 16 strings array; 2.036 sort μs; 14.498 rand gen μs; 0.821 overhead μs; 17.356 total μs; 54.925 swaps; 45.890 compares
+Merge Sort; std::string type; 128 byte length; 200 iteration; 32 strings array; 5.907 sort μs; 29.005 rand gen μs; 1.157 overhead μs; 36.069 total μs; 140.500 swaps; 121.490 compares
+Merge Sort; std::string type; 128 byte length; 200 iteration; 64 strings array; 15.296 sort μs; 58.645 rand gen μs; 2.057 overhead μs; 75.999 total μs; 343.680 swaps; 304.985 compares
+Merge Sort; std::string type; 128 byte length; 200 iteration; 128 strings array; 41.068 sort μs; 117.804 rand gen μs; 3.877 overhead μs; 162.750 total μs; 817.045 swaps; 736.730 compares
+Merge Sort; std::string type; 128 byte length; 200 iteration; 256 strings array; 112.024 sort μs; 229.999 rand gen μs; 6.923 overhead μs; 348.946 total μs; 1886.625 swaps; 1726.895 compares
+Merge Sort; std::string type; 128 byte length; 200 iteration; 512 strings array; 341.642 sort μs; 458.499 rand gen μs; 13.487 overhead μs; 813.628 total μs; 4287.005 swaps; 3963.280 compares
+Merge Sort; std::string type; 128 byte length; 200 iteration; 1024 strings array; 1126.765 sort μs; 925.928 rand gen μs; 37.296 overhead μs; 2089.990 total μs; 9593.280 swaps; 8946.320 compares
+Merge Sort; std::string type; 1024 byte length; 200 iteration; 16 strings array; 2.140 sort μs; 110.251 rand gen μs; 0.914 overhead μs; 113.304 total μs; 54.825 swaps; 45.715 compares
+Merge Sort; std::string type; 1024 byte length; 200 iteration; 32 strings array; 6.024 sort μs; 218.018 rand gen μs; 1.307 overhead μs; 225.348 total μs; 140.885 swaps; 121.690 compares
+Merge Sort; std::string type; 1024 byte length; 200 iteration; 64 strings array; 15.372 sort μs; 435.329 rand gen μs; 2.062 overhead μs; 452.764 total μs; 344.060 swaps; 305.010 compares
+Merge Sort; std::string type; 1024 byte length; 200 iteration; 128 strings array; 40.031 sort μs; 862.774 rand gen μs; 8.733 overhead μs; 911.538 total μs; 815.155 swaps; 736.170 compares
+Merge Sort; std::string type; 1024 byte length; 200 iteration; 256 strings array; 121.671 sort μs; 1834.805 rand gen μs; 28.745 overhead μs; 1985.222 total μs; 1887.970 swaps; 1726.185 compares
+Merge Sort; std::string type; 1024 byte length; 200 iteration; 512 strings array; 374.547 sort μs; 3722.866 rand gen μs; 62.615 overhead μs; 4160.028 total μs; 4286.340 swaps; 3962.905 compares
+Merge Sort; std::string type; 1024 byte length; 200 iteration; 1024 strings array; 1204.822 sort μs; 7248.150 rand gen μs; 110.084 overhead μs; 8563.057 total μs; 9595.350 swaps; 8947.560 compares
