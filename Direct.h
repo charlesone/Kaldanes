@@ -43,10 +43,11 @@ Direct.h - header file for Direct string type, which are variable-length (with a
 
 using namespace std;
 
+// My intent is for this to work for more than just typename char someday: wchar_t, char16_t, char32_t
 template <typename T, std::size_t maxStringSize>
 class Direct
 {
-private:
+protected:
 
     static const std::size_t length = maxStringSize;
 
@@ -54,6 +55,11 @@ private:
     {
         T arr[length + 1]; // null termination
     };
+
+    // Notice, no default assignments above, which yields an empty default constructor, which
+    // means release builds (dropping empty functions) will not have quadratic behavior for
+    // cross-container element movement (IMHO)
+
     Struct r;
 
 public:
@@ -69,7 +75,7 @@ public:
     {
     public:
         Item_Size_Mismatch() :
-            runtime_error("sizeof(r) must equal array items/arraySize (possible compiler dependency)") {}
+            runtime_error("array[0].structSize() must equal array items/arraySize (possible compiler dependency)") {}
     };
 
     size_t size() const noexcept

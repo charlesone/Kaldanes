@@ -66,7 +66,7 @@ static std::size_t tailStructSize = -1;
 template <std::size_t maxStringSize, std::size_t maxPmnkSize = 7, std::size_t switchoverPmnkSize = 16>
 class Head
 {
-private:
+protected:
 
     //static_assert(maxStringSize > 0, "maxStringSize must be positive"); // can't get this to work
     //static_assert(maxPmnkSize <= maxStringSize, "maxPmnkSize must be <= maxStringSize"); // can't get this to work
@@ -95,6 +95,10 @@ private:
         char pmnk[pmnkSize + 1]; // Poor Man's Normalized Key, see below. Null-terminated.
     };
 
+    // Notice, no default assignments above, which yields an empty default constructor, which
+    // means release builds (dropping empty functions) will not have quadratic behavior for
+    // cross-container element movement (IMHO)
+
     /* B-tree Indexes and CPU Caches Goetz Graefe and Per-Ake Larson
         IEEE Proceedings of the 17th International Conference on Data Engineering
         Section 6.1, "Poor Man's Normalized Keys", p. 355:
@@ -119,7 +123,7 @@ public:
     {
     public:
         Item_Size_Mismatch() :
-            runtime_error("sizeof(array[0].s) must equal arrayByteLength/arrayCount (possible compiler dependency)") {}
+            runtime_error("array[0].structSize() must equal arrayByteLength/arrayCount (possible compiler dependency)") {}
     };
 
     class Assign_String_Too_Long : public runtime_error
@@ -304,11 +308,11 @@ public:
         }
     }
 
-    void dropAnchorKInit(Head headArr[], Direct<char, tailSize> tailArr[], std::size_t size)
+    void dropAnchorKInit(Head headArr[], tail tailArr[], std::size_t size)
     // parameters should look like (headArray, tailArray, array count)
     {
         // if (tailAnchor != 0) throw Already_Array_Anchor();
-        // if (sizeof(headArray[0]) != sizeof(headArray)/size) throw Item_Size_Mismatch();
+        if (sizeof(headArr[0]) != sizeof(h)) throw Item_Size_Mismatch();
         tailAnchor = (char*)tailArr;
         tailElementSize = tailArr[0].size();
         tailStructSize = tailArr[0].structSize();

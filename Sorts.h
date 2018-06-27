@@ -10,6 +10,13 @@ public:
         runtime_error("Array non-negative 'low' must initially be less than non-negative 'high'") {}
 };
 
+class Index_Value_Error : public runtime_error
+{
+public:
+    Index_Value_Error() :
+        runtime_error("Index value has wrong sign") {}
+};
+
 double compares;
 double swaps;
 
@@ -80,7 +87,6 @@ void insertionSortInvokeOld(T arr[], int size)
         }
     }
 }
-
 
 template<typename T>
 void insertionSortInvoke (T arr[], int size)
@@ -205,6 +211,44 @@ void stlSortInvoke(T arr[], int size)
 {
     // Can't seem to get past a const bug: "discards qualifiers"
     //std::sort(arr, arr + size - 1, [](T a, T b) {return (a < b);} );
+}
+
+/*// negative result means not an exact match: negative index of where it would be
+template<typename T, typename U>
+int binarySearch(T arr[], std::size_t size, U value)
+{
+    int len = strlen(value.c_str());
+    char str[len+1]; // null terminated
+    strcpy(str, value.c_str());
+    str[len] = 0;
+    int left = 0;
+    int right = size - 1;
+    int middle = -1;
+    while (left <= right)
+    {
+        middle = (left + right) / 2;
+        if (arr[middle] == str) return middle;
+        else if (arr[middle] > str) right = middle - 1;
+        else left = middle + 1;
+    }
+    return -middle; // for range searches (inexact)
+}*/
+
+// negative result means not an exact match: negative index of where it would be
+template<typename T>
+int binarySearch(T arr[], std::size_t size, const char value[])
+{
+    int left = 0;
+    int right = size - 1;
+    int middle = -1;
+    while (left <= right)
+    {
+        middle = (left + right) / 2;
+        if (arr[middle] == value) return middle;
+        else if (arr[middle] > value) right = middle - 1;
+        else left = middle + 1;
+    }
+    return -middle; // for range searches (inexact)
 }
 
 #endif // SORTS_H_INCLUDED

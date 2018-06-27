@@ -110,6 +110,10 @@ private:
         Torso t;
     };
 
+    // Notice, no default assignments above, which yields an empty default constructor, which
+    // means release builds (dropping empty functions) will not have quadratic behavior for
+    // cross-container element movement (IMHO)
+
     Unity s;
 
 public:
@@ -118,7 +122,7 @@ public:
     {
     public:
         Item_Size_Mismatch() :
-            runtime_error("sizeof(array[0].s) must equal arrayByteLength/arrayCount (possible compiler dependency)") {}
+            runtime_error("array[0].structSize() must equal arrayByteLength/arrayCount (possible compiler dependency)") {}
     };
 
     class Assign_String_Too_Long : public runtime_error
@@ -304,8 +308,8 @@ public:
     void dropAnchorKInit(Symbiont symbArr[], std::size_t size) // parameters should look like (array, array count)
     {
         // if (strAnchor != 0) throw Already_Array_Anchor();
-        //if (sizeof(symbArr[0]) != sizeof(symbArr)/size) throw Item_Size_Mismatch();
-        strAnchor = symbArr[0].s.t.tail;
+        if (sizeof(symbArr[0]) != sizeof(s)) throw Item_Size_Mismatch();
+	strAnchor = symbArr[0].s.t.tail;
         for (int i = 0; i < size; ++i) symbArr[i].s.h.k = i;
     }
 
