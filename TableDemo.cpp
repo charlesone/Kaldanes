@@ -64,9 +64,9 @@ enum class Table
 };
 // insert new tables before table_Count, please
 
-static char* tableAnchors[(int)Table::table_Count] = {0}; // after the first item, the rest get zeroed.
+static char* rowAnchors[(int)Table::table_Count] = {0}; // after the first item, the rest get zeroed.
 
-enum class Column
+enum class Column // must be in the order of Table, above
 {
     // 14 airports table columns
     airportId,
@@ -194,7 +194,21 @@ routeRow;
 using namespace __gnu_cxx;
 
 #include "Typelist.h"
-typedef LOKI_TYPELIST_3(airportRow, airlineRow, routeRow) tableTypes;
+// I'm using Loki typelists, because they are -std=c++=11.
+// The better variadic version of typelists is from the code project by geoyar,
+// but it's -std=c++=14, which I cannot seem to get working on centos-7 right now, but definitely later.
+typedef LOKI_TYPELIST_3(airportRow, airlineRow, routeRow) tableTypes; // must be in the order of Table, above
+
+// a similar thing can be done to static polymorphically obtain
+// proper object pointers for the IndexStrings below, if needed.
+template<Column columnEnum>
+inline Loki::TL::TypeAt<tableTypes, (std::size_t)(column2Table(columnEnum))> columnEnum2RowStringAnchor()
+{
+    const Table table = column2Table(columnEnum);
+    const std::size_t tableId = (std::size_t)table;
+    const char* rowAnchor = rowAnchors[tableId];
+    return (Loki::TL::TypeAt<tableTypes, (std::size_t)(column2Table(columnEnum))>)rowAnchor;
+}
 
 typedef IndexString<Column::airportId, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportIdType;
 typedef IndexString<Column::airportName, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportNameType;
@@ -398,8 +412,8 @@ int main()
         cout << endl;
 
         routesView myRoutes[100];
-//        cout << endl << myRoutes[0].tableCount() << " table join:" << endl;
-//        printTable(myRoutes, 10);
+        cout << endl << myRoutes[0].tableCount() << " table join:" << endl;
+        printTable(myRoutes, 10);
 
     }
     catch (...)
