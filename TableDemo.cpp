@@ -53,6 +53,9 @@ using namespace std;
 static const std::size_t maxColumnSizeDefault = 1024;
 static const std::size_t pmnkSizeDefault = 7;
 
+#include "Row.h"
+#include "Index.h"
+
 enum class Table
 {
     airports,
@@ -64,7 +67,8 @@ enum class Table
 };
 // insert new tables before table_Count, please
 
-static char* rowAnchors[(int)Table::table_Count] = {0}; // after the first item, the rest get zeroed.
+static char* charRowAnchors[(int)Table::table_Count] = {0}; // after the first item, the rest get zeroed.
+static Row* rowAnchors[(int)Table::table_Count] = {0}; // after the first item, the rest get zeroed.
 
 enum class Column // must be in the order of Table, above
 {
@@ -117,10 +121,8 @@ enum class Column // must be in the order of Table, above
 // insert new columns in order before columnCount,
 // please, then adjust the table of IDs below
 
-#include "Index.h"
-
 // Index metadata resides in these (3) arrays
-static char* charAnchors[(int)Column::columnCount] = {0}; // after the first item, the rest get zeroed.
+static char* charIndexAnchors[(int)Column::columnCount] = {0}; // after the first item, the rest get zeroed.
 static Index* indexAnchors[(int)Column::columnCount] = {0}; // after the first item, the rest get zeroed.
 static std::size_t indexLengths[(int)Column::columnCount] = {0}; // ditto, and index length = table length.
 
@@ -198,16 +200,16 @@ using namespace __gnu_cxx;
 // The better variadic version of typelists is from the code project by geoyar,
 // but it's -std=c++=14, which I cannot seem to get working on centos-7 right now, but definitely later.
 typedef LOKI_TYPELIST_3(airportRow, airlineRow, routeRow) tableTypes; // must be in the order of Table, above
+static_assert((int)Table::table_Count==Loki::TL::Length<tableTypes>::value,
+    "(int)Table::table_Count and tableTypes lengths must match");
 
-// a similar thing can be done to static polymorphically obtain
-// proper object pointers for the IndexStrings below, if needed.
 template<Column columnEnum>
-inline Loki::TL::TypeAt<tableTypes, (std::size_t)(column2Table(columnEnum))> columnEnum2RowStringAnchor()
+inline Loki::TL::TypeAt<tableTypes, (std::size_t)(column2Table(columnEnum))>* columnEnum2RowStringAnchor()
 {
     const Table table = column2Table(columnEnum);
     const std::size_t tableId = (std::size_t)table;
-    const char* rowAnchor = rowAnchors[tableId];
-    return (Loki::TL::TypeAt<tableTypes, (std::size_t)(column2Table(columnEnum))>)rowAnchor;
+    const char* charRowAnchor = charRowAnchors[tableId];
+    return (Loki::TL::TypeAt<tableTypes, (std::size_t)(column2Table(columnEnum))>*)charRowAnchor;
 }
 
 typedef IndexString<Column::airportId, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportIdType;
@@ -222,7 +224,7 @@ typedef IndexString<Column::routeDestinationAirportId, char, routesMaxLen, Table
 
 #include "JoinedRow.h"
 
-static constexpr Column routesViewColumns[] =
+static constexpr Column routesJoinColumns[] =
 {
     Column::routeSourceAirportId,
     Column::airportId,
@@ -230,10 +232,12 @@ static constexpr Column routesViewColumns[] =
     Column::airportId,
     Column::airlineId
 };
+// must be in the order of the view, above
+typedef LOKI_TYPELIST_5(routeRow, airportRow, routeRow, airportRow, airlineRow) joinTypes;
 
-typedef JoinedRow<routesViewColumns, sizeof(routesViewColumns), tableTypes> routesView;
-static_assert((int)Table::table_Count==Loki::TL::Length<tableTypes>::value,
-    "(int)Table::table_Count and tableTypes lengths must match");
+typedef JoinedRow<routesJoinColumns, tableTypes> routesJoin;
+static_assert(sizeof(routesJoinColumns)/sizeof(Column)==Loki::TL::Length<joinTypes>::value,
+    "the sizeof(routesJoinColumns) and joinTypes lengths must match");
 
 
 /*
@@ -411,7 +415,7 @@ int main()
         printTable(indexPtr, 5);
         cout << endl;
 
-        routesView myRoutes[100];
+        routesJoin myRoutes[100];
         cout << endl << myRoutes[0].tableCount() << " table join:" << endl;
         printTable(myRoutes, 10);
 

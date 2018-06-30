@@ -43,15 +43,16 @@ RowString.h - header file for RowString type, which are variable-length (with an
 #include <stddef.h>
 #include <algorithm>
 #include <string.h>
+#include "Row.h"
 
 typedef char* ColumnStr;
 
 using namespace std;
 
 // My intent is for this to work for more than just typename char someday: wchar_t, char16_t, char32_t
-template <typename T, std::size_t maxStringSize, Table table, std::size_t maxColumnsCount = 4,
+template <typename T, std::size_t maxStringSize, Table tableEnum, std::size_t maxColumnsCount = 4,
          std::size_t maxColumnSize = 1024>
-class RowString
+class RowString: public Row
 {
 public:
 
@@ -77,7 +78,7 @@ public:
 public:
     Struct r;
 
-    typedef RowString<T, maxStringSize, table, maxColumnsCount> rowType;
+    typedef RowString<T, maxStringSize, tableEnum, maxColumnsCount> rowType;
 
     class Assign_String_Too_Long : public runtime_error
     {
@@ -202,8 +203,8 @@ public:
 
     ColumnStr columnStr(Column columnEnum) // returns a pointer into the column inside the row
     {
-        if (tableAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
-        if (column2Table(columnEnum) != table) throw Wrong_Column_For_This_Table();
+        if (charRowAnchors[(int)tableEnum] == 0) throw Bad_RowString_Anchor(); // no table to index
+        if (column2Table(columnEnum) != tableEnum) throw Wrong_Column_For_This_Table();
         char *lhsColumnStr = (char*)r + r.columnOffset[columnId[(int)columnEnum]];
 
         int len = strlen(lhsColumnStr);
@@ -270,9 +271,11 @@ public:
     void dropAnchor(RowString rowArr[], std::size_t size)
     // parameters should look like (rowArray, array count)
     {
-        if (tableAnchors[(int)table] != 0) throw Already_Array_Anchor();
+        if (charRowAnchors[(int)tableEnum] != 0) throw Already_Array_Anchor();
+        if (rowAnchors[(int)tableEnum] != 0) throw Already_Array_Anchor();
         if (sizeof(rowArr[0]) != sizeof(r)) throw Item_Size_Mismatch();
-        tableAnchors[(int)table] = (char*)rowArr;
+        charRowAnchors[(int)tableEnum] = (char*)rowArr;
+        rowAnchors[(int)tableEnum] = &rowArr[0];
     }
 
     void reserve(int i) { } // no-op

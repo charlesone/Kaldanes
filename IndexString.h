@@ -180,17 +180,17 @@ public:
 
     IndexString& copyKey() // Only used during IndexString init: copy the pmnk of the IndexString key from the RowString
     {
-        if (charAnchors[(int)columnEnum] == 0) throw Bad_IndexString_Anchor(); // no index for this column
+        if (charIndexAnchors[(int)columnEnum] == 0) throw Bad_IndexString_Anchor(); // no index for this column
         if (h.k != 0) throw Over_Writing_Existing_IndexString_Key(); // some confusion as to order of operations
         h.pmnk[0] = 0;
         // First, get the k-value, the corresponding rowString-array-index
         char *pmnkPtr = h.pmnk;
         char *hPtr = pmnkPtr - offsetof(IndexStringStruct, pmnk);
-        int delta = hPtr - charAnchors[(int)columnEnum];
+        int delta = hPtr - charIndexAnchors[(int)columnEnum];
         int k = delta/sizeof(h);
 //        int k = ((char*)h.pmnk - offsetof(IndexStringStruct, pmnk) - charAnchors[(int)columnEnum])/sizeof(h);
         // Second, get the rowString-column string pointer (source)
-        char *rowStr = tableAnchors[(int)table] + (sizeof(((rowType*)0)->r) * k); // points to first byte of corresponding row
+        char *rowStr = charRowAnchors[(int)table] + (sizeof(((rowType*)0)->r) * k); // points to first byte of corresponding row
         rowType *row = (rowType*)(rowStr); // row pointer of corresponding row
         char *columnStr = rowStr + row->r.columnOffset[columnId[(int)columnEnum]];
         // Third, get the rowString's column-string length
@@ -210,11 +210,11 @@ public:
 
     rowType row()
     {
-        if (tableAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
-        if (charAnchors[(int)columnEnum] == 0 || h.k < 0)
+        if (charRowAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
+        if (charIndexAnchors[(int)columnEnum] == 0 || h.k < 0)
             throw Bad_IndexString_Anchor(); // no index for this column
 
-        char *rowStr = tableAnchors[(int)table] + (sizeof(((rowType*)0)->r) * h.k); // points to first byte of rhs row
+        char *rowStr = charRowAnchors[(int)table] + (sizeof(((rowType*)0)->r) * h.k); // points to first byte of rhs row
         rowType *row = (rowType*)(rowStr); // rhs row pointer
 
         return row[0];
@@ -222,11 +222,11 @@ public:
 
     ColumnStr c_str() // returns a more costly pointer into the column inside the row at the IndexStringStruct h.k offset
     {
-        if (tableAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
-        if (charAnchors[(int)columnEnum] == 0 || h.k < 0)
+        if (charRowAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
+        if (charIndexAnchors[(int)columnEnum] == 0 || h.k < 0)
             throw Bad_IndexString_Anchor(); // no index for this column
 
-        char *lhsRowStr = tableAnchors[(int)table] + (sizeof(((rowType*)0)->r) * h.k); // points to first byte of lhs row
+        char *lhsRowStr = charRowAnchors[(int)table] + (sizeof(((rowType*)0)->r) * h.k); // points to first byte of lhs row
         rowType *lhsRow = (rowType*)(lhsRowStr); // lhs row pointer
         char *lhsColumnStr = lhsRowStr + lhsRow->r.columnOffset[columnId[(int)columnEnum]];
 
@@ -239,16 +239,16 @@ private:
 
     inline int compareTail(const IndexString& rhs)
     {
-        if (tableAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
-        if (charAnchors[(int)columnEnum] == 0 || h.k < 0 || rhs.h.k < 0)
+        if (charRowAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
+        if (charIndexAnchors[(int)columnEnum] == 0 || h.k < 0 || rhs.h.k < 0)
             throw Bad_IndexString_Anchor(); // no index for this column
         // throw Should_Not_Execute_Here(); // this is for performance debugging
 
-        char *lhsRowStr = tableAnchors[(int)table] + (sizeof(((rowType*)0)->r) * h.k); // points to first byte of lhs row
+        char *lhsRowStr = charRowAnchors[(int)table] + (sizeof(((rowType*)0)->r) * h.k); // points to first byte of lhs row
         rowType *lhsRow = (rowType*)(lhsRowStr); // lhs row pointer
         char *lhsColumnStr = lhsRowStr + lhsRow->r.columnOffset[columnId[(int)columnEnum]] + pmnkSize; // points after pmnkSize
 
-        char *rhsRowStr = tableAnchors[(int)table] + (sizeof(((rowType*)0)->r) * rhs.h.k); // points to first byte of rhs row
+        char *rhsRowStr = charRowAnchors[(int)table] + (sizeof(((rowType*)0)->r) * rhs.h.k); // points to first byte of rhs row
         rowType *rhsRow = (rowType*)(rhsRowStr); // rhs row pointer
         char *rhsColumnStr = rhsRowStr + rhsRow->r.columnOffset[columnId[(int)columnEnum]] + pmnkSize; // points after pmnkSize
 
@@ -257,12 +257,12 @@ private:
 
     inline int compareTail(const char rhsTailStr[])
     {
-        if (tableAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
-        if (charAnchors[(int)columnEnum] == 0 || h.k < 0)
+        if (charRowAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
+        if (charIndexAnchors[(int)columnEnum] == 0 || h.k < 0)
             throw Bad_IndexString_Anchor(); // no index for this column
         // throw Should_Not_Execute_Here(); // this is for performance debugging
 
-        char *lhsRowStr = tableAnchors[(int)table] + (sizeof(((rowType*)0)->r) * h.k); // points to first byte of lhs row
+        char *lhsRowStr = charRowAnchors[(int)table] + (sizeof(((rowType*)0)->r) * h.k); // points to first byte of lhs row
         rowType *lhsRow = (rowType*)(lhsRowStr); // lhs row pointer
         char *lhsColumnStr = lhsRowStr + lhsRow->r.columnOffset[columnId[(int)columnEnum]] + pmnkSize; // points after pmnkSize
 
@@ -440,11 +440,11 @@ public:
     void dropAnchorCopyKeysSortIndex(IndexString indexArr[], std::size_t size)
     // parameters should look like (indexArray, array count)
     {
-        if (tableAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
+        if (charRowAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
         if (sizeof(indexArr[0]) != sizeof(h)) throw Item_Size_Mismatch();
-        if (charAnchors[(int)columnEnum] != 0) throw Already_IndexString_Anchor(); // came here twice
+        if (charIndexAnchors[(int)columnEnum] != 0) throw Already_IndexString_Anchor(); // came here twice
 
-        charAnchors[(int)columnEnum] = (char*)indexArr[0].h.pmnk - offsetof(IndexStringStruct, pmnk);
+        charIndexAnchors[(int)columnEnum] = (char*)indexArr[0].h.pmnk - offsetof(IndexStringStruct, pmnk);
         indexAnchors[(int)columnEnum] = &indexArr[0];
         indexLengths[(int)columnEnum] = size;
 
@@ -460,13 +460,13 @@ public:
     // prints the row pointed to by the IndexStringStruct h.k offset
     friend ostream& operator<< (ostream &os, const IndexString& rhs)
     {
-        if (tableAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
-        if (charAnchors[(int)columnEnum] == 0 || rhs.h.k < 0)
+        if (charRowAnchors[(int)table] == 0) throw Bad_RowString_Anchor(); // no table to index
+        if (charIndexAnchors[(int)columnEnum] == 0 || rhs.h.k < 0)
             throw Bad_IndexString_Anchor(); // no index for this column
         os << rhs.h.pmnk;
         if (strlen(rhs.h.pmnk) == pmnkSize)
         {
-            char *rhsRowStr = tableAnchors[(int)table] + (sizeof(((rowType*)0)->r) * rhs.h.k); // points to first byte of rhs row
+            char *rhsRowStr = charRowAnchors[(int)table] + (sizeof(((rowType*)0)->r) * rhs.h.k); // points to first byte of rhs row
             rowType *rhsRow = (rowType*)(rhsRowStr); // rhs row pointer
             char *rhsColumnStr = rhsRowStr + rhsRow->r.columnOffset[columnId[(int)columnEnum]] + pmnkSize; // points after pmnkSize
             os << rhsColumnStr;
