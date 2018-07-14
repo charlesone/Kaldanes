@@ -7,11 +7,12 @@
 
 using namespace std;
 
-template <const Column columnArray[], typename columnTableTypes>
+// will be variadic as soon as I get the type handling worked out
+template <typename T1, typename T2, typename T3, typename T4, std::size_t arrayLen = 4>
 class JoinedRow
 {
 public:
-    static const std::size_t arrayCount = Loki::TL::Length<columnTableTypes>::value;
+    static const std::size_t arrayCount = arrayLen;
 
     struct JoinedRowStruct
     {
@@ -42,77 +43,21 @@ public:
     friend ostream& operator<< (ostream &os, const JoinedRow& rhs)
     {
         // This part could be automated with some ifdef generic programming
-        typedef Loki::TL::TypeAt<columnTableTypes, 0>* table0Ptr;
-        table0Ptr ptr0 = (table0Ptr)rowAnchors[(int)column2Table(columnArray[0])];
-        typedef Loki::TL::TypeAt<columnTableTypes, 1>* table1Ptr;
-        table1Ptr ptr1 = (table1Ptr)rowAnchors[(int)column2Table(columnArray[1])];
-        typedef Loki::TL::TypeAt<columnTableTypes, 2>* table2Ptr;
-        table2Ptr ptr2 = (table2Ptr)rowAnchors[(int)column2Table(columnArray[2])];
-        typedef Loki::TL::TypeAt<columnTableTypes, 3>* table3Ptr;
-        table3Ptr ptr3 = (table3Ptr)rowAnchors[(int)column2Table(columnArray[3])];
-        typedef Loki::TL::TypeAt<columnTableTypes, 4>* table4Ptr;
-        table4Ptr ptr4 = (table4Ptr)rowAnchors[(int)column2Table(columnArray[4])];
-        typedef Loki::TL::TypeAt<columnTableTypes, 5>* table5Ptr;
-        table5Ptr ptr5 = (table5Ptr)rowAnchors[(int)column2Table(columnArray[5])];
 
         for (int i = 0; i < (int)Table::table_Count; i++)
         {// this means all tables must be allocated and anchored before the first join is accessed this way
-            if (charRowAnchors[i] == 0)
+            if (rowAnchors[i] == 0)
                 throw Bad_RowString_Anchor(); // no index for this table
         }
-        for (int i = 0; i < arrayCount; i++)
-        {
-            Loki::TL::TypeAt<columnTableTypes, (std::size_t)(column2Table(columnArray[0]))>* row = ptr0[rhs.j.k[0]];
-            os << row;
-        }
+    T1* ptr1 = (T1*)rowAnchors[(std::size_t)Table::airports];
+    T2* ptr2 = (T2*)rowAnchors[(std::size_t)Table::routes];
+    T3* ptr3 = (T3*)rowAnchors[(std::size_t)Table::airports];
+    T4* ptr4 = (T4*)rowAnchors[(std::size_t)Table::airlines];
+        os << ptr1[rhs.j.k[0]];
+        os << ptr2[rhs.j.k[1]];
+        os << ptr3[rhs.j.k[2]];
+        os << ptr4[rhs.j.k[3]];
         return os;
-
-/*        Loki::TL::TypeAt<columnTableTypes, (std::size_t)(column2Table(columnArray[0]))>* ptr0 = columnEnum2RowStringAnchor<columnArray[0]>();
-        Loki::TL::TypeAt<columnTableTypes, (std::size_t)(column2Table(columnArray[1]))>* ptr1 = columnEnum2RowStringAnchor<columnArray[1]>();
-        Loki::TL::TypeAt<columnTableTypes, (std::size_t)(column2Table(columnArray[2]))>* ptr2 = columnEnum2RowStringAnchor<columnArray[2]>();
-        Loki::TL::TypeAt<columnTableTypes, (std::size_t)(column2Table(columnArray[3]))>* ptr3 = columnEnum2RowStringAnchor<columnArray[3]>();
-        Loki::TL::TypeAt<columnTableTypes, (std::size_t)(column2Table(columnArray[4]))>* ptr4 = columnEnum2RowStringAnchor<columnArray[4]>();
-        int offset0 = rhs.j.k[0];
-//        os << ptr1[j.k[0]];
-        if (sizeofColumnArray < 2) return os;
-        os << columnEnum2RowStringAnchor<columnArray[1]>()[j.k[i]];
-        if (sizeofColumnArray < 3) return os;
-        os << columnEnum2RowStringAnchor<columnArray[2]>()[j.k[i]];
-        if (sizeofColumnArray < 4) return os;
-        os << columnEnum2RowStringAnchor<columnArray[3]>()[j.k[i]];
-        if (sizeofColumnArray < 5) return os;
-        os << columnEnum2RowStringAnchor<columnArray[4]>()[j.k[i]];
-        if (sizeofColumnArray < 6) return os;
-        os << columnEnum2RowStringAnchor<columnArray[5]>()[j.k[i]];
-        if (sizeofColumnArray < 7) return os;
-        os << columnEnum2RowStringAnchor<columnArray[6]>()[j.k[i]];
-        if (sizeofColumnArray < 8) return os;
-        os << columnEnum2RowStringAnchor<columnArray[7]>()[j.k[i]];
-        if (sizeofColumnArray < 9) return os;
-        os << columnEnum2RowStringAnchor<columnArray[8]>()[j.k[i]];
-        if (sizeofColumnArray < 10) return os;
-        os << columnEnum2RowStringAnchor<columnArray[9]>()[j.k[i]];
-        if (sizeofColumnArray < 11) return os;
-        os << columnEnum2RowStringAnchor<columnArray[10]>()[j.k[i]];
-        if (sizeofColumnArray < 12) return os;
-        os << columnEnum2RowStringAnchor<columnArray[11]>()[j.k[i]];
-        if (sizeofColumnArray < 13) return os;
-        os << columnEnum2RowStringAnchor<columnArray[12]>()[j.k[i]];
-        if (sizeofColumnArray < 14) return os;
-        os << columnEnum2RowStringAnchor<columnArray[13]>()[j.k[i]];
-        if (sizeofColumnArray < 15) return os;
-        os << columnEnum2RowStringAnchor<columnArray[14]>()[j.k[i]];
-        if (sizeofColumnArray < 16) return os;
-        os << columnEnum2RowStringAnchor<columnArray[15]>()[j.k[i]];
-        if (sizeofColumnArray < 17) return os;
-        os << columnEnum2RowStringAnchor<columnArray[16]>()[j.k[i]];
-        if (sizeofColumnArray < 18) return os;
-        os << columnEnum2RowStringAnchor<columnArray[17]>()[j.k[i]];
-        if (sizeofColumnArray < 19) return os;
-        os << columnEnum2RowStringAnchor<columnArray[18]>()[j.k[i]];
-        if (sizeofColumnArray < 20) return os;
-        os << columnEnum2RowStringAnchor<columnArray[19]>()[j.k[i]];
-        return os;*/
     }
 
 };

@@ -11,7 +11,7 @@ public:
     {
     }
 
-    Row(const Row& rhs)
+    Row(Row& rhs)
     {
     }
 

@@ -52,7 +52,7 @@ using namespace std;
 // My intent is for this to work for more than just typename char someday: wchar_t, char16_t, char32_t
 template <typename T, std::size_t maxStringSize, Table tableEnum, std::size_t maxColumnsCount = 4,
          std::size_t maxColumnSize = 1024>
-class RowString: public Row
+class RowString
 {
 public:
 
@@ -276,6 +276,7 @@ public:
         if (sizeof(rowArr[0]) != sizeof(r)) throw Item_Size_Mismatch();
         charRowAnchors[(int)tableEnum] = (char*)rowArr;
         rowAnchors[(int)tableEnum] = &rowArr[0];
+        rowLengths[(int)tableEnum] = size;
     }
 
     void reserve(int i) { } // no-op
