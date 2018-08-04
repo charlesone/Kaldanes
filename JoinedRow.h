@@ -7,12 +7,12 @@
 
 using namespace std;
 
-// will be variadic as soon as I get the type handling worked out
-template <typename T1, typename T2, typename T3, typename T4, std::size_t arrayLen = 4>
+template <typename... T>
 class JoinedRow
 {
 public:
-    static const std::size_t arrayCount = arrayLen;
+    // the initial relation has two table indexes, the rest are links to one table index
+    static const std::size_t arrayCount = sizeof...(T) + 1;
 
     struct JoinedRowStruct
     {
@@ -49,14 +49,6 @@ public:
             if (rowAnchors[i] == 0)
                 throw Bad_RowString_Anchor(); // no index for this table
         }
-    T1* ptr1 = (T1*)rowAnchors[(std::size_t)Table::airports];
-    T2* ptr2 = (T2*)rowAnchors[(std::size_t)Table::routes];
-    T3* ptr3 = (T3*)rowAnchors[(std::size_t)Table::airports];
-    T4* ptr4 = (T4*)rowAnchors[(std::size_t)Table::airlines];
-        os << ptr1[rhs.j.k[0]];
-        os << ptr2[rhs.j.k[1]];
-        os << ptr3[rhs.j.k[2]];
-        os << ptr4[rhs.j.k[3]];
         return os;
     }
 

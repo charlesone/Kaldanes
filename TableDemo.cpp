@@ -124,7 +124,7 @@ enum class Column // must be in the order of Table, above
 
 // Index metadata resides in these (3) arrays
 static char* charIndexAnchors[(int)Column::columnCount] = {0}; // after the first item, the rest get zeroed.
-static Index* indexAnchors[(int)Column::columnCount] = {0}; // after the first item, the rest get zeroed.
+static void* indexAnchors[(int)Column::columnCount] = {0}; // after the first item, the rest get zeroed.
 static std::size_t indexLengths[(int)Column::columnCount] = {0}; // ditto, and index length = table length.
 
 typedef std::size_t ColumnOffset;
@@ -221,19 +221,15 @@ typedef IndexString<Column::routeAirlineId, char, routesMaxLen, Table::routes, r
 typedef IndexString<Column::routeSourceAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeSourceAirportIdType;
 typedef IndexString<Column::routeDestinationAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeDestinationAirportIdType;
 
+#include "Relation.h"
+
+typedef Relation<airportIdType, routeSourceAirportIdType> airportId2RouteSourceAirportId;
+typedef Relation<routeDestinationAirportIdType, airportIdType> routeDestinationAirportId2AirportId;
+typedef Relation<routeAirlineIdType, airlineIdType> routeAirlineId2AirlineId;
+
 #include "JoinedRow.h"
 
-static constexpr Column routesJoinColumns[] =
-{
-    Column::routeSourceAirportId,
-    Column::airportId,
-    Column::routeDestinationAirportId,
-    Column::airportId,
-    Column::airlineId
-};
-
-typedef JoinedRow<airportIdType, routeSourceAirportIdType, airportIdType, airlineIdType, 4> routesJoin;
-
+typedef JoinedRow<airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId> routesJoin;
 
 /*
  █████╗       ██████╗   ███████╗
