@@ -53,9 +53,6 @@ using namespace std;
 static const std::size_t maxColumnSizeDefault = 1024;
 static const std::size_t pmnkSizeDefault = 7;
 
-#include "Row.h"
-#include "Index.h"
-
 enum class Table
 {
     airports,
@@ -69,7 +66,7 @@ enum class Table
 
 static char* charRowAnchors[(int)Table::table_Count] = {0}; // after the first item, the rest get zeroed.
 static void* rowAnchors[(int)Table::table_Count] = {0}; // after the first item, the rest get zeroed.
-static std::size_t rowLengths[(int)Table::table_Count] = {0}; // ditto, and index length = table length.
+static std::size_t rowCounts[(int)Table::table_Count] = {0}; // ditto, and index length = table length.
 
 enum class Column // must be in the order of Table, above
 {
@@ -125,7 +122,7 @@ enum class Column // must be in the order of Table, above
 // Index metadata resides in these (3) arrays
 static char* charIndexAnchors[(int)Column::columnCount] = {0}; // after the first item, the rest get zeroed.
 static void* indexAnchors[(int)Column::columnCount] = {0}; // after the first item, the rest get zeroed.
-static std::size_t indexLengths[(int)Column::columnCount] = {0}; // ditto, and index length = table length.
+static std::size_t indexCounts[(int)Column::columnCount] = {0}; // ditto, and index length = table length.
 
 typedef std::size_t ColumnOffset;
 static const ColumnOffset trammel = UINT_MAX; // to catch the alignment bugs
@@ -198,14 +195,14 @@ routeRow;
 // Compile time (static) programming is difficult in c++11
 template<Column columnEnum>
 constexpr decltype((columnEnum < Column::airportsDivider) ? (airportRow*)0
-        : (columnEnum < Column::airlinesDivider) ? (airlineRow*)0
-        : (columnEnum < Column::routesDivider) ? (routeRow*)0
-        : (void*)0) column2RowStringPtr()
+                   : (columnEnum < Column::airlinesDivider) ? (airlineRow*)0
+                   : (columnEnum < Column::routesDivider) ? (routeRow*)0
+                   : (void*)0) column2RowStringPtr()
 {
     return (decltype((columnEnum < Column::airportsDivider) ? (airportRow*)0
-        : (columnEnum < Column::airlinesDivider) ? (airlineRow*)0
-        : (columnEnum < Column::routesDivider) ? (routeRow*)0
-        : (void*)0)) (columnEnum < Column::airportsDivider) ? reinterpret_cast<airportRow*>(rowAnchors[(std::size_t)Table::airports])
+                     : (columnEnum < Column::airlinesDivider) ? (airlineRow*)0
+                     : (columnEnum < Column::routesDivider) ? (routeRow*)0
+                     : (void*)0)) (columnEnum < Column::airportsDivider) ? reinterpret_cast<airportRow*>(rowAnchors[(std::size_t)Table::airports])
            : (columnEnum < Column::airlinesDivider) ? reinterpret_cast<airlineRow*>(rowAnchors[(std::size_t)Table::airlines])
            : (columnEnum < Column::routesDivider) ? reinterpret_cast<routeRow*>(rowAnchors[(std::size_t)Table::routes])
            : (void*)0;
@@ -221,23 +218,18 @@ typedef IndexString<Column::routeAirlineId, char, routesMaxLen, Table::routes, r
 typedef IndexString<Column::routeSourceAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeSourceAirportIdType;
 typedef IndexString<Column::routeDestinationAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeDestinationAirportIdType;
 
-#include "Relation.h"
-
-typedef Relation<airportIdType, routeSourceAirportIdType> airportId2RouteSourceAirportId;
-typedef Relation<routeDestinationAirportIdType, airportIdType> routeDestinationAirportId2AirportId;
-typedef Relation<routeAirlineIdType, airlineIdType> routeAirlineId2AirlineId;
-
-#include "JoinedRow.h"
-
-typedef JoinedRow<airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId> routesJoin;
+#include "RelationVector.h"
+#include "Tuple.h"
+//#include "JoinedRow.h"
+//typedef JoinedRow<RoutesJoinRelsTuple, RoutesJoinRowTypesTuple> routesJoin;
 
 /*
- █████╗       ██████╗   ███████╗
-██╔══██╗      ██╔══██╗  ██╔════╝
-███████║      ██████╔╝  ███████╗
-██╔══██║      ██╔═══╝   ╚════██║
-██║  ██║ctive ██║rogram ███████║ection
-╚═╝  ╚═╝      ╚═╝       ╚══════╝
+██████╗        ██████╗   ███████╗
+██╔══██╗       ██╔══██╗  ██╔════╝
+██████╔╝       ██████╔╝  ███████╗
+██╔══██╗       ██╔═══╝   ╚════██║
+██║  ██║untime ██║rogram ███████║ection
+╚═╝  ╚═╝       ╚═╝       ╚══════╝
 */
 
 class Boolian_Error : public runtime_error
@@ -344,7 +336,8 @@ int main()
 {
     //airports, airlines, routes
     try
-    {// Anonyomous catch -> exception names in release code execution
+    {
+        // Anonyomous catch -> exception names in release code execution
 
         asserts();
 
@@ -361,7 +354,7 @@ int main()
         routes[0].dropAnchor(routes, routesCount);
         loadCSVFile(routes, routesCount, routesFile);
 
-        // IndexString space allocation
+        // Index space allocation
         airportIdType airportsId[airportsCount];
         airportNameType airportsName[airportsCount];
         airportCityType airportsCity[airportsCount];
@@ -386,29 +379,34 @@ int main()
         int rowIndex;
         airportNameType* indexPtr;
 
-        char goodName[] = "La Guardia Airport";
-        rowIndex = binarySearch(airportsName, airportsCount, goodName);
-        indexPtr = airportsName + abs(rowIndex) - 2;
-        if (rowIndex < 0) cout << "Missing: ";
-        else cout << "Existing: ";
-        cout << goodName << " Airport record search:" << endl;
-        cout << "Returns: " << rowIndex << endl << endl;
-        printTable(indexPtr, 5);
-        cout << endl;
+        auto searchAndPrint = [&] (string name)
+        {
+            rowIndex = binarySearch(airportsName, airportsCount, name.c_str());
+            indexPtr = airportsName + abs(rowIndex) - 2;
+            cout << "\"" << name << "\" Airport record search:" << endl;
+            cout << "Returns: " << rowIndex << ((rowIndex < 0) ? " (Missing)" : " (Existing)") << endl << endl;
+            printTable(indexPtr, 5);
+            cout << endl;
+        };
 
-        char badName[] = "La Nunca Airport";
-        rowIndex = binarySearch(airportsName, airportsCount, badName);
-        indexPtr = airportsName + abs(rowIndex) - 2;
-        if (rowIndex < 0) cout << "Missing: ";
-        else cout << "Existing: ";
-        cout << badName << " Airport record search:" << endl;
-        cout << "Returns: " << rowIndex << endl << endl;
-        printTable(indexPtr, 5);
-        cout << endl;
+        searchAndPrint("La Guardia Airport");
+        searchAndPrint("La Nunca Airport");
 
-        routesJoin myRoutes[100];
-        cout << endl << myRoutes[0].tableCount() << " table join:" << endl;
-        printTable(myRoutes, 10);
+        typedef RelationVector<airportIdType, routeSourceAirportIdType> airportId2RouteSourceAirportId;
+        typedef RelationVector<routeDestinationAirportIdType, airportIdType> routeDestinationAirportId2AirportId;
+        typedef RelationVector<routeAirlineIdType, airlineIdType> routeAirlineId2AirlineId;
+
+        static std::size_t tableOffsets[(int)Column::columnCount] = {0};
+
+        typedef Tuple<airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId> RoutesJoinRelsTuple;
+        typedef Tuple<airportRow, routeRow, airportRow, airlineRow> RoutesJoinRowTypesTuple;
+
+
+
+
+        //routesJoin myRoutes[100];
+        //cout << endl << myRoutes[0].tableCount() << " table join:" << endl;
+        //printTable(myRoutes, 10);
 
     }
     catch (...)
@@ -422,3 +420,4 @@ int main()
     }
     return 0;
 }
+

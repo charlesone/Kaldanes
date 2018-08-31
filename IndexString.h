@@ -56,7 +56,6 @@ IndexString.h - header file for Kaldane IndexString string, which are variable-l
 
 #include <iostream>
 #include <typeinfo>
-#include "Index.h"
 #include "RowString.h"
 #include "Sorts.h"
 
@@ -67,7 +66,7 @@ template <Column columnEnum,
          // this next default must match the RowString default, declared there
          std::size_t maxColumnSize = 1024,
          std::size_t pmnkSize = 7>
-class IndexString: Index
+class IndexString
 {
     friend class RowString<T, maxStringSize, tableEnum, maxColumnsCount, maxColumnSize>;
 
@@ -205,7 +204,7 @@ public:
         return *this;
     }
 
-    size_t structSize() const noexcept
+    std::size_t structSize() const noexcept
     {
         return sizeof(h);
     }
@@ -213,6 +212,16 @@ public:
     const int indexAnchorOff()
     {
         return indexAnchorOffset;
+    }
+
+    const Table enumTable()
+    {
+        return tableEnum;
+    }
+
+    std::size_t count()
+    {
+        return indexCounts[indexAnchorOffset];
     }
 
     rowType row()
@@ -453,7 +462,7 @@ public:
 
         charIndexAnchors[indexAnchorOffset] = (char*)indexArr[0].h.pmnk - offsetof(IndexStringStruct, pmnk);
         indexAnchors[indexAnchorOffset] = &indexArr[0];
-        indexLengths[indexAnchorOffset] = size;
+        indexCounts[indexAnchorOffset] = size;
 
         for (int i = 0; i < size; ++i)
         {

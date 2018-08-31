@@ -4,20 +4,31 @@
 #include <iostream>
 #include "RowString.h"
 #include "IndexString.h"
+#include "RelationVector.h"
+#include "Tuple.h"
 
 using namespace std;
 
-template <typename... T>
+static std::size_t joinedRowDepth = 0;
+static Column joinedRowColumns[25]; // supports 24-way joins
+static Table joinedRowTables[25]; // supports 24-way joins
+
+template <typename RelsTuple, typename RowTypesTuple>
 class JoinedRow
 {
 public:
-    // the initial relation has two table indexes, the rest are links to one table index
-    static const std::size_t arrayCount = sizeof...(T) + 1;
+    //static_assert(((((RelsTuple)0)->size()) ==  (((RowTypesTuple)0)->size())), "The size of RelsTuple and RowTypesTuple must match");
+
+    // the first RelationVector in RelsTuple has two table indexes (a from-link and a to-link),
+    // the rest in RelsTuple are one table indexes (to links) making N + 1 tables in the JoinedRowStruct
+
+    static const std::size_t arrayCount = ((RelsTuple)0)->size() + 1;
+    static std::size_t tableOffsets[arrayCount];// = {(int)(((Rel1)0.r.&fromIndex)->enumTable()),
+                                                 //        (int)(((T...)0.r.&toIndex)->enumTable())};
 
     struct JoinedRowStruct
     {
-        int k[arrayCount];
-        bool valid;
+        int k[arrayCount] = {0};// These are the k-values indicating a specific row in a specific indexed table (type of template class RowString)
     };
 
     JoinedRowStruct j;
@@ -37,6 +48,11 @@ public:
     const std::size_t structSize()
     {
         return sizeof(j);
+    }
+
+    void compileQuery() // will be selected when only one entered
+    {
+
     }
 
     // prints the joined rows

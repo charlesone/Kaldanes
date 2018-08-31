@@ -43,7 +43,6 @@ RowString.h - header file for RowString type, which are variable-length (with an
 #include <stddef.h>
 #include <algorithm>
 #include <string.h>
-#include "Row.h"
 
 typedef char* ColumnStr;
 
@@ -143,12 +142,12 @@ public:
             runtime_error("index fields MUST BE null terminated within the row array") {}
     };
 
-    size_t size() const noexcept
+    std::size_t size() const noexcept
     {
         return rowLength;
     }
 
-    size_t structSize() const noexcept
+    std::size_t structSize() const noexcept
     {
         return sizeof(r);
     }
@@ -156,6 +155,11 @@ public:
     void checkUnitLength(std::size_t size) // parameter size should be (array length/array count)
     {
         if (sizeof(r) != size) throw Item_Size_Mismatch();
+    }
+
+    std::size_t count()
+    {
+        return rowCounts[(int)tableEnum];
     }
 
     // for a simple one column rowString
@@ -276,7 +280,7 @@ public:
         if (sizeof(rowArr[0]) != sizeof(r)) throw Item_Size_Mismatch();
         charRowAnchors[(int)tableEnum] = (char*)rowArr;
         rowAnchors[(int)tableEnum] = &rowArr[0];
-        rowLengths[(int)tableEnum] = size;
+        rowCounts[(int)tableEnum] = size;
     }
 
     void reserve(int i) { } // no-op
