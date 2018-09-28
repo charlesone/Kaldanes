@@ -204,17 +204,22 @@ public:
         return *this;
     }
 
-    std::size_t structSize() const noexcept
+    constexpr std::size_t structSize()
     {
         return sizeof(h);
     }
 
-    const int indexAnchorOff()
+    constexpr int indexAnchorOff()
     {
         return indexAnchorOffset;
     }
 
-    const Table enumTable()
+    constexpr Column enumColumn()
+    {
+        return columnEnum;
+    }
+
+    constexpr Table enumTable()
     {
         return tableEnum;
     }
@@ -224,7 +229,7 @@ public:
         return indexCounts[indexAnchorOffset];
     }
 
-    rowType row()
+    rowType* row()
     {
         if (charRowAnchors[rowAnchorOffset] == 0) throw Bad_RowString_Anchor(); // no table to index
         if (charIndexAnchors[indexAnchorOffset] == 0 || h.k < 0)
@@ -233,7 +238,7 @@ public:
         char *rowStr = charRowAnchors[rowAnchorOffset] + (sizeof(((rowType*)0)->r) * h.k); // points to first byte of rhs row
         rowType *row = (rowType*)(rowStr); // rhs row pointer
 
-        return row[0];
+        return row;
     }
 
     ColumnStr c_str() // returns a more costly pointer into the column inside the row at the IndexStringStruct h.k offset

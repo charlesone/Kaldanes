@@ -33,6 +33,7 @@
 #include <stddef.h>
 #include <algorithm>
 #include <cstring>
+#include <tuple>
 
 using namespace std;
 // Banners from: http://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow&t=Section
@@ -45,6 +46,13 @@ using namespace std;
 ╚════██║      ██║╚██╔╝██║        ╚════██║
 ███████║tatic ██║ ╚═╝ ██║etadata ███████║ection
 ╚══════╝      ╚═╝     ╚═╝        ╚══════╝
+
+Goal: What would reside in a database catalog and execute at runtime (compiler, optimizer, etc.)
+instead lives in type space and executes at compile time.
+
+Everything in this section (classes, types, static data, const and constexpr)
+is needed for generic programming (compile-time)
+
 */
 
 // Order is critical ...
@@ -178,20 +186,16 @@ constexpr Table column2Table(Column columnEnum)
 
 const std::size_t airportsMaxLen = 184, airportsColumns = 14, airportsCount = 7184;
 const char airportsFile[] = "./airports.csv";
-typedef RowString<char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault>
-airportRow;
+typedef RowString<char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault> airportRow;
 
 const std::size_t airlinesMaxLen = 113, airlinesColumns = 8, airlinesCount = 6162;
 const char airlinesFile[] = "./airlines.csv";
-typedef RowString<char, airlinesMaxLen, Table::airlines, airlinesColumns, maxColumnSizeDefault>
-airlineRow;
+typedef RowString<char, airlinesMaxLen, Table::airlines, airlinesColumns, maxColumnSizeDefault> airlineRow;
 
 const std::size_t routesMaxLen = 65, routesColumns = 9, routesCount = 67663;
 const char routesFile[] = "./routes.csv";
-typedef RowString<char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault>
-routeRow;
+typedef RowString<char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault> routeRow;
 
-// This is ugly, but I need full c++14 (can't get it on centos 7) at least, to make it cleaner
 // Compile time (static) programming is difficult in c++11
 template<Column columnEnum>
 constexpr decltype((columnEnum < Column::airportsDivider) ? (airportRow*)0
@@ -219,9 +223,18 @@ typedef IndexString<Column::routeSourceAirportId, char, routesMaxLen, Table::rou
 typedef IndexString<Column::routeDestinationAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeDestinationAirportIdType;
 
 #include "RelationVector.h"
-#include "Tuple.h"
-//#include "JoinedRow.h"
-//typedef JoinedRow<RoutesJoinRelsTuple, RoutesJoinRowTypesTuple> routesJoin;
+
+typedef RelationVector<airportIdType, Column::airportId, routeSourceAirportIdType, Column::routeSourceAirportId> airportId2RouteSourceAirportIdType;
+typedef RelationVector<routeDestinationAirportIdType, Column::routeDestinationAirportId, airportIdType, Column::airportId> routeDestinationAirportId2AirportIdType;
+typedef RelationVector<routeAirlineIdType, Column::routeAirlineId, airlineIdType, Column::airlineId> routeAirlineId2AirlineIdType;
+
+typedef tuple<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinRelationsTupleType;
+
+// could binary search on c_str from join row offset index -> constexpr auto (c_str) -> returns decltype of index (tuple<n> or variadic)
+
+#include "JoinedRow.h"
+typedef QueryPlan<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanType;
+typedef JoinedRow<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinedRowType;
 
 /*
 ██████╗        ██████╗   ███████╗
@@ -230,6 +243,9 @@ typedef IndexString<Column::routeDestinationAirportId, char, routesMaxLen, Table
 ██╔══██╗       ██╔═══╝   ╚════██║
 ██║  ██║untime ██║rogram ███████║ection
 ╚═╝  ╚═╝       ╚═╝       ╚══════╝
+
+Nothing in this section has definitions that the generic programming (compile-time) requires.
+
 */
 
 class Boolian_Error : public runtime_error
@@ -376,10 +392,12 @@ int main()
         routesSourceAirportId[routesCount].dropAnchorCopyKeysSortIndex(routesSourceAirportId, routesCount);
         routesDestinationAirportId[routesCount].dropAnchorCopyKeysSortIndex(routesDestinationAirportId, routesCount);
 
+        cout << "First, let's execute a point query lambda on a column index, for an airport that exists, and one that is imaginary." << endl << endl;
+
         int rowIndex;
         airportNameType* indexPtr;
 
-        auto searchAndPrint = [&] (string name)
+        auto searchAndPrint5 = [&] (string name)
         {
             rowIndex = binarySearch(airportsName, airportsCount, name.c_str());
             indexPtr = airportsName + abs(rowIndex) - 2;
@@ -389,22 +407,33 @@ int main()
             cout << endl;
         };
 
-        searchAndPrint("La Guardia Airport");
-        searchAndPrint("La Nunca Airport");
+        searchAndPrint5("La Guardia Airport");
+        searchAndPrint5("La Nunca Airport");
 
-        typedef RelationVector<airportIdType, routeSourceAirportIdType> airportId2RouteSourceAirportId;
-        typedef RelationVector<routeDestinationAirportIdType, airportIdType> routeDestinationAirportId2AirportId;
-        typedef RelationVector<routeAirlineIdType, airlineIdType> routeAirlineId2AirlineId;
+        cout << "Second, let's make some relation vectors with 'from' and 'to' indexes for each, and see that we can access the table rows from them." << endl << endl;
 
-        static std::size_t tableOffsets[(int)Column::columnCount] = {0};
+        airportId2RouteSourceAirportIdType airportId2RouteSourceAirportId;
+        cout << "Relation Vector airportId2RouteSourceAirportId.fromIndex[24]: " << endl << ((airportId2RouteSourceAirportId.fromIndex())->row())[23] << endl << endl;
+        cout << "Relation Vector airportId2RouteSourceAirportId byte size: " << sizeof(airportId2RouteSourceAirportId) << endl << endl;
 
-        typedef Tuple<airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId> RoutesJoinRelsTuple;
-        typedef Tuple<airportRow, routeRow, airportRow, airlineRow> RoutesJoinRowTypesTuple;
+        routeDestinationAirportId2AirportIdType routeDestinationAirportId2AirportId;
+
+        routeAirlineId2AirlineIdType routeAirlineId2AirlineId;
+        cout << "Relation Vector routeAirlineId2AirlineId.toIndex[15]: " << endl << ((routeAirlineId2AirlineId.toIndex())->row())[15] << endl << endl;
+
+        cout << "Third, let's make a tuple of three relation vectors that will form a join, and see that we can access the same table rows from that." << endl << endl;
+
+        routesJoinRelationsTupleType RoutesJoinRelationsTuple(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
+        cout << "Routes Join tuple<0> 'from' airportId2RouteSourceAirportId.fromIndex[24] (same as above): " << endl << ((get<0>(RoutesJoinRelationsTuple).fromIndex())->row())[23] << endl << endl;
+        cout << "Routes Join tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above): " << endl << ((get<2>(RoutesJoinRelationsTuple).toIndex())->row())[15] << endl << endl;
+        cout << "Routes Join tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl;
+
+        cout << "Fourth, let's make a QueryPlan of the joined row tables from the relation vectors, and see if we can access the same table rows from that." << endl <<  endl;
+
+routesQueryPlanType routesQueryPlan(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
 
 
-
-
-        //routesJoin myRoutes[100];
+        //routesJoinedRowType myRoutes[100];
         //cout << endl << myRoutes[0].tableCount() << " table join:" << endl;
         //printTable(myRoutes, 10);
 
