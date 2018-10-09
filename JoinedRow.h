@@ -2,13 +2,17 @@
 #define JOINEDROW_H
 
 #include <iostream>
+#include <memory>
+#include <functional>
+#include <type_traits>
 #include "RowString.h"
 #include "IndexString.h"
 #include "RelationVector.h"
 
 using namespace std;
 
-static std::size_t tableDepth;
+static int joinedRowIndex;
+static int joinedRowRow;
 static Column joinedRowColumn = Column::nilColumn;
 static std::size_t tableOffsets[100];
 static Column joinedRowColumns[100];
@@ -26,20 +30,120 @@ public:
 
     relsTupleType relsTuple;
 
-    template<typename oneRelVec>
-    constexpr int walk(oneRelVec last)
+    struct QueryPlanStruct
     {
-        cout << endl << "tableDepth = " << tableDepth << endl << endl;
-        return tableDepth;
+        int k[arrayCount] = {3530,47126,3657,4539};// These are the testing k-values indicating a specific row in a specific indexed table (type of template class RowString)
     };
 
-    template<typename firstRelVec, typename... remainingRelVecs>
-    constexpr int walk(firstRelVec first, remainingRelVecs... rest)
+    QueryPlanStruct j;
+
+    class Bad_RowString_Anchor : public runtime_error
     {
-        cout << endl << "tableDepth = " << tableDepth << endl << endl;
-        tableDepth++;
-        return walk(rest...);
+    public:
+        Bad_RowString_Anchor() :
+            runtime_error("after allocation, you MUST call rowArray[0].dropAnchor(rowArray, correct_arrayCount)") {}
     };
+
+    class Variadic_Parameter_Pack_Logic_Failed : public runtime_error
+    {
+    public:
+        Variadic_Parameter_Pack_Logic_Failed() :
+            runtime_error("somehow, the counting of JoinedRow elements is wrong versus relational vectors.") {}
+    };
+
+    void emptyFunc()
+    {
+        return;
+    };
+
+    template<typename... remainingRelVecs>
+    typename std::enable_if<sizeof...(remainingRelVecs) == 0>::type queryPlanTupleOutput() {} // SFINAE'd away.
+
+    template<typename firstRelVec, typename... remainingRelVecs>
+    void queryPlanTupleOutput()// of course this method only seems to work for void returns with no parameters :(
+    {
+        const std::size_t relVecDepth = sizeof...(relVecs) - sizeof...(remainingRelVecs) -1;
+        //cout << endl << "index = " << joinedRowIndex << ", row = " << joinedRowRow << ", relVecDepth = " << relVecDepth << endl << endl;
+        (joinedRowIndex < relVecDepth) ? throw Variadic_Parameter_Pack_Logic_Failed() : ((void)0); // seriously out of whack.
+
+        (joinedRowIndex == 0 && relVecDepth == 0) ?
+        cout << ((get<relVecDepth>(relsTuple).fromIndex())->row())[joinedRowRow] << endl
+             : (joinedRowIndex == relVecDepth + 1) ?
+             cout << ((get<relVecDepth>(relsTuple).toIndex())->row())[joinedRowRow] << endl
+             : cout;
+
+        // if neither of those -> call deeper or just fall through and return
+        (!((joinedRowIndex == 0 && relVecDepth == 0) || (joinedRowIndex == relVecDepth + 1))) ? queryPlanTupleOutput<remainingRelVecs...>()
+        : emptyFunc();
+
+        return;
+    };
+
+    void printQueryPlanTest()
+    {
+        for (int i = 0; i < arrayCount; ++i)
+        {
+            joinedRowIndex = i;
+            joinedRowRow = j.k[i];
+            queryPlanTupleOutput<relVecs...>();
+        }
+
+    }
+
+    template<typename... remainingRelVecs> // Can't seem to get this struct method to work :(
+    struct calls
+    {
+        relsTupleType structRelsTuple;
+
+        static int structQueryPlanTupleOutput(std::size_t index, std::size_t row)
+        {
+            const std::size_t relVecDepth = sizeof...(relVecs) - sizeof...(remainingRelVecs) -1;
+            //cout << endl << "index = " << index << ", row = " << row << ", relVecDepth = " << relVecDepth << endl << endl;
+            return relVecDepth;
+        }
+    };
+
+    template<typename firstRelVec, typename... remainingRelVecs> // Can't seem to get this struct method to work for tuple :(
+    struct calls<firstRelVec, remainingRelVecs...>
+    {
+        relsTupleType structRelsTuple;
+
+        int structEmptyFunc()
+        {
+            return 0;
+        };
+
+        int structQueryPlanTupleOutput(std::size_t index, std::size_t row)
+        {
+            const std::size_t relVecDepth = sizeof...(relVecs) - sizeof...(remainingRelVecs) -1;
+            //cout << endl << "index = " << index << ", row = " << row << ", relVecDepth = " << relVecDepth << endl << endl;
+            (index < relVecDepth) ? throw Variadic_Parameter_Pack_Logic_Failed() : ((void)0); // seriously out of whack.
+
+            (index == 0 && relVecDepth == 0) ?
+            cout << ((get<relVecDepth>(structRelsTuple).fromIndex())->row())[row] << endl
+                 : (index == relVecDepth + 1) ?
+                 cout << ((get<relVecDepth>(structRelsTuple).toIndex())->row())[row] << endl
+                 : cout;
+
+            // if neither of those -> call deeper or just fall through and return
+            (!((index == 0 && relVecDepth == 0) || (index == relVecDepth + 1))) ? calls<remainingRelVecs...>::structQueryPlanTupleOutput(index, row)
+            : structEmptyFunc();
+
+            return relVecDepth;
+        }
+    };
+
+    typedef calls<relVecs ...> callsType; // Can't seem to get this struct method to work for tuple :(
+
+    callsType c; // Can't seem to get this struct method to work for tuple :(
+
+    void printQueryPlanTest2() // Can't seem to get this struct method to work for tuple :(
+    {
+        for (int i = 0; i < arrayCount; ++i)
+        {
+            c.calls<relVecs...>::structQueryPlanTupleOutput(i, j.k[i]);
+        }
+    }
 
     QueryPlan(relVecs... args)
     {
@@ -50,13 +154,24 @@ public:
             joinedRowTables[i] = Table::nilTable;
         }
         relsTuple = std::make_tuple(args...);
-        tableDepth = 0;
-        walk(args...);
-        cout << endl << "tableDepth = " << tableDepth << endl << endl;
+        // c.calls<relVecs...>::structRelsTuple = std::make_tuple(args...); // Can't seem to get this struct method to work for tuple :(
     }
+
+    // prints the joined rows
+    friend ostream& operator<< (ostream &os, const QueryPlan& rhs)
+    {
+        for (int i = 0; i < (int)Table::table_Count; i++)
+        {
+            // this means all tables must be allocated and anchored before the first join is accessed this way
+            if (rowAnchors[i] == 0)
+                throw Bad_RowString_Anchor(); // no index for this table
+        }
+        return os;
+    }
+
 };
 
-template <typename... relVecs>
+template <typename queryPlanRelsTupleType, int placeholder, typename... relVecs>
 class JoinedRow
 {
 public:
@@ -65,7 +180,9 @@ public:
 
     struct JoinedRowStruct
     {
-        int k[queryPlanType::arrayCount] = {0};// These are the k-values indicating a specific row in a specific indexed table (type of template class RowString)
+        // These are the k-values indicating a specific row in a specific indexed table: a type of
+        // template class RowString. There will be at least 2 values, N = sizeof...(relVecs)+1
+        int k[queryPlanType::arrayCount] = {0, 0};
     };
 
     JoinedRowStruct j;
@@ -75,6 +192,13 @@ public:
     public:
         Bad_RowString_Anchor() :
             runtime_error("after allocation, you MUST call rowArray[0].dropAnchor(rowArray, correct_arrayCount)") {}
+    };
+
+    class Variadic_Parameter_Pack_Logic_Failed : public runtime_error
+    {
+    public:
+        Variadic_Parameter_Pack_Logic_Failed() :
+            runtime_error("somehow, the counting of JoinedRow elements is wrong versus relational vectors.") {}
     };
 
     const std::size_t tableCount()
@@ -92,17 +216,24 @@ public:
 
     }
 
+    void test()
+    {
+        for (int i = 0; i < queryPlanType::arrayCount; ++i)
+        {
+            joinedRowOutput(i, j.k[i], forward_as_tuple(queryPlanType::relsTuple));
+        }
+    }
+
     // prints the joined rows
     friend ostream& operator<< (ostream &os, const JoinedRow& rhs)
     {
-        // This part could be automated with some ifdef generic programming
-
         for (int i = 0; i < (int)Table::table_Count; i++)
         {
             // this means all tables must be allocated and anchored before the first join is accessed this way
             if (rowAnchors[i] == 0)
                 throw Bad_RowString_Anchor(); // no index for this table
         }
+
         return os;
     }
 

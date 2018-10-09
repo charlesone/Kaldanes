@@ -132,9 +132,9 @@ static char* charIndexAnchors[(int)Column::columnCount] = {0}; // after the firs
 static void* indexAnchors[(int)Column::columnCount] = {0}; // after the first item, the rest get zeroed.
 static std::size_t indexCounts[(int)Column::columnCount] = {0}; // ditto, and index length = table length.
 
-typedef std::size_t ColumnOffset;
-static const ColumnOffset trammel = UINT_MAX; // to catch the alignment bugs
-static const ColumnOffset columnId[(int)Column::columnCount + 2] =
+typedef std::size_t OffsetValue;
+static const OffsetValue trammel = UINT_MAX; // to catch the alignment bugs
+static const OffsetValue columnId[(int)Column::columnCount + 2] =
 // This array translates from the Column enum to the column ID in the specific table.
 // THEY NEED TO BE MAINTAINED IN ALIGNMENT!
 // "It must be mounted on a tripod!": see "The Wild Bunch" by Peckinpah (director's cut)
@@ -234,7 +234,7 @@ typedef tuple<airportId2RouteSourceAirportIdType, routeDestinationAirportId2Airp
 
 #include "JoinedRow.h"
 typedef QueryPlan<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanType;
-typedef JoinedRow<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinedRowType;
+typedef JoinedRow<routesJoinRelationsTupleType, trammel, airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinedRowType;
 
 /*
 ██████╗        ██████╗   ███████╗
@@ -306,7 +306,7 @@ void printTable(T arr[], int size)
     if (strstr(typeName.c_str(), isIndexString))
     {
         // probably should list the friend classes first, in case of detailed demangling
-        for (int i = 0; i < size; i++) cout << arr[i] << endl;
+        for (int i = 0; i < size; i++) cout << *(arr[i].row()) << endl;
     }
     else if (strstr(typeName.c_str(), isRowString))
     {
@@ -392,25 +392,40 @@ int main()
         routesSourceAirportId[routesCount].dropAnchorCopyKeysSortIndex(routesSourceAirportId, routesCount);
         routesDestinationAirportId[routesCount].dropAnchorCopyKeysSortIndex(routesDestinationAirportId, routesCount);
 
-        cout << "First, let's execute a point query lambda on a column index, for an airport that exists, and one that is imaginary." << endl << endl;
+        cout << "First, let's execute a point query lambda on the airportsName index, for an airport that exists, and one that is imaginary." << endl << endl;
 
         int rowIndex;
-        airportNameType* indexPtr;
+        airportNameType* airportPtr;
+        routeAirlineIdType* routesPtr;
 
-        auto searchAndPrint5 = [&] (string name)
+        auto printAirports = [&] (string name, std::size_t count = 5)
         {
             rowIndex = binarySearch(airportsName, airportsCount, name.c_str());
-            indexPtr = airportsName + abs(rowIndex) - 2;
+            airportPtr = airportsName + abs(rowIndex) - 2;
             cout << "\"" << name << "\" Airport record search:" << endl;
             cout << "Returns: " << rowIndex << ((rowIndex < 0) ? " (Missing)" : " (Existing)") << endl << endl;
-            printTable(indexPtr, 5);
+            printTable(airportPtr, count);
             cout << endl;
         };
 
-        searchAndPrint5("La Guardia Airport");
-        searchAndPrint5("La Nunca Airport");
+        printAirports("La Guardia Airport");
+        printAirports("La Nunca Airport");
 
-        cout << "Second, let's make some relation vectors with 'from' and 'to' indexes for each, and see that we can access the table rows from them." << endl << endl;
+        cout << "And, let's execute a point query lambda on the routesAirlineId index, landing in the middle of the Southwest Airlines (WN) routes." << endl << endl;
+
+        auto printRoutes = [&] (string name, std::size_t count = 50)
+        {
+            rowIndex = binarySearch(routesAirlineId, routesCount, name.c_str());
+            routesPtr = routesAirlineId + abs(rowIndex) - 25;
+            cout << "\"" << name << "\" Routes record search:" << endl;
+            cout << "Returns: " << rowIndex << ((rowIndex < 0) ? " (Missing)" : " (Existing)") << endl << endl;
+            printTable(routesPtr, count);
+            cout << endl;
+        };
+
+        printRoutes("4547");
+
+        cout << "Second, let's make some relation vectors with 'from' and 'to' indexes for each, and see that we can access the table rows from there." << endl << endl;
 
         airportId2RouteSourceAirportIdType airportId2RouteSourceAirportId;
         cout << "Relation Vector airportId2RouteSourceAirportId.fromIndex[24]: " << endl << ((airportId2RouteSourceAirportId.fromIndex())->row())[23] << endl << endl;
@@ -421,17 +436,18 @@ int main()
         routeAirlineId2AirlineIdType routeAirlineId2AirlineId;
         cout << "Relation Vector routeAirlineId2AirlineId.toIndex[15]: " << endl << ((routeAirlineId2AirlineId.toIndex())->row())[15] << endl << endl;
 
-        cout << "Third, let's make a tuple of three relation vectors that will form a join, and see that we can access the same table rows from that." << endl << endl;
+        cout << "Third, let's make a tuple of three relation vectors that will form a join, and see that we can access the same table rows from there." << endl << endl;
 
         routesJoinRelationsTupleType RoutesJoinRelationsTuple(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
         cout << "Routes Join tuple<0> 'from' airportId2RouteSourceAirportId.fromIndex[24] (same as above): " << endl << ((get<0>(RoutesJoinRelationsTuple).fromIndex())->row())[23] << endl << endl;
         cout << "Routes Join tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above): " << endl << ((get<2>(RoutesJoinRelationsTuple).toIndex())->row())[15] << endl << endl;
-        cout << "Routes Join tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl;
+        cout << "Routes Join tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl << endl;
 
-        cout << "Fourth, let's make a QueryPlan of the joined row tables from the relation vectors, and see if we can access the same table rows from that." << endl <<  endl;
+        cout << "Fourth, let's make a QueryPlan of the joined row tables from the relation vectors, and see if we can access the same table rows from there." << endl <<  endl;
 
-routesQueryPlanType routesQueryPlan(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
+        routesQueryPlanType routesQueryPlan(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
 
+        routesQueryPlan.printQueryPlanTest();
 
         //routesJoinedRowType myRoutes[100];
         //cout << endl << myRoutes[0].tableCount() << " table join:" << endl;
