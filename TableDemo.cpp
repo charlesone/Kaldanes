@@ -443,7 +443,7 @@ int main()
         cout << "Routes Join tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above): " << endl << ((get<2>(RoutesJoinRelationsTuple).toIndex())->row())[15] << endl << endl;
         cout << "Routes Join tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl << endl;
 
-        cout << "Fourth, let's make a QueryPlan of the joined row tables from the relation vectors, and see if we can access the same table rows from there." << endl <<  endl;
+        cout << "Fourth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors, and see if we can access the same table rows from there." << endl <<  endl;
 
         routesQueryPlanType routesQueryPlan(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
 

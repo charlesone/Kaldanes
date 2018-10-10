@@ -11,12 +11,10 @@
 
 using namespace std;
 
-static int joinedRowIndex;
-static int joinedRowRow;
-static Column joinedRowColumn = Column::nilColumn;
 static std::size_t tableOffsets[100];
 static Column joinedRowColumns[100];
 static Table joinedRowTables[100];
+static bool joinedRowTablesIncluded[100];
 
 template <typename... relVecs>
 class QueryPlan
@@ -29,6 +27,8 @@ public:
     static const std::size_t arrayCount = (sizeof...(relVecs)) + 1;
 
     relsTupleType relsTuple;
+    int joinedRowIndex;
+    int joinedRowRow;
 
     struct QueryPlanStruct
     {
@@ -51,10 +51,59 @@ public:
             runtime_error("somehow, the counting of JoinedRow elements is wrong versus relational vectors.") {}
     };
 
-    void emptyFunc()
+    class Relation_Vector_Linkage_Rule_Violation : public runtime_error
+    {
+    public:
+        Relation_Vector_Linkage_Rule_Violation() :
+            runtime_error("Linkage Rule: after the first one, every successive relation vector's from-index, must be on a table already linked from or to") {}
+    };
+
+    constexpr void emptyFunc()
     {
         return;
     };
+
+    template<typename... remainingRelVecs>
+    constexpr typename std::enable_if<sizeof...(remainingRelVecs) == 0>::type queryPlanChecker() {} // SFINAE'd away.
+
+    template<typename firstRelVec, typename... remainingRelVecs>
+    constexpr void queryPlanChecker()// of course this method only seems to work for void returns with no parameters :(
+    {
+        const std::size_t relVecDepth = sizeof...(relVecs) - sizeof...(remainingRelVecs) -1;
+        //cout << endl << "index = " << joinedRowIndex << ", row = " << joinedRowRow << ", relVecDepth = " << relVecDepth << endl << endl;
+        (joinedRowIndex < relVecDepth) ?
+        throw Variadic_Parameter_Pack_Logic_Failed() : emptyFunc(); // seriously out of whack.
+
+        typedef decltype(((firstRelVec*)0)->r.from) fromType;
+        typedef decltype(((firstRelVec*)0)->r.to) toType;
+        const Column fromColumn = ((fromType)0)->enumColumn();
+        const Column toColumn = ((toType)0)->enumColumn();
+        const int fromTable = (int)column2Table(fromColumn);
+        const int toTable = (int)column2Table(toColumn);
+
+        (joinedRowIndex == 0 && relVecDepth == 0) ? joinedRowTablesIncluded[fromTable] = true
+                : (joinedRowIndex == relVecDepth + 1) ? joinedRowTablesIncluded[toTable] = true
+                        : 0;
+
+        (!joinedRowTablesIncluded[fromTable]) ? throw Relation_Vector_Linkage_Rule_Violation() : emptyFunc();
+        // if neither of those, then call deeper, otherwise just fall through and return
+        (!((joinedRowIndex == 0 && relVecDepth == 0) || (joinedRowIndex == relVecDepth + 1))) ?
+        queryPlanChecker<remainingRelVecs...>()
+        : emptyFunc();
+
+        return;
+    };
+
+    void checkQueryPlan()
+    {
+        for (int i = 0; i < arrayCount; ++i) joinedRowTablesIncluded[arrayCount] = false;
+        for (int i = 0; i < arrayCount; ++i)
+        {
+            joinedRowIndex = i;
+            //joinedRowRow = j.k[i];
+            queryPlanChecker<relVecs...>();
+        }
+    }
 
     template<typename... remainingRelVecs>
     typename std::enable_if<sizeof...(remainingRelVecs) == 0>::type queryPlanTupleOutput() {} // SFINAE'd away.
@@ -72,7 +121,7 @@ public:
              cout << ((get<relVecDepth>(relsTuple).toIndex())->row())[joinedRowRow] << endl
              : cout;
 
-        // if neither of those -> call deeper or just fall through and return
+        // if neither of those, then call deeper, otherwise just fall through and return
         (!((joinedRowIndex == 0 && relVecDepth == 0) || (joinedRowIndex == relVecDepth + 1))) ? queryPlanTupleOutput<remainingRelVecs...>()
         : emptyFunc();
 
@@ -154,6 +203,7 @@ public:
             joinedRowTables[i] = Table::nilTable;
         }
         relsTuple = std::make_tuple(args...);
+        checkQueryPlan();
         // c.calls<relVecs...>::structRelsTuple = std::make_tuple(args...); // Can't seem to get this struct method to work for tuple :(
     }
 
