@@ -251,4 +251,34 @@ int binarySearch(T arr[], std::size_t size, const char value[])
     return -middle; // for range searches (inexact)
 }
 
+// negative result means not an exact match: negative index of where it would be
+template<typename T>
+int binarySearchRangeLow(T arr[], std::size_t size, const char value[])
+{
+    int len = strlen(value);
+    char belowValue[len+1](value);
+    if (value[len] > CHAR_MIN) belowValue[len] = value[len] - 1; // could be a value ending in CHAR_MIN != 0
+    int returnIndex = binarySearch(arr, size, belowValue);
+    returnIndex = abs(returnIndex); // don't expect to find the precedent, but might
+    for (; arr[returnIndex - 1] >= value; returnIndex--); // could be a set of value ending in CHAR_MIN
+    for (; arr[returnIndex + 1] < value; returnIndex++); // could be a set of belowValue
+    if (arr[returnIndex] != value) returnIndex = -returnIndex; // didn't find the value
+    return returnIndex;
+}
+
+// negative result means not an exact match: negative index of where it would be
+template<typename T>
+int binarySearchRangeHigh(T arr[], std::size_t size, const char value[])
+{
+    int len = strlen(value);
+    char aboveValue[len+1](value);
+    if (value[len] < CHAR_MAX) aboveValue[len] = value[len] + 1; // could be a value ending in CHAR_MAX
+    int returnIndex = binarySearch(arr, size, aboveValue);
+    returnIndex = abs(returnIndex); // don't expect to find the successor, but might
+    for (; arr[returnIndex + 1] <= value; returnIndex++); // could be a set of value ending in CHAR_MAX
+    for (; arr[returnIndex - 1] > value; returnIndex--); // could be a set of aboveValue
+    if (arr[returnIndex] != value) returnIndex = -returnIndex; // didn't find the value
+    return returnIndex;
+}
+
 #endif // SORTS_H_INCLUDED
