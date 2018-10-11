@@ -136,7 +136,7 @@ public:
             joinedRowRow = j.k[i];
             queryPlanTupleOutput<relVecs...>();
         }
-
+        cout << endl;
     }
 
     template<typename... remainingRelVecs> // Can't seem to get this struct method to work :(

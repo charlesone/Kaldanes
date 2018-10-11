@@ -14,7 +14,7 @@
 using namespace std;
 
 // This is a database relation using indexes with a directional component for automatic optimization.
-template <typename fromIndexType, Column fromColumnEnum, typename toIndexType, Column toColumnEnum>
+template <typename fromIndexType, typename toIndexType>
 class RelationVector
 {
 public:

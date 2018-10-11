@@ -214,26 +214,31 @@ constexpr decltype((columnEnum < Column::airportsDivider) ? (airportRow*)0
 
 typedef IndexString<Column::airportId, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportIdType;
 typedef IndexString<Column::airportName, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportNameType;
-typedef IndexString<Column::airportCity, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportCityType;
+typedef IndexString<Column::airportCountry, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportCountryType;
 typedef IndexString<Column::airportIATA, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportIATAType;
 typedef IndexString<Column::airportICAO, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportICAOType;
 typedef IndexString<Column::airlineId, char, airlinesMaxLen, Table::airlines, airlinesColumns, maxColumnSizeDefault, pmnkSizeDefault> airlineIdType;
+typedef IndexString<Column::airlineCountry, char, airlinesMaxLen, Table::airlines, airlinesColumns, maxColumnSizeDefault, pmnkSizeDefault> airlineCountryType;
 typedef IndexString<Column::routeAirlineId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeAirlineIdType;
 typedef IndexString<Column::routeSourceAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeSourceAirportIdType;
 typedef IndexString<Column::routeDestinationAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeDestinationAirportIdType;
 
 #include "RelationVector.h"
 
-typedef RelationVector<airportIdType, Column::airportId, routeSourceAirportIdType, Column::routeSourceAirportId> airportId2RouteSourceAirportIdType;
-typedef RelationVector<routeDestinationAirportIdType, Column::routeDestinationAirportId, airportIdType, Column::airportId> routeDestinationAirportId2AirportIdType;
-typedef RelationVector<routeAirlineIdType, Column::routeAirlineId, airlineIdType, Column::airlineId> routeAirlineId2AirlineIdType;
+typedef RelationVector<airportIdType, routeSourceAirportIdType> airportId2RouteSourceAirportIdType;
+typedef RelationVector<routeDestinationAirportIdType, airportIdType> routeDestinationAirportId2AirportIdType;
+typedef RelationVector<routeAirlineIdType, airlineIdType> routeAirlineId2AirlineIdType;
+typedef RelationVector<airlineCountryType, airportCountryType> airlineCountry2airportCountryType;
 
 typedef tuple<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinRelationsTupleType;
+typedef tuple<airportId2RouteSourceAirportIdType, airlineCountry2airportCountryType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinRelationsTupleTypeFail;
 
 // could binary search on c_str from join row offset index -> constexpr auto (c_str) -> returns decltype of index (tuple<n> or variadic)
 
 #include "JoinedRow.h"
 typedef QueryPlan<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanType;
+typedef QueryPlan<airportId2RouteSourceAirportIdType, airlineCountry2airportCountryType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanTypeFail;
+
 typedef JoinedRow<routesJoinRelationsTupleType, trammel, airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinedRowType;
 
 /*
@@ -373,10 +378,11 @@ int main()
         // Index space allocation
         airportIdType airportsId[airportsCount];
         airportNameType airportsName[airportsCount];
-        airportCityType airportsCity[airportsCount];
+        airportCountryType airportsCountry[airportsCount];
         airportIATAType airportsIATA[airportsCount];
         airportICAOType airportsICAO[airportsCount];
         airlineIdType airlinesId[airlinesCount];
+        airlineCountryType airlinesCountry[airlinesCount];
         routeAirlineIdType routesAirlineId[routesCount];
         routeSourceAirportIdType routesSourceAirportId[routesCount];
         routeDestinationAirportIdType routesDestinationAirportId[routesCount];
@@ -384,10 +390,11 @@ int main()
         // Building the indexes
         airportsId[airportsCount].dropAnchorCopyKeysSortIndex(airportsId, airportsCount);
         airportsName[airportsCount].dropAnchorCopyKeysSortIndex(airportsName, airportsCount);
-        airportsCity[airportsCount].dropAnchorCopyKeysSortIndex(airportsCity, airportsCount);
+        airportsCountry[airportsCount].dropAnchorCopyKeysSortIndex(airportsCountry, airportsCount);
         airportsIATA[airportsCount].dropAnchorCopyKeysSortIndex(airportsIATA, airportsCount);
         airportsICAO[airportsCount].dropAnchorCopyKeysSortIndex(airportsICAO, airportsCount);
         airlinesId[airlinesCount].dropAnchorCopyKeysSortIndex(airlinesId, airlinesCount);
+        airlinesCountry[airlinesCount].dropAnchorCopyKeysSortIndex(airlinesCountry, airlinesCount);
         routesAirlineId[routesCount].dropAnchorCopyKeysSortIndex(routesAirlineId, routesCount);
         routesSourceAirportId[routesCount].dropAnchorCopyKeysSortIndex(routesSourceAirportId, routesCount);
         routesDestinationAirportId[routesCount].dropAnchorCopyKeysSortIndex(routesDestinationAirportId, routesCount);
@@ -443,11 +450,30 @@ int main()
         cout << "Routes Join tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above): " << endl << ((get<2>(RoutesJoinRelationsTuple).toIndex())->row())[15] << endl << endl;
         cout << "Routes Join tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl << endl;
 
-        cout << "Fourth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors, and see if we can access the same table rows from there." << endl <<  endl;
+        cout << "Fourth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors, and see if we can access a madeup joined route (SJC->LAS) from there." << endl <<  endl;
 
         routesQueryPlanType routesQueryPlan(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
 
         routesQueryPlan.printQueryPlanTest();
+
+cout << "Fifth, let's " << endl <<  endl;
+
+
+
+
+
+
+
+
+
+
+
+
+        cout << "Last, let's make a linked (and checked) QueryPlan of the joined row tables with one extra relation vector, that violates the linkage rule: that every from-index (after the first one) has a preceding to-indexed or initial from-indexed table to link from. The query plan checker should throw  an exception." << endl <<  endl;
+
+        airlineCountry2airportCountryType airlineCountry2airportCountry;
+
+        routesQueryPlanTypeFail routesQueryPlanFail(airportId2RouteSourceAirportId, airlineCountry2airportCountry, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
 
         //routesJoinedRowType myRoutes[100];
         //cout << endl << myRoutes[0].tableCount() << " table join:" << endl;
