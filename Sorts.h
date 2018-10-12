@@ -236,6 +236,23 @@ int binarySearch(T arr[], std::size_t size, U value)
 
 // negative result means not an exact match: negative index of where it would be
 template<typename T>
+int binarySearch(T arr[], std::size_t size, const T value)
+{
+    int left = 0;
+    int right = size - 1;
+    int middle = -1;
+    while (left <= right)
+    {
+        middle = (left + right) / 2;
+        if (arr[middle] == value) return middle;
+        else if (arr[middle] > value) right = middle - 1;
+        else left = middle + 1;
+    }
+    return -middle; // for range searches (inexact)
+}
+
+// negative result means not an exact match: negative index of where it would be
+template<typename T>
 int binarySearch(T arr[], std::size_t size, const char value[])
 {
     int left = 0;
@@ -253,10 +270,24 @@ int binarySearch(T arr[], std::size_t size, const char value[])
 
 // negative result means not an exact match: negative index of where it would be
 template<typename T>
+int binarySearchRangeLow(T arr[], std::size_t size, const T value)
+{
+    T belowValue(value);
+    belowValue = value - 1;
+    int returnIndex = binarySearch(arr, size, belowValue);
+    returnIndex = abs(returnIndex); // don't expect to find the precedent, but might
+    for (; arr[returnIndex + 1] < value; returnIndex++); // could be a set of belowValue
+    if (arr[returnIndex] != value) returnIndex = -returnIndex; // didn't find the value
+    return returnIndex;
+}
+
+// negative result means not an exact match: negative index of where it would be
+template<typename T>
 int binarySearchRangeLow(T arr[], std::size_t size, const char value[])
 {
     int len = strlen(value);
-    char belowValue[len+1](value);
+    char belowValue[len+1];
+    strcpy(belowValue, value);
     if (value[len] > CHAR_MIN) belowValue[len] = value[len] - 1; // could be a value ending in CHAR_MIN != 0
     int returnIndex = binarySearch(arr, size, belowValue);
     returnIndex = abs(returnIndex); // don't expect to find the precedent, but might
@@ -268,10 +299,24 @@ int binarySearchRangeLow(T arr[], std::size_t size, const char value[])
 
 // negative result means not an exact match: negative index of where it would be
 template<typename T>
+int binarySearchRangeHigh(T arr[], std::size_t size, const T value)
+{
+    T aboveValue(value);
+    aboveValue = value + 1;
+    int returnIndex = binarySearch(arr, size, aboveValue);
+    returnIndex = abs(returnIndex); // don't expect to find the successor, but might
+    for (; arr[returnIndex - 1] > value; returnIndex--); // could be a set of aboveValue
+    if (arr[returnIndex] != value) returnIndex = -returnIndex; // didn't find the value
+    return returnIndex;
+}
+
+// negative result means not an exact match: negative index of where it would be
+template<typename T>
 int binarySearchRangeHigh(T arr[], std::size_t size, const char value[])
 {
     int len = strlen(value);
-    char aboveValue[len+1](value);
+    char aboveValue[len+1];
+    strcpy(aboveValue, value);
     if (value[len] < CHAR_MAX) aboveValue[len] = value[len] + 1; // could be a value ending in CHAR_MAX
     int returnIndex = binarySearch(arr, size, aboveValue);
     returnIndex = abs(returnIndex); // don't expect to find the successor, but might

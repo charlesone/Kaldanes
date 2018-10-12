@@ -70,7 +70,7 @@ public:
     constexpr void queryPlanChecker()// of course this method only seems to work for void returns with no parameters :(
     {
         const std::size_t relVecDepth = sizeof...(relVecs) - sizeof...(remainingRelVecs) -1;
-        //cout << endl << "index = " << joinedRowIndex << ", row = " << joinedRowRow << ", relVecDepth = " << relVecDepth << endl << endl;
+        //cout << endl << "index = " << joinedRowIndex << ", relVecDepth = " << relVecDepth << endl << endl;
         (joinedRowIndex < relVecDepth) ?
         throw Variadic_Parameter_Pack_Logic_Failed() : emptyFunc(); // seriously out of whack.
 
@@ -96,11 +96,10 @@ public:
 
     void checkQueryPlan()
     {
-        for (int i = 0; i < arrayCount; ++i) joinedRowTablesIncluded[arrayCount] = false;
+        for (int i = 0; i < arrayCount; ++i) joinedRowTablesIncluded[i] = false;
         for (int i = 0; i < arrayCount; ++i)
         {
             joinedRowIndex = i;
-            //joinedRowRow = j.k[i];
             queryPlanChecker<relVecs...>();
         }
     }

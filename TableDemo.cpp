@@ -237,7 +237,7 @@ typedef tuple<airportId2RouteSourceAirportIdType, airlineCountry2airportCountryT
 
 #include "JoinedRow.h"
 typedef QueryPlan<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanType;
-typedef QueryPlan<airportId2RouteSourceAirportIdType, airlineCountry2airportCountryType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanTypeFail;
+typedef QueryPlan<airportId2RouteSourceAirportIdType, airlineCountry2airportCountryType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanFailType;
 
 typedef JoinedRow<routesJoinRelationsTupleType, trammel, airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinedRowType;
 
@@ -402,37 +402,41 @@ int main()
         cout << "First, let's execute a point query lambda on the airportsName index, for an airport that exists, and one that is imaginary." << endl << endl;
 
         int rowIndex;
-        airportNameType* airportPtr;
-        routeAirlineIdType* routesPtr;
+        airportNameType* airportNamePtr;
+        routeAirlineIdType* routesAirlinePtr;
 
         auto printAirports = [&] (string name, std::size_t count = 5)
         {
             rowIndex = binarySearch(airportsName, airportsCount, name.c_str());
-            airportPtr = airportsName + abs(rowIndex) - 2;
-            cout << "\"" << name << "\" Airport record search:" << endl;
+            airportNamePtr = airportsName + abs(rowIndex) - 2;
+            cout << "\"" << name << "\" Airport record query:" << endl;
             cout << "Returns: " << rowIndex << ((rowIndex < 0) ? " (Missing)" : " (Existing)") << endl << endl;
-            printTable(airportPtr, count);
+            printTable(airportNamePtr, count);
             cout << endl;
         };
 
         printAirports("La Guardia Airport");
         printAirports("La Nunca Airport");
 
-        cout << "And, let's execute a point query lambda on the routesAirlineId index, landing in the middle of the Southwest Airlines (WN) routes." << endl << endl;
+        cout << "Second, let's execute a range query lambda on the routesAirlineId index, printing all Allegiant Airlines (AAY, ID=35) routes." << endl << endl;
 
-        auto printRoutes = [&] (string name, std::size_t count = 50)
+        int rangeLowRowIndex;
+        int rangeHighRowIndex;
+
+        auto printRoutesAirlinesRange = [&] (string name)
         {
-            rowIndex = binarySearch(routesAirlineId, routesCount, name.c_str());
-            routesPtr = routesAirlineId + abs(rowIndex) - 25;
-            cout << "\"" << name << "\" Routes record search:" << endl;
-            cout << "Returns: " << rowIndex << ((rowIndex < 0) ? " (Missing)" : " (Existing)") << endl << endl;
-            printTable(routesPtr, count);
+            rangeLowRowIndex = binarySearchRangeLow(routesAirlineId, routesCount, name.c_str());
+            routesAirlinePtr = routesAirlineId + abs(rangeLowRowIndex);
+            rangeHighRowIndex = binarySearchRangeHigh(routesAirlineId, routesCount, name.c_str());
+            cout << "\"" << name << "\" Routes record range query:" << endl;
+            cout << "Returns: " << rangeLowRowIndex << ((rangeLowRowIndex < 0) ? " (Missing)" : " (Existing)") << endl << endl;
+            printTable(routesAirlinePtr, rangeHighRowIndex - rangeLowRowIndex + 1);
             cout << endl;
         };
 
-        printRoutes("4547");
+        printRoutesAirlinesRange("35");
 
-        cout << "Second, let's make some relation vectors with 'from' and 'to' indexes for each, and see that we can access the table rows from there." << endl << endl;
+        cout << "Third, let's make some relation vectors with 'from' and 'to' indexes for each, and see that we can access the table rows from there." << endl << endl;
 
         airportId2RouteSourceAirportIdType airportId2RouteSourceAirportId;
         cout << "Relation Vector airportId2RouteSourceAirportId.fromIndex[24]: " << endl << ((airportId2RouteSourceAirportId.fromIndex())->row())[23] << endl << endl;
@@ -443,20 +447,20 @@ int main()
         routeAirlineId2AirlineIdType routeAirlineId2AirlineId;
         cout << "Relation Vector routeAirlineId2AirlineId.toIndex[15]: " << endl << ((routeAirlineId2AirlineId.toIndex())->row())[15] << endl << endl;
 
-        cout << "Third, let's make a tuple of three relation vectors that will form a join, and see that we can access the same table rows from there." << endl << endl;
+        cout << "Fourth, let's make a tuple of three relation vectors that will form a join, and see that we can access the same table rows from there." << endl << endl;
 
         routesJoinRelationsTupleType RoutesJoinRelationsTuple(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
         cout << "Routes Join tuple<0> 'from' airportId2RouteSourceAirportId.fromIndex[24] (same as above): " << endl << ((get<0>(RoutesJoinRelationsTuple).fromIndex())->row())[23] << endl << endl;
         cout << "Routes Join tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above): " << endl << ((get<2>(RoutesJoinRelationsTuple).toIndex())->row())[15] << endl << endl;
         cout << "Routes Join tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl << endl;
 
-        cout << "Fourth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors, and see if we can access a madeup joined route (SJC->LAS) from there." << endl <<  endl;
+        cout << "Fifth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors, and see if we can access a madeup joined route (SJC->LAS) from there." << endl <<  endl;
 
         routesQueryPlanType routesQueryPlan(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
 
         routesQueryPlan.printQueryPlanTest();
 
-cout << "Fifth, let's " << endl <<  endl;
+cout << "Sixth, let's " << endl <<  endl;
 
 
 
@@ -469,11 +473,11 @@ cout << "Fifth, let's " << endl <<  endl;
 
 
 
-        cout << "Last, let's make a linked (and checked) QueryPlan of the joined row tables with one extra relation vector, that violates the linkage rule: that every from-index (after the first one) has a preceding to-indexed or initial from-indexed table to link from. The query plan checker should throw  an exception." << endl <<  endl;
+        cout << "Finally, let's make a linked (and checked) QueryPlan of the joined row tables with one extra relation vector, that violates the linkage rule: that every from-index (after the first one) has a preceding to-indexed or initial from-indexed table to link from. The query plan checker should throw  an exception." << endl <<  endl;
 
         airlineCountry2airportCountryType airlineCountry2airportCountry;
 
-        routesQueryPlanTypeFail routesQueryPlanFail(airportId2RouteSourceAirportId, airlineCountry2airportCountry, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
+        routesQueryPlanFailType routesQueryPlanFail(airportId2RouteSourceAirportId, airlineCountry2airportCountry, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
 
         //routesJoinedRowType myRoutes[100];
         //cout << endl << myRoutes[0].tableCount() << " table join:" << endl;
