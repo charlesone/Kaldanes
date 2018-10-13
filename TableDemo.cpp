@@ -399,6 +399,9 @@ int main()
         routesSourceAirportId[routesCount].dropAnchorCopyKeysSortIndex(routesSourceAirportId, routesCount);
         routesDestinationAirportId[routesCount].dropAnchorCopyKeysSortIndex(routesDestinationAirportId, routesCount);
 
+        //printTable(routesAirlineId, routesCount);
+        //exit(0);
+
         cout << "First, let's execute a point query lambda on the airportsName index, for an airport that exists, and one that is imaginary." << endl << endl;
 
         int rowIndex;
@@ -419,6 +422,10 @@ int main()
         printAirports("La Nunca Airport");
 
         cout << "Second, let's execute a range query lambda on the routesAirlineId index, printing all Allegiant Airlines (AAY, ID=35) routes." << endl << endl;
+
+        // for debugging, copy output and save to an already created empty text file, otherwise no line ends
+        //printTable(routesAirlineId, routesCount);
+        //exit(0);
 
         int rangeLowRowIndex;
         int rangeHighRowIndex;

@@ -224,6 +224,11 @@ public:
         return tableEnum;
     }
 
+    constexpr std::size_t columnPmnksize()
+    {
+        return pmnkSize;
+    }
+
     std::size_t count()
     {
         return indexCounts[indexAnchorOffset];
