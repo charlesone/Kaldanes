@@ -32,19 +32,26 @@ public:
 
     struct RelationStruct
     {
-        fromIndexType* from = reinterpret_cast<fromIndexType*>(testedIndexStringAnchor(indexAnchors[((fromIndexType*)0)->indexAnchorOff()]));
-        toIndexType* to = reinterpret_cast<toIndexType*>(testedIndexStringAnchor(indexAnchors[((toIndexType*)0)->indexAnchorOff()]));
+        fromIndexType* from;
+        toIndexType* to;
     };
 
     RelationStruct r;
 
+    constexpr void emptyFunc()
+    {
+        return;
+    };
+
     fromIndexType* fromIndex()
     {
+        (r.from == 0) ? r.from = reinterpret_cast<fromIndexType*>(testedIndexStringAnchor(indexAnchors[((fromIndexType*)0)->indexAnchorOff()])) : r.from;
         return r.from;
     }
 
     toIndexType* toIndex()
     {
+        (r.to == 0) ? r.to = reinterpret_cast<toIndexType*>(testedIndexStringAnchor(indexAnchors[((toIndexType*)0)->indexAnchorOff()])) : r.to;
         return r.to;
     }
 

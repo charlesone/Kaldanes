@@ -1,3 +1,4 @@
+
 // Building a table with indexes using Kaldanes
 
 // Please build for release to get performance metrics
@@ -231,23 +232,24 @@ typedef RelationVector<routeAirlineIdType, airlineIdType> routeAirlineId2Airline
 typedef RelationVector<airlineCountryType, airportCountryType> airlineCountry2airportCountryType;
 
 typedef tuple<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinRelationsTupleType;
-typedef tuple<airportId2RouteSourceAirportIdType, airlineCountry2airportCountryType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinRelationsTupleTypeFail;
+routesJoinRelationsTupleType relVecsTuple;
 
 // could binary search on c_str from join row offset index -> constexpr auto (c_str) -> returns decltype of index (tuple<n> or variadic)
 
 #include "JoinedRow.h"
 typedef QueryPlan<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanType;
+typedef JoinedRow<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinedRowType;
+
 typedef QueryPlan<airportId2RouteSourceAirportIdType, airlineCountry2airportCountryType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanFailType;
 
-typedef JoinedRow<routesJoinRelationsTupleType, trammel, airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinedRowType;
 
 /*
-██████╗        ██████╗   ███████╗
-██╔══██╗       ██╔══██╗  ██╔════╝
-██████╔╝       ██████╔╝  ███████╗
-██╔══██╗       ██╔═══╝   ╚════██║
-██║  ██║untime ██║rogram ███████║ection
-╚═╝  ╚═╝       ╚═╝       ╚══════╝
+ █████╗       ██████╗   ███████╗
+██╔══██╗      ██╔══██╗  ██╔════╝
+███████║      ██████╔╝  ███████╗
+██╔══██║      ██╔═══╝   ╚════██║
+██║  ██║ctive ██║rogram ███████║ection
+╚═╝  ╚═╝      ╚═╝       ╚══════╝
 
 Nothing in this section has definitions that the generic programming (compile-time) requires.
 
@@ -457,15 +459,20 @@ int main()
         cout << "Fourth, let's make a tuple of three relation vectors that will form a join, and see that we can access the same table rows from there." << endl << endl;
 
         routesJoinRelationsTupleType RoutesJoinRelationsTuple(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
-        cout << "Routes Join tuple<0> 'from' airportId2RouteSourceAirportId.fromIndex[24] (same as above): " << endl << ((get<0>(RoutesJoinRelationsTuple).fromIndex())->row())[23] << endl << endl;
-        cout << "Routes Join tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above): " << endl << ((get<2>(RoutesJoinRelationsTuple).toIndex())->row())[15] << endl << endl;
-        cout << "Routes Join tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl << endl;
+        cout << "Routes Join relation tuple<0> 'from' airportId2RouteSourceAirportId.fromIndex[24] (same as above): " << endl << ((get<0>(RoutesJoinRelationsTuple).fromIndex())->row())[23] << endl << endl;
+        cout << "Routes Join relation tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above): " << endl << ((get<2>(RoutesJoinRelationsTuple).toIndex())->row())[15] << endl << endl;
+        cout << "Routes Join relation tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl << endl;
 
-        cout << "Fifth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors, and see if we can access a madeup joined route (SJC->LAS) from there." << endl <<  endl;
+        cout << "Fifth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors (which makes a tuple called relVecsTuple), and see if we can access a madeup joined route (SJC->LAS) from the JoinedRow." << endl <<  endl;
 
         routesQueryPlanType routesQueryPlan(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
+//        cout << "Query Plan for routes byte size: " << sizeof(routesQueryPlan) << endl << endl;
 
-        routesQueryPlan.printQueryPlanTest();
+        routesJoinedRowType routesJoinedRow[100];
+
+        routesJoinedRow[0].joinedRowPrintTest();
+
+        cout << "Routes JoinedRow byte size: " << sizeof(routesJoinedRow[0]) << endl << endl;
 
 cout << "Sixth, let's " << endl <<  endl;
 
