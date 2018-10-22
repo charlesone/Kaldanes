@@ -404,7 +404,7 @@ int main()
         //printTable(routesAirlineId, routesCount);
         //exit(0);
 
-        cout << "First, let's execute a point query lambda on the airportsName index, for an airport that exists, and one that is imaginary." << endl << endl;
+        cout << endl << "First, let's execute a point query lambda on the airportsName index, for an airport that exists, and one that is imaginary." << endl << endl;
 
         int rowIndex;
         airportNameType* airportNamePtr;
@@ -415,15 +415,17 @@ int main()
             rowIndex = binarySearch(airportsName, airportsCount, name.c_str());
             airportNamePtr = airportsName + abs(rowIndex) - 2;
             cout << "\"" << name << "\" Airport record query:" << endl;
-            cout << "Returns: " << rowIndex << ((rowIndex < 0) ? " (Missing)" : " (Existing)") << endl << endl;
+            cout << "Returns: " << rowIndex << ((rowIndex < 0) ? " (Missing)" : " (Existing)") << endl;
+            cout << std::string(165, '-') << endl;
             printTable(airportNamePtr, count);
-            cout << endl;
+            cout << std::string(165, '-') << endl;
         };
 
         printAirports("La Guardia Airport");
+        cout << endl;
         printAirports("La Nunca Airport");
 
-        cout << "Second, let's execute a range query lambda on the routesAirlineId index, printing all Allegiant Airlines (AAY, ID=35) routes." << endl << endl;
+        cout << endl << "Second, let's execute a range query lambda on the routesAirlineId index, printing all Allegiant Airlines (AAY, ID=35) routes." << endl << endl;
 
         // for debugging, copy output and save to an already created empty text file, otherwise no line ends
         //printTable(routesAirlineId, routesCount);
@@ -438,56 +440,68 @@ int main()
             routesAirlinePtr = routesAirlineId + abs(rangeLowRowIndex);
             rangeHighRowIndex = binarySearchRangeHigh(routesAirlineId, routesCount, name.c_str());
             cout << "\"" << name << "\" Routes record range query:" << endl;
-            cout << "Returns: " << rangeLowRowIndex << ((rangeLowRowIndex < 0) ? " (Missing)" : " (Existing)") << endl << endl;
+            cout << "Returns: " << rangeLowRowIndex << ((rangeLowRowIndex < 0) ? " (Missing)" : " (Existing)") << endl;
+            cout << std::string(35, '-') << endl;
             printTable(routesAirlinePtr, rangeHighRowIndex - rangeLowRowIndex + 1);
-            cout << endl;
+            cout << std::string(35, '-') << endl;
         };
 
         printRoutesAirlinesRange("35");
 
-        cout << "Third, let's make some relation vectors with 'from' and 'to' indexes for each, and see that we can access the table rows from there." << endl << endl;
+        cout << endl << "Third, let's make some relation vectors with 'from' and 'to' indexes for each, and see that we can access the table rows from there." << endl << endl;
 
         airportId2RouteSourceAirportIdType airportId2RouteSourceAirportId;
-        cout << "Relation Vector airportId2RouteSourceAirportId.fromIndex[24]: " << endl << ((airportId2RouteSourceAirportId.fromIndex())->row())[23] << endl << endl;
+        cout << "Relation Vector airportId2RouteSourceAirportId.fromIndex[24]: " << endl << std::string(133, '-') << endl;
+        cout << ((airportId2RouteSourceAirportId.fromIndex())->row())[23];
+        cout << endl << std::string(133, '-') << endl;
         cout << "Relation Vector airportId2RouteSourceAirportId byte size: " << sizeof(airportId2RouteSourceAirportId) << endl << endl;
 
         routeDestinationAirportId2AirportIdType routeDestinationAirportId2AirportId;
 
         routeAirlineId2AirlineIdType routeAirlineId2AirlineId;
-        cout << "Relation Vector routeAirlineId2AirlineId.toIndex[15]: " << endl << ((routeAirlineId2AirlineId.toIndex())->row())[15] << endl << endl;
+        cout << "Relation Vector routeAirlineId2AirlineId.toIndex[15]: " << endl << std::string(43, '-') << endl;
+        cout << ((routeAirlineId2AirlineId.toIndex())->row())[15];
+        cout << endl << std::string(43, '-') << endl;
 
-        cout << "Fourth, let's make a tuple of three relation vectors that will form a join, and see that we can access the same table rows from there." << endl << endl;
+        cout << endl << "Fourth, let's make a tuple of three relation vectors that will form a join, and see that we can access the same table rows from there." << endl << endl;
 
         routesJoinRelationsTupleType RoutesJoinRelationsTuple(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
-        cout << "Routes Join relation tuple<0> 'from' airportId2RouteSourceAirportId.fromIndex[24] (same as above): " << endl << ((get<0>(RoutesJoinRelationsTuple).fromIndex())->row())[23] << endl << endl;
-        cout << "Routes Join relation tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above): " << endl << ((get<2>(RoutesJoinRelationsTuple).toIndex())->row())[15] << endl << endl;
-        cout << "Routes Join relation tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl << endl;
+        cout << "Routes Join relation tuple<0> 'from' airportId2RouteSourceAirportId.fromIndex[24] (same as above): " << endl << std::string(133, '-') << endl;
+        cout << ((get<0>(RoutesJoinRelationsTuple).fromIndex())->row())[23];
+        cout << endl << std::string(133, '-') << endl << endl;
+        cout << "Routes Join relation tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above): " << endl << std::string(43, '-') << endl;
+        cout << ((get<2>(RoutesJoinRelationsTuple).toIndex())->row())[15];
+        cout << endl << std::string(43, '-') << endl;
+        cout << "Routes Join relation tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl;
 
-        cout << "Fifth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors (which makes a tuple called relVecsTuple), and see if we can access a madeup joined route (SJC->LAS) from the JoinedRow." << endl <<  endl;
+        cout << endl << "Fifth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors (which makes a tuple called relVecsTuple), and see if we can access a madeup joined route (SJC->LAS) from the JoinedRow." << endl <<  endl;
 
         routesQueryPlanType routesQueryPlan(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
-//        cout << "Query Plan for routes byte size: " << sizeof(routesQueryPlan) << endl << endl;
+        cout << "Query Plan for routes byte size: " << sizeof(routesQueryPlan) << endl << endl;
 
         routesJoinedRowType routesJoinedRow[100];
 
+        cout << std::string(171, '-') << endl;
         routesJoinedRow[0].joinedRowPrintTest();
+        cout << std::string(171, '-') << endl;
 
-        cout << "Routes JoinedRow byte size: " << sizeof(routesJoinedRow[0]) << endl << endl;
+        cout << "Routes JoinedRow byte size: " << sizeof(routesJoinedRow[0]) << endl;
 
-cout << "Sixth, let's " << endl <<  endl;
+        cout << endl << "Sixth, let's try a nested loop join" << endl <<  endl;
 
-
-
-
-
-
+        int retVal = (routesQueryPlan).searchRangeLowTo(2, "4547");
+        cout << "retVal = " << retVal << endl << endl;
 
 
 
 
 
 
-        cout << "Finally, let's make a linked (and checked) QueryPlan of the joined row tables with one extra relation vector, that violates the linkage rule: that every from-index (after the first one) has a preceding to-indexed or initial from-indexed table to link from. The query plan checker should throw  an exception." << endl <<  endl;
+
+
+
+
+        cout << "Finally, let's make a linked (and checked) QueryPlan of the joined row tables with one extra relation vector, that violates the linkage rule: that every from-index (after the first one) has a preceding to-indexed or initial from-indexed table to link from. The query plan checker should throw  an exception (exception name at end of error string)." << endl <<  endl;
 
         airlineCountry2airportCountryType airlineCountry2airportCountry;
 
@@ -505,7 +519,7 @@ cout << "Sixth, let's " << endl <<  endl;
              << (p ?
                  p.__cxa_exception_type()->name() :
                  "Anonymous")
-             << endl;
+             << endl; // the exception name is at the end of the long error string
     }
     return 0;
 }

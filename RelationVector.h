@@ -25,11 +25,6 @@ public:
             runtime_error("no index, or corrupted index for this column of this table") {}
     };
 
-    constexpr static void* testedIndexStringAnchor(void* indexStringAnchor)
-    {
-        return (indexStringAnchor != 0) ? indexStringAnchor : throw Bad_IndexString_Anchor();
-    }
-
     struct RelationStruct
     {
         fromIndexType* from;
@@ -45,16 +40,32 @@ public:
 
     fromIndexType* fromIndex()
     {
-        (r.from == 0) ? r.from = reinterpret_cast<fromIndexType*>(testedIndexStringAnchor(indexAnchors[((fromIndexType*)0)->indexAnchorOff()])) : r.from;
+        (r.from != 0) ? emptyFunc() : fixFromPtr();
         return r.from;
     }
 
     toIndexType* toIndex()
     {
-        (r.to == 0) ? r.to = reinterpret_cast<toIndexType*>(testedIndexStringAnchor(indexAnchors[((toIndexType*)0)->indexAnchorOff()])) : r.to;
+        (r.to != 0) ? emptyFunc() : fixToPtr();
         return r.to;
     }
 
+    constexpr static void* testedIndexStringAnchor(void* indexStringAnchor)
+    {
+        return (indexStringAnchor != 0) ? indexStringAnchor : throw Bad_IndexString_Anchor();
+    }
+
+    void fixFromPtr()
+    {
+        r.from = reinterpret_cast<fromIndexType*>(testedIndexStringAnchor(indexAnchors[((fromIndexType*)0)->indexAnchorOff()]));
+        return;
+    }
+
+    void fixToPtr()
+    {
+        r.to = reinterpret_cast<toIndexType*>(testedIndexStringAnchor(indexAnchors[((toIndexType*)0)->indexAnchorOff()]));
+        return;
+    }
 
     // prints the metadata
     friend ostream& operator<< (ostream &os, const RelationVector& rhs)
