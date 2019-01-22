@@ -22,7 +22,7 @@ Kaldanes are a set of families of data structures and programming methods for a 
     added to the Application during this compilation process under terms of your choice,
     provided you also meet the terms and conditions of the Application license.
 
-There are currently three C++ source code files and four C++ header files in this collection:
+There are currently six C++ source code files and eight C++ header files in this collection:
 
 1. SortBench.cpp - a benchmark application for measuring the performance (clock time) of
   various kinds of template sort methods (selection, shell, insertion, merge and quick sorts,
