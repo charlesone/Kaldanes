@@ -238,31 +238,6 @@ There are currently six C++ source code files and eight C++ header files in this
   (2) routes are flown by one airline + airlines serve many routes [1:m], and (3 and 4) routes
   have one source and destination airport + airports have many source routes [1:m] and many
   destination routes [1:m].
-   __________________________________________________________________________________________
-  |                                                                                          |
-  |                           OpenFlights.org Air Routes Database                            |
-  |     ________________                                               ________________      |
-  |    |                |_                                           _|                |     |
-  |    |                | \                                         / |                |     |
-  |    |    Airlines    |----------------- serving [m:m] -------------|    Airports    |     |
-  |    |                |_/                                         \_|                |     |
-  |    |________________|                                             |________________|     |
-  |            |                                                          |       |          |
-  |            |                                                         /        |          |
-  |            :                            .--- source [m:1] ----------'         |          |
-  |             \                          /                                      |          |
-  |              \                        /                                       |          |
-  |             flying                   |                                        |          |
-  |               [1:m]                 /|\                                       |          |
-  |                 \            ______|_|_|______                                |          |
-  |                  \         _|                 |_                              ;          |
-  |                   \       / |                 | \                            /           |
-  |                    `--------|     Routes      |------ destination [m:1] ----'            |
-  |                           \_|                 |_/                                        |
-  |                             |_________________|                                          |
-  |                                                                                          |
-  |                                                                                          |
-  |__________________________________________________________________________________________|
 
   Once again, the TableDemo program, as all the demo programs do, has two sections before the
   main() function: (1) a Static Metadata Section (SMS) laid out in an absolutely order critical
@@ -325,10 +300,10 @@ There are currently six C++ source code files and eight C++ header files in this
   http://www.catspawdynamics.com/images/gino_d%27achille_5-the_chessmen_of_mars.jpg
   or google image search the word "kaldane" for other images
   https://en.wikipedia.org/wiki/Kaldane
-
-There are also various performancce text data files from SortDemo and big runs from SortBench against the four
-data types: Direct, Symbiont, Head and std::string.
 ______________________________________________________________________________________
+
+There is a Technical White Paper explaining all the details:
+https://github.com/charlesone/Kaldanes/blob/master/Technical%20White%20Paper.pdf
 
 See the wiki for more information:
 https://github.com/charlesone/Kaldanes/wiki
