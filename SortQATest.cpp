@@ -22,15 +22,70 @@
     added to the Application during this compilation process under terms of your choice,
     provided you also meet the terms and conditions of the Application license.
 
+  Caveat: these are single-threaded sorting comparisons. Multi-threading,
+  distribution, and best sorting algorithm are a separate exercise. Having the
+  fastest strings on the fastest containers makes for the fastest single threaded
+  sorting, independent of the algorithm, distribution and the parallelization. Slow
+  components are not worthy of fast algorithms and excellent distributed
+  parallelization.
+
+  SortQATest is a program in the Kaldanes GitHub code base:
+  https://github.com/charlesone/Kaldanes
+
+  All files concerned are located in there and can be built by the “make all”
+  command (including the header files Direct.h, Symbiont.h, Head.h, and Sorts.h).
+
+  SortQATest is a C++11 Linux console program churning out performance output
+  statistics line-by-line to the console. It does performance analysis using the
+  precision nanosecond clock support from C++11 on Linux. SortQATest has not yet
+  been run on Windows.
+
+  Four types of 8-byte strings are tested against the same template quick sort
+  functions, and next plot, merge sort: (1) std::string class objects are provided
+  by C++ libraries and have the ability to be shared with copy-on-write support for
+  threading, so moving them is by pointer, (2) Direct template class strings, which
+  move as a single element during sorting, (3) Symbiont template class strings,
+  which are stored in a block with a head and a body, such that during sorting the
+  heads move and the bodies stay in place, and (4) Head template class strings
+  which have their heads stored in a separate array, and which declare a Direct
+  array internally to store the bodies which don’t move.
+
+  A generically interesting thing is how random strings are generated for the
+  SortQATest program. The number of calls to the random bits generation is reduced
+  by an average of four across different string lengths. This was done by
+  generating them 64 bits wide at a time into a char overlay. No comparisons were
+  done, but it is mighty fast.
+
+  SortQATest was taken from the source for SortDemo, with the std::strings
+  removed (they take too long.) SortQATest throws an exception if the three
+  string classes produce different numbers of compares and swaps from sorting the
+  identical string arrays using the identical code. Also, since merge sort only
+  uses the <= comparison, and quick sort only uses the < and the > comparisons on
+  the actual data (not integer indexes), for coverage it was decided to walk the
+  sorted arrays with all possible Boolean combinations to test all of the
+  comparison functions, comparing both the previous and successive array element
+  against the current one, for consistency against the sorted random data, and
+  this caught some subtle bugs. The pmnk (poor man’s normalized key) compare
+  logic is complex and highly optimized to never, ever go to compare the tail
+  string if the result can be deduced from the pmnk head string. Comparisons with
+  self, or a pivot copy of self, reduce to K-value equality. SortQATest runs
+  forever and the output looks like SortDemo.
+
 */
 
+#define __STDC_WANT_LIB_EXT1__ 1
 #include <iostream>
 #include <chrono>
+#include <random>
 #include <string.h>
 #include <algorithm>
+#include <climits>
 #include "Direct.h"
 #include "Symbiont.h"
 #include "Head.h"
+
+static const bool debugTrace = false;
+
 #include "Sorts.h"
 
 using namespace std;
@@ -348,11 +403,15 @@ void doThreeLongMerge(int size)
 
 int main()
 {
-    cout << endl << endl << "Three different string types, identical in content and "
+    cout << endl << endl << "Three different string types, identical in content and" << endl
          << "sorting logic, but not in timings." << endl << endl
-         << "[Remember to set the C++11 switch in the IDE or compiler!" << endl
-         << " Remember to use release builds if you are analyzing performance, otherwise Symbionts very slow!" << endl
-         << " Remember to set the \"ulimit -s\" soft and hard stack limits to unlimited, otherwise it dies!]" << endl << endl;
+         << "[Note that the number of swaps and compares for identical arrays," << endl
+         << "   using the identical code: these statistics should be identical." << endl << endl
+         << " Remember to set the C++11 switch in the IDE or compiler!" << endl << endl
+         << " Remember to use release builds if you are analyzing performance," << endl
+         << "   otherwise Symbionts will be very slow!" << endl << endl
+         << " Remember to set the \"ulimit -s\" soft and hard stack limits to unlimited," <<endl
+         << "   otherwise it can die!]" << endl << endl;
     try // so you can see the exception names in release code execution
     {
         do

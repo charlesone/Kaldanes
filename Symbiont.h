@@ -25,21 +25,19 @@
 
 Symbiont.h - header file for Kaldane Symbiont string, which are variable-length (with an upper
   bound) null-terminated byte strings that have their indexes and a "poor man's normalized key"
-  (pmnk) moved when they are swapped, without moving their tail strings (ignoring the Sort Benchmark
-  rules). Symbiont has "value-string semantics" as Stroustrup defined for his String type (C++11,
-  chapter 19.3) These might be a candidate for the Indy Sort. Symbiont strings behave like Direct
-  strings for short lengths (32 bytes or less, by internally equating the pmnk length with the
-  string length.) This allows Symbiont strings to match Direct strings in performance for short
-  strings and still have constant time complexity for any string length: they are a candidate
-  for general purpose string programming with stack slab allocation/deallocation as opposed to
-  the fine-grained allocators, which are necessary for pointer strings like <string>. Symbiont
-  strings are quadratic in the debug build for  merge sort, and linear in the release build for
-  both quick sort and merge sort, so remember to use the release build for performance analysis.
-  They are designed to be used  with with slab allocation/deallocation on the stack, as opposed
-  to fine-grained allocators. Since the allocated slab never needs to contain pointers, only
-  array indices, the slab data structure is base+offset and can be mmapped to a file or /dev/shm
-  and shared locally or across a memory fabric such as Gen-Z, or stored and transmitted, or mmapped
-  over an NFS: consistency considerations are an issue for sharing, of course (caveat participem).
+  (pmnk) moved when they are swapped, without moving their tail strings (ignoring the Sort
+  Benchmark rules). Symbiont has "value-string semantics" as Stroustrup defined for his String
+  type (C++11, chapter 19.3) These might be a candidate for the Indy Sort. Symbiont strings
+  behave like Direct strings for short lengths (32 bytes or less, by internally equating the
+  pmnk length with the string length.) This allows Symbiont strings to match Direct strings in performance for short strings and still have constant time complexity for any string length:
+  they are a candidate for general purpose string programming with stack slab
+  allocation/deallocation as opposed to the fine-grained allocators, which are necessary for
+  pointer strings like <string>. Symbiont strings are quadratic in the debug build for merge
+  sort, and linear in the release build for both quick sort and merge sort, so remember to
+  use the release build for performance analysis. They are designed to be used  with with slab allocation/deallocation on the stack, as opposed to fine-grained allocators. Since the
+  allocated slab never needs to contain pointers, only array indices, the slab data structure is base+offset and can be mmapped to a file or /dev/shm and shared locally or across a memory
+  fabric such as Gen-Z, or stored and transmitted, or mmapped over an NFS: consistency
+  considerations are an issue for sharing, of course (caveat participem).
 
   The name Kaldane is an antique SciFi reference (heads move, bodies stay):
   http://www.catspawdynamics.com/images/gino_d%27achille_5-the_chessmen_of_mars.jpg
@@ -49,6 +47,7 @@ Symbiont.h - header file for Kaldane Symbiont string, which are variable-length 
 */
 
 #include <iostream>
+#include <cstring>
 
 using namespace std;
 
@@ -58,9 +57,6 @@ template <std::size_t maxStringSize, std::size_t maxPmnkSize = 3, std::size_t sw
 class Symbiont
 {
 private:
-
-    //static_assert(maxStringSize > 0, "maxStringSize must be positive"); // can't get this to work
-    //static_assert(maxPmnkSize <= maxStringSize, "maxPmnkSize must be <= maxStringSize"); // can't get this to work
 
     static const std::size_t headPlusTailLen = maxStringSize;
     // if maxStringSize <= switchoverPmnkSize, the pmnk will contain the whole string
@@ -170,13 +166,13 @@ public:
 
     Symbiont& assign(const char* str)
     {
-        int len = strlen(str);
+        std::size_t len = strlen(str);
         if (len > headPlusTailLen) throw Assign_String_Too_Long();
         s.h.pmnk[0] = 0;
         s.t.tail[0] = 0;
         if (len > pmnkSize)
         {
-            strncpy(s.h.pmnk, str, pmnkSize);
+            memcpy(s.h.pmnk, str, pmnkSize);
             s.h.pmnk[pmnkSize] = 0;
             strcpy(s.t.tail, str+pmnkSize);
         }
@@ -310,7 +306,7 @@ public:
         // if (strAnchor != 0) throw Already_Array_Anchor();
         if (sizeof(symbArr[0]) != sizeof(s)) throw Item_Size_Mismatch();
 	strAnchor = symbArr[0].s.t.tail;
-        for (int i = 0; i < size; ++i) symbArr[i].s.h.k = i;
+        for (std::size_t i = 0; i < size; ++i) symbArr[i].s.h.k = i;
     }
 
     friend ostream& operator<< (ostream &os, const Symbiont& rhs)

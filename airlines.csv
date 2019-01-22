@@ -18,8 +18,8 @@
 # The data was modified to remove quotes from pair-quoted text: ,"text", -> ,text,
 # The data was further modified to repair the entry at line 6077, ID# 20124 to remove an extra comma
 # The csv contains 6,162 non-commented lines of data
-# The longest data, at non-commented line number 2,380 for 113 bytes is:
-# 2380,Flight Inspection Center of the General Administration of Civil Aviation in China,\N,,CFI,CHINA JET,China,N
+# The longest data, at non-commented line number 2,380 for 404 bytes (special character font) is:
+# 17568,Dexter (DXT),Ă„ï¿½Ă¢â‚¬ï¿½Ă„ï¿½Ă‚ÂµĂ„ï¿½Ă‚ÂºÄ‚â€˜Ă¯Â¿Â½Ä‚â€˜Ă¢â‚¬ï¿½Ă„ï¿½Ă‚ÂµÄ‚â€˜Ă¢â€�Â¬ Ă„ï¿½Ă‚Â°Ă„ï¿½Ă‚Â²Ă„ï¿½Ă‚Â¸Ă„ï¿½Ă‚Â°Ä‚â€˜Ă¢â‚¬ï¿½Ă„ï¿½Ă‚Â°Ă„ï¿½Ă‚ÂºÄ‚â€˜Ă¯Â¿Â½Ă„ï¿½Ă‚Â¸,,DXT,Dexter,Russia,N
 # Using "#" here to denote comments is an R language standard for csv files
 #
 # This {airports-extended.csv} is made available under the Public Domain Dedication and License version v1.0

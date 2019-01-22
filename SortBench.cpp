@@ -24,6 +24,43 @@
     added to the Application during this compilation process under terms of your choice,
     provided you also meet the terms and conditions of the Application license.
 
+  SortBench program results: comparing the Direct, Head, Symbiont and std::string
+  classes.
+
+  Caveat: these are single-threaded sorting comparisons. Multi-threading,
+  distribution, and best sorting algorithm are a separate exercise. Having the
+  fastest strings on the fastest containers makes for the fastest single threaded
+  sorting, independent of the algorithm, distribution and the parallelization. Slow
+  components are not worthy of fast algorithms and excellent distributed
+  parallelization.
+
+  SortBench is a program in the Kaldanes GitHub code base:
+  https://github.com/charlesone/Kaldanes
+
+  All files concerned are located in there and can be built by the “make all”
+  command (including the header files Direct.h, Symbiont.h, Head.h, and Sorts.h).
+
+  SortBench is a C++11 Linux console program churning out performance output
+  statistics line-by-line to the console. It does performance analysis using the
+  precision nanosecond clock support from C++11 on Linux. SortBench has not yet
+  been run on Windows.
+
+  Four types of 8-byte strings are tested against the same template quick sort
+  functions, and next plot, merge sort: (1) std::string class objects are provided
+  by C++ libraries and have the ability to be shared with copy-on-write support for
+  threading, so moving them is by pointer, (2) Direct template class strings, which
+  move as a single element during sorting, (3) Symbiont template class strings,
+  which are stored in a block with a head and a body, such that during sorting the
+  heads move and the bodies stay in place, and (4) Head template class strings
+  which have their heads stored in a separate array, and which declare a Direct
+  array internally to store the bodies which don’t move.
+
+  A generically interesting thing is how random strings are generated for the
+  SortBench program. The number of calls to the random bits generation is reduced
+  by an average of four across different string lengths. This was done by
+  generating them 64 bits wide at a time into a char overlay. No comparisons were
+  done, but it is mighty fast.
+
 */
 
 // Remember to set the C++11 switch in the IDE or compiler!
@@ -32,6 +69,7 @@
 //    permanently, otherwise these tests won't get very far!
 //
 
+#define __STDC_WANT_LIB_EXT1__ 1
 #include <locale>
 //#include <codecvt> // this is needed for u16string and u32string to work as PString: not yet there
 #include <iostream>
@@ -53,6 +91,9 @@
 #include "Direct.h"
 #include "Symbiont.h"
 #include "Head.h"
+
+static const bool debugTrace = false;
+
 #include "Sorts.h"
 
 #ifdef __GNUG__
@@ -245,10 +286,10 @@ public:
 #if defined (semicolonSeparated) && ! defined (checkSorted)
         cout.precision(3);
         cout << arraySize << " " << genusName << " array" << "; ";
-        cout << fixed << chrono::duration <double, micro> (testTimes / (double) iterations).count() << " sort \u03BCs; ";
-        cout << chrono::duration <double, micro> (randomGenerationTimes / (double) iterations).count() << " rand gen \u03BCs; ";
-        cout << chrono::duration <double, micro> (overheadTimes / (double) iterations).count() << " overhead \u03BCs; ";
-        cout << chrono::duration <double, micro> (totalTimes / (double) iterations).count() << " total \u03BCs; ";
+        cout << fixed << chrono::duration <double, micro> (testTimes / (double) iterations).count() << " sort us (microseconds); ";
+        cout << chrono::duration <double, micro> (randomGenerationTimes / (double) iterations).count() << " rand gen us; ";
+        cout << chrono::duration <double, micro> (overheadTimes / (double) iterations).count() << " overhead us; ";
+        cout << chrono::duration <double, micro> (totalTimes / (double) iterations).count() << " total us; ";
         cout << (double) swaps/ (double) iterations << " swaps; ";
         cout << (double) compares/ (double) iterations << " compares";
 #endif // if defined (semicolonSeparated) && ! defined (checkSorted)
@@ -342,7 +383,7 @@ public:
 template<typename T>
 void throwExceptionIfUnsorted(T arr[], int size)
 {
-    for (int i = 1; i < size; ++i)
+    for (int i = 1; i < size - 1; ++i)
     {
         if (arr[i - 1] > arr[i])
         {
@@ -1343,10 +1384,13 @@ public:
 
 int main()
 {
-// Remember to set the C++11 switch in the IDE or compiler!
-// Remember to use release builds if you are analyzing performance, otherwise very slow!
-// Remember to set the "ulimit -s" soft and hard stack limits to unlimited
-//    permanently, otherwise these tests won't get very far!
+    cout << endl << endl << "Three different string types, identical in content and" << endl
+         << "sorting logic, but not in timings." << endl << endl
+         << "[Note: Remember to set the C++11 switch in the IDE or compiler!" << endl << endl
+         << " Remember to use release builds if you are analyzing performance," << endl
+         << "   otherwise Symbionts will be very slow!" << endl << endl
+         << " Remember to set the \"ulimit -s\" soft and hard stack limits to unlimited," <<endl
+         << "   otherwise it can die!]" << endl;
 
     SortBench m;
     m.initializeVars(16, 65536, 5); // initial array size, doubling maximum, and iterations per size (precision)
@@ -1391,6 +1435,8 @@ int main()
 
         PString<string> pstringsMS;
         pstringsMS.mergeSort(2, 1024); // initial, maximum string length by doubling
+	
+	cout << endl;
 
     }
     catch (...)

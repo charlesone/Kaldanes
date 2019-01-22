@@ -95,7 +95,7 @@ public:
 
     Direct& assign (const char* str)
     {
-        int strLength = strlen(str);
+        std::size_t strLength = strlen(str);
         if (strLength > length) throw Assign_String_Too_Long();
         strcpy(r.arr, str);
         return *this;

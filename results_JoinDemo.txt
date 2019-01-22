@@ -1,0 +1,144 @@
+[charles@localhost Kaldanes]$ ./JoinDemo
+
+
+[Note: Remember to set the C++11 switch in the IDE or compiler!
+
+ Remember to use release builds if you are analyzing performance,
+   otherwise Index builds will be very slow!
+
+ Remember to set the "ulimit -s" soft and hard stack limits to unlimited,
+   otherwise it can die!]
+
+
+Time for space allocating and loading the three tables from CSV files = 28689.818 microseconds.
+Time for space allocating the ten indexes = 0.688 microseconds.
+Time for copying the keys and sorting the ten indexes = 89496.312 microseconds.
+Time for each index on the average = 8949.631 microseconds.
+Time for creating the three relation vectors = 0.471 microseconds.
+Time for creating the tuple containing the three relation vectors = 0.447 microseconds.
+Time for creating the query plan to join the three relation vectors = 5.858 microseconds.
+Time for creating the joined row array to contain the join output = 0.653 microseconds.
+________________________________________________________________________________
+
+First, we do ten standard join queries listing the valid routes (possessing valid airlines, from and to airports) for the top ten passenger carriers in the world (as of 2016).
+
+Time for American Airlines (199M passengers) join query = 2220.231 microseconds.
+Using 4703 range queries.
+Reporting 2340 valid air routes.
+
+Time for Delta Air Lines (184M passengers) join query = 1808.416 microseconds.
+Using 3962 range queries.
+Reporting 1977 valid air routes.
+
+Time for Southwest Airlines (152M passengers) join query = 915.955 microseconds.
+Using 2291 range queries.
+Reporting 1140 valid air routes.
+
+Time for United Airlines (143M passengers) join query = 1864.007 microseconds.
+Using 4358 range queries.
+Reporting 2172 valid air routes.
+
+Time for Ryanair/Ireland (120M passengers) join query = 2179.461 microseconds.
+Using 4969 range queries.
+Reporting 2482 valid air routes.
+
+Time for China Southern Airlines (85M passengers) join query = 1211.766 microseconds.
+Using 2894 range queries.
+Reporting 1422 valid air routes.
+
+Time for China Eastern Airlines (81M passengers) join query = 1032.598 microseconds.
+Using 2502 range queries.
+Reporting 1211 valid air routes.
+
+Time for easyJet/UK (73M passengers) join query = 935.681 microseconds.
+Using 2262 range queries.
+Reporting 1130 valid air routes.
+
+Time for Turkish Airlines (63M passengers) join query = 580.196 microseconds.
+Using 1309 range queries.
+Reporting 640 valid air routes.
+
+Time for Lufthansa (62M passengers) join query = 827.419 microseconds.
+Using 1846 range queries.
+Reporting 919 valid air routes.
+
+Total valid air routes count for the top ten passenger carriers = 15433.
+Time for all ten standard join queries, in total = 13575.730 microseconds.
+Using a total of 31096 range queries.
+________________________________________________________________________________
+
+Second, we create a full memoized join of all the routes for all airlines in very compact form.
+
+Time for full memoized join creation = 69234.922 microseconds.
+Using 139697 range queries.
+Full memoized join: valid routes count for all airlines = 65612
+
+________________________________________________________________________________
+
+Third, we use that full memoized join to do ten memoized join queries listing the valid routes for the top ten passenger carriers in the world (as of 2016). Note that the numbers of routes are the same as the nested loop joins, but take three orders of magnitude less time, and only one range query for each.
+
+Time for American Airlines (199M passengers) join query = 7.957 microseconds.
+Using 1 range query.
+Reporting 2340 valid air routes.
+
+Time for Delta Air Lines (184M passengers) join query = 4.126 microseconds.
+Using 1 range query.
+Reporting 1977 valid air routes.
+
+Time for Southwest Airlines (152M passengers) join query = 4.374 microseconds.
+Using 1 range query.
+Reporting 1140 valid air routes.
+
+Time for United Airlines (143M passengers) join query = 4.311 microseconds.
+Using 1 range query.
+Reporting 2172 valid air routes.
+
+Time for Ryanair/Ireland (120M passengers) join query = 8.330 microseconds.
+Using 1 range query.
+Reporting 2482 valid air routes.
+
+Time for China Southern Airlines (85M passengers) join query = 3.824 microseconds.
+Using 1 range query.
+Reporting 1422 valid air routes.
+
+Time for China Eastern Airlines (81M passengers) join query = 3.264 microseconds.
+Using 1 range query.
+Reporting 1211 valid air routes.
+
+Time for easyJet/UK (73M passengers) join query = 3.283 microseconds.
+Using 1 range query.
+Reporting 1130 valid air routes.
+
+Time for Turkish Airlines (63M passengers) join query = 2.519 microseconds.
+Using 1 range query.
+Reporting 640 valid air routes.
+
+Time for Lufthansa (62M passengers) join query = 4.960 microseconds.
+Using 1 range query.
+Reporting 919 valid air routes.
+
+Total valid air routes count for the top ten passenger carriers = 15433.
+Time for all ten memoized join queries, in total = 46.948 microseconds.
+Using a total of 10 range queries.
+
+________________________________________________________________________________
+
+Statistics for the run of the program, including:
+   1. Allocating and loading three tables from CSV files on disk, around 80K rows.
+   2. Allocating, copying the keys and sorting ten indexes on those three tables.
+   3. Creating three relation vectors, each containing a from-index and a to-index.
+   4. Creating a tuple from those three relation vectors to store the query objects.
+   5. Creating and optimizing a database join query plan for those three relation vectors.
+   6. Creating a joined row output array and doing ten nested loop join queries into it for the top ten airlines.
+   7. Doing a full memoized loop join query for all airlines into it.
+   8. Doing ten memoized join queries into arrays for the top ten airlines.
+
+Total run time spent in main() procedure thus far = 0.20185 seconds
+
+Total relational database system time spent in main() procedure thus far, including I/O = 0.20105 seconds
+
+Total display output time spent in main() procedure thus far = 0.00080 seconds
+________________________________________________________________________________
+
+Segmentation fault (core dumped)
+[charles@localhost Kaldanes]$

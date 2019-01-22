@@ -1,4 +1,4 @@
-// Building a table with indexes using Kaldanes
+// BigJoinDemo.cpp - Exploring big joins and memoized joins on tables with indexes using Kaldanes
 
 // Please build for release to get good performance
 
@@ -24,11 +24,9 @@
     added to the Application during this compilation process under terms of your choice,
     provided you also meet the terms and conditions of the Application license.
 
-  TableDemo.cpp program
+  BigJoinDemo.cpp program
 
-  As features were added to this nascent relational database system, the TableDemo program
-  exposes that history and it still serves as an eyeball check to see if the latest changes have
-  added bugs breaking earlier coding.
+  Exploring big joins and memoized joins on tables with indexes using Kaldanes
 
   The OpenFlights.org Air Routes Database
 
@@ -81,7 +79,7 @@
   |                                                                                          |
   |__________________________________________________________________________________________|
 
-  Once again, the TableDemo program, as all the demo programs do, has two sections before the
+  Once again, the BigJoinDemo program, as all the demo programs do, has two sections before the
   main() function: (1) a Static Metadata Section (SMS) laid out in an absolutely order critical
   way containing everything (classes, types, static data, const and constexpr) that is needed
   for generic programming (compile-time) of the relational database system, and (2) an Active
@@ -94,7 +92,7 @@
   handler, that prints out the ugly extended name of the exception with the readable name at the
   end, and that also works in release code for bug analysis during performance testing.
 
-  TableDemo keeps track of the time consumed by operations and printing those operations
+  BigJoinDemo keeps track of the time consumed by operations and printing those operations
   separately, using the nanosecond clock facility of C++11 on Linux. Initially it builds the
   database:
 
@@ -108,79 +106,66 @@
   demos (TableDemo, JoinDemo and BigJoinDemo,) the average time to produce the database and
   bring it up from scratch using input .csv files was 115.556 ms, less than 1/8th of a second.
 
-  First, TableDemo uses a point query lambda to print out the 5 rows centered on a specific
-  airport that exists, and one that doesn’t exist, so that it can be shown where it would fit in
-  the order of airports. Failed binary searches can be one off the correct location, high or
-  low. That small error needs to be corrected for after a range query boundary value binary
-  string search which almost always will fail, but be within one of the high or low edge of the
-  range where the boundary should have been.
+  Since there are only 65,612 valid air routes in this database, simple queries on valid routes
+  will not allow bigger results to test the performance at scale. However, what if the question
+  is asked of the database, “How many double routes would there be if at the end of any flight
+  on one of those 65,612 valid routes, the passenger hopped on any plane from any airline
+  leaving that destination airport to go anywhere you could fly?”
 
-  Second, a range query lambda is executed on the airlines index on the routes table, printing
-  all the 378 valid Allegiant Airlines routes. Those are printed out.
+  Those could called “double routes” where the destination airport of that route was linked as
+  the source airport of any other route for any airline. This might be an interesting query for
+  disease transmission, tracking criminal activity or missing persons, etc.
 
-  Third, three RelationVector objects are created: (1) an airport relating as source to some
-  routes, (2) some routes relating to their destination airport and (3) some routes relating to
-  the airline serving them. Then the airport of the first relation’s from-index’s table row and
-  the airline of the third relation’s to-index’s table row are printed to make sure everything
-  is working.
+  Those QueryPlan class objects would have six RelationVector objects as template input types,
+  of which one would be the same: the connection between a route table destination airport and
+  the airport table row would occur twice. Hence five relation vectors are created for this
+  double route join query that has six relations: (1) an airline flying some first routes, (2)
+  some first routes relating to their first source airport, (3) some first routes relating to
+  their first destination airport, (4) some first destination airports relating to second route
+  source airports, (5: identical relation vector as 3, but different linkage) some second
+  routes relating to their second destination airport and (6: inverse of 1) some second route
+  airlines relating to an airline.
 
-  Fourth, a tuple is created from the three relation vectors and printing of the same two rows
-  above are made to corroborate that that works from the tuple.
+  Since the top-down query plan construction in constexpr void initJoin() mimics how nested
+  loop joins are done by hand, the query optimizer gets this right for this query and probably
+  for any bill-of-materials explosion on inventory tables and similar queries that conform to
+  the nested loop join model. This will not automatically work for more exotic queries, and
+  future refactoring the current demo code base will naturally enhance query optimization to
+  handle more and more exotic cases. However, this should never be at the cost of performance
+  and scale.
 
-  Fifth, a QueryPlan object is created using those three relations in the same order as the
-  parameter pack of types. Then, a synthetic JoinedRow is constructed (scaffolding) and printed
-  to make sure joined row printing works.
+  BigJoinDemo has different subjects of inquiry from JoinDemo, which looked at the top ten
+  passenger carriers.  This demo looks at a relatively even trend of air carriers from American
+  Airlines at the top, to the tiny air carriers that only fly a few routes. In addition to the
+  two types of queries run in JoinDemo: the full nested loop join and the full memoized join
+  producing the same array as the nested loop join for fast memoized queries, a third query
+  only accessing the range on the memoized joined row array is done. This is because that
+  memoized array, which is ordered by the from-index of airline provides the same sequential
+  access to ordered result data as do the output joined row arrays from the first two queries,
+  without moving the array data to another location. When the result data is small, this does
+  not matter, but in the case of American Airlines there are 564,538 double routes in almost
+  16MB of data being moved. Since that data move only gains you a difference in location and
+  not in access speed, it is truly unnecessary and is quite costly for bigger result sets.
 
-  Sixth, a nested loop join is performed to print out all the valid air routes (having valid
-  airlines and destination airports) with Fresno Yosemite Airport as the source airport. There
-  are 20 routes in the output, each with four rows printed: source airport, route, destination
-  airport and airline. True to the intent: three relation vectors soft-define a joined row with
-  four table row’s K-values in it.
+  The third double route query without the move is the fastest, with the identical result to
+  the other two. The performance results are on the graph at the beginning of this document: a
+  constant time of some microseconds for joins, of any number of tables (C++ compiler limited,)
+  for tables of any size (memory and operating system limited,) with mmapped relational
+  database slabs sharable across nodes in a datacenter at the hardware limit of data access.
 
-  The first two K-values in the joined row element are soft-defined as (1) the from-index table
-  row and (2) the to-index table row of the first relation vector and the second two are (3) the
-  to-index table rows from the second and (4) the third relation vector, and that would be true
-  for any succeeding relation vector. That definition isn’t written down anywhere in code other
-  than comments. It arises from the compile time generic programming structure of constants
-  generated by the compiler. In other words, C++11 magic constants arise from generic
-  programming recursion.
+  It took 9.094 seconds to do the full nested loop join to create the memoized joined row array
+  for all possible double routes (10,925,455) in the database, and to allow those memoized
+  joins to take two microseconds and make relational database joins effectively free of cost.
+  Note that the correlation is still one microsecond per resulting output memoized join array
+  element even at that scale. The time spent compiling the relational database into memoized
+  joins by producers will dwarf the time spent compiling the C++ code for them, but it is time
+  well spent and energy and cooling costs saved.
 
-  It is thought that soft-definition of type structure and member function by generic compile
-  time programming recursive processing of other template class types is a new and somewhat
-  open-ended method of deriving types, only limited by the imagination.
-
-  Finally, a new relation is created from an airport’s country to an airport’s country
-  (perfectly legal.) What is not legal is to insert it into a QueryPlan before an airport
-  table’s index is included and then try to generate an object from that plan. The final test
-  produces a relational linkage exception that is readable on the end to terminate the program.
-
-  Before throwing that exception, the time it took to execute the entire TableDemo program is
-  listed:
-
-  1.    Allocating and loading three tables from CSV files on disk = 28,230 microseconds.
-  2.    Allocating, copying the keys and sorting ten indexes on those three tables = 92,024
-        microseconds.
-  3.    Executing multiple point and range query lambdas on the indexes, as a test = 12.500
-        microseconds.
-  4.    Creating three relation vectors, each containing a from-index and a to-index = 0.907
-        microseconds.
-  5.    Creating a tuple from those three relation vectors to store the query objects = 0.442
-        microseconds.
-  6.    Creating and optimizing a database join query plan for those three relation vectors =
-        2.239 microseconds.
-  7.    Creating a joined row output array and doing a query plan nested loop join into it =
-        43.285 microseconds
-
-  All of that building, launching, query planning and generation, and nested loop join querying
-  of a relational database from text editor files took 120,314.021 microseconds: less than 1/8
-  of a second.
-
-  If a consumer was using mmap to access this relational database as a previously produced slab,
-  this execution would be much faster, especially on a memory centric Gen-Z system, or at least
-  a 3D XPoint memory. With mmap it would take an estimated 1/100th second to bring up the slab
-  database from scratch with one mmap call and execute the various queries in the main() of
-  TableDemo. And that would be true of the startup loading of the database from scratch for the
-  JoinDemo and BigJoinDemo programs as well.
+  Triple routes would most likely number around 2 billion, and that could further make the
+  scalability case, but the picture at the front of this white paper makes the case
+  sufficiently, since each query on the triple route memoized join result would still only cost
+  one range query [at an average of 2(log2(n)-1)), where n is 2G array, instead of a 10M array]
+  to access as well.
 
 */
 
@@ -193,11 +178,19 @@
 #include <cstring>
 #include <tuple>
 #include <chrono>
+#include <climits>
+#include <typeinfo>
+
+#ifdef __GNUG__
+#include <cxxabi.h> // gcc only: fetching type names
+#endif // __GNUG__
+
+#define NAME_OF(variable) ((void)variable, #variable)
+
+static const bool debugTrace = false;
 
 using namespace std;
 using namespace std::chrono;
-
-static const bool debugTrace = false;
 
 // Banners from: http://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow&t=Section
 // Using ANSI Shadow font
@@ -217,6 +210,24 @@ Everything in this section (classes, types, static data, const and constexpr)
 is needed for generic programming (compile-time)
 
 */
+
+template<typename T>
+void displayNameOfType(T elem)
+{
+    string typeName = typeid(T).name();
+
+#ifdef __GNUG__
+    int status = 0;
+    char *readableName = abi::__cxa_demangle(typeName.c_str(), NULL, NULL, &status);
+    if (status == 0)
+    {
+        typeName = readableName;
+        std::free(readableName);
+    }
+#endif // __GNUG__
+
+    cout << typeName;
+}
 
 // Order is critical ...
 
@@ -388,21 +399,20 @@ typedef IndexString<Column::routeDestinationAirportId, char, routesMaxLen, Table
 
 #include "RelationVector.h"
 
-typedef RelationVector<airportIdType, routeSourceAirportIdType> airportId2RouteSourceAirportIdType;
+// routes join relations
+typedef RelationVector<airlineIdType, routeAirlineIdType> airlineId2RouteAirlineIdType;
+typedef RelationVector<routeSourceAirportIdType, airportIdType> routeSourceAirportId2AirportIdType;
 typedef RelationVector<routeDestinationAirportIdType, airportIdType> routeDestinationAirportId2AirportIdType;
+// double routes join relations
+typedef RelationVector<routeDestinationAirportIdType, routeSourceAirportIdType> routeDestinationAirportId2RouteSourceAirportIdType;
 typedef RelationVector<routeAirlineIdType, airlineIdType> routeAirlineId2AirlineIdType;
-typedef RelationVector<airlineCountryType, airportCountryType> airlineCountry2airportCountryType;
 
-typedef tuple<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinRelationsTupleType;
-routesJoinRelationsTupleType relVecsTuple;
-
-// could binary search on c_str from join row offset index -> constexpr auto (c_str) -> returns decltype of index (tuple<n> or variadic)
+typedef tuple<airlineId2RouteAirlineIdType, routeSourceAirportId2AirportIdType, routeDestinationAirportId2AirportIdType, routeDestinationAirportId2RouteSourceAirportIdType, routeAirlineId2AirlineIdType, routeDestinationAirportId2AirportIdType> doubleRoutesJoinRelationsTupleType;
+doubleRoutesJoinRelationsTupleType relVecsTuple;
 
 #include "JoinedRow.h"
-typedef QueryPlan<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanType;
-typedef JoinedRow<airportId2RouteSourceAirportIdType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesJoinedRowType;
-
-typedef QueryPlan<airportId2RouteSourceAirportIdType, airlineCountry2airportCountryType, routeDestinationAirportId2AirportIdType, routeAirlineId2AirlineIdType> routesQueryPlanFailType;
+typedef QueryPlan<airlineId2RouteAirlineIdType, routeSourceAirportId2AirportIdType, routeDestinationAirportId2AirportIdType, routeDestinationAirportId2RouteSourceAirportIdType, routeAirlineId2AirlineIdType, routeDestinationAirportId2AirportIdType> doubleRoutesQueryPlanType;
+typedef JoinedRow<airlineId2RouteAirlineIdType, routeSourceAirportId2AirportIdType, routeDestinationAirportId2AirportIdType, routeDestinationAirportId2RouteSourceAirportIdType, routeAirlineId2AirlineIdType, routeDestinationAirportId2AirportIdType> doubleRoutesJoinedRowType;
 
 
 /*
@@ -420,31 +430,54 @@ Nothing in this section has definitions that the generic programming (compile-ti
 // Statistics
 duration<double, nano> runTime;
 duration<double, nano> testTime;
+duration<double, nano> standardJoinTime;
+duration<double, nano> memoizedJoinTime;
+duration<double, nano> rangeQueryTime;
 duration<double, nano> totalTime;
+double rangeQueriesStart;
 
 void resetStats()
 {
     testTime = duration<double, nano> (0);
+    standardJoinTime = duration<double, nano> (0);
+    memoizedJoinTime = duration<double, nano> (0);
     totalTime = duration<double, nano> (0);
+    rangeQueries = 0;
+    rangeQueriesStart = 0;
 }
 
 void displayTime(const char text[])
 {
     cout.precision(3);
-    cout << "Time for " << text << " = " << fixed << chrono::duration <double, micro> (testTime).count() << " microseconds" << endl;
+    cout << "Time for " << text << " = " << fixed << chrono::duration <double, micro> (testTime).count() << " microseconds." << endl;
+}
+
+void displayTime(const char text[], duration<double, nano> time)
+{
+    cout.precision(3);
+    cout << "Time for " << text << " = " << fixed << chrono::duration <double, micro> (time).count() << " microseconds." << endl;
+}
+
+void displayRangeQueries()
+{
+    int queries = rangeQueries - rangeQueriesStart;
+    cout.precision(0);
+    cout << "Using " << fixed << queries << ((queries == 1) ? " range query." : " range queries.") << endl;
 }
 
 void displayStats()
 {
-    cout << std::string(80, '_') << endl;
+    cout << std::string(80, '_') << endl << endl;
     cout << "Statistics for the run of the program, including:" << endl;
     cout << "   1. Allocating and loading three tables from CSV files on disk, around 80K rows." << endl;
     cout << "   2. Allocating, copying the keys and sorting ten indexes on those three tables." << endl;
-    cout << "   3. Executing multiple point and range query lambdas on the indexes, as a test." << endl;
-    cout << "   4. Creating three relation vectors, each containing a from-index and a to-index." << endl;
-    cout << "   5. Creating a tuple from those three relation vectors to store the query objects." << endl;
-    cout << "   6. Creating and optimizing a database join query plan for those three relation vectors." << endl;
-    cout << "   7. Creating a joined row output array and doing a query plan nested loop join into it." << endl << endl;
+    cout << "   3. Creating six relation vectors, each containing a from-index and a to-index." << endl;
+    cout << "   4. Creating a tuple from those six relation vectors to store the query objects." << endl;
+    cout << "   5. Creating and optimizing a database seven-table double-route join query plan for those six relation vectors." << endl;
+    cout << "   6. Creating a joined row output array and doing ten nested loop join queries into it for the double-routes of the ten lowest-to-highest route carriers." << endl;
+    cout << "   7. Doing a full memoized loop join double-route query for all airlines into the joined row output array." << endl;
+    cout << "   8. Doing ten memoized join double-route queries into arrays for the ten lowest-to-highest route carriers (apples to apples comparison.)" << endl;
+    cout << "   9. Doing ten memoized join double-route queries for the ten lowest-to-highest route carriers (apples to oranges comparison.)" << endl << endl;
     cout.precision(5);
     cout << "Total run time spent in main() procedure thus far = "
          << fixed << chrono::duration <double, micro> (runTime/1000000).count() << " seconds" << endl << endl;
@@ -468,6 +501,40 @@ public:
     Could_Not_Open_File() :
         runtime_error("file name could not be opened") {}
 };
+
+class Range_Query_Consistency_Failure : public runtime_error
+{
+public:
+    Range_Query_Consistency_Failure() :
+        runtime_error("if range low is found, same key range high must also be.") {}
+};
+
+class Array_Not_Sorted : public runtime_error
+{
+public:
+    Array_Not_Sorted() :
+        runtime_error("Array items are not in sorted order") {}
+};
+
+class Output_Array_Size_Not_Big_Enough : public runtime_error
+{
+public:
+    Output_Array_Size_Not_Big_Enough() :
+        runtime_error("Array size not big enough for output: more JoinedRows than space") {}
+};
+
+template<typename T>
+void throwExceptionIfUnsorted(T arr[], int size)
+{
+    for (int i = 1; i < size - 1; ++i)
+    {
+        if (arr[i - 1] > arr[i])
+        {
+            throw Array_Not_Sorted();
+        }
+    }
+    return;
+}
 
 template<typename T>
 void loadCSVFile(T arr[], int size, const char filename[])
@@ -572,6 +639,13 @@ void asserts()
     columnIdChecker();
 }
 
+class Logic_Error : public runtime_error
+{
+public:
+    Logic_Error() :
+        runtime_error("something terribly wrong if you can't allocate an array.") {}
+};
+
 int main()
 {
     cout << endl << endl << "[Note: Remember to set the C++11 switch in the IDE or compiler!" << endl << endl
@@ -587,10 +661,9 @@ int main()
 
         asserts();
 
-        // Tables
-
         high_resolution_clock::time_point runStart = high_resolution_clock::now();
 
+        // Tables
         high_resolution_clock::time_point start = high_resolution_clock::now();
 
         airportRow airports[airportsCount];
@@ -611,7 +684,6 @@ int main()
         displayTime("space allocating and loading the three tables from CSV files");
 
         // Index space allocation
-
         start = high_resolution_clock::now();
 
         airportIdType airportsId[airportsCount];
@@ -630,7 +702,6 @@ int main()
         displayTime("space allocating the ten indexes");
 
         // Building the indexes
-
         start = high_resolution_clock::now();
 
         airportsId[airportsCount].dropAnchorCopyKeysSortIndex(airportsId, airportsCount);
@@ -650,153 +721,298 @@ int main()
         testTime /= 10;
         displayTime("each index on the average");
 
-        cout << endl << "First, let's execute a point query lambda on the airportsName index, for an airport that exists, and one that is imaginary." << endl << endl;
-
-        int rowIndex;
-        airportNameType* airportNamePtr;
-        routeAirlineIdType* routesAirlinePtr;
-
-        auto printAirports = [&] (string name, std::size_t count = 5)
-        {
-            start = high_resolution_clock::now();
-            rowIndex = binarySearch(airportsName, airportsCount, name.c_str());
-            testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
-            totalTime += testTime;
-            displayTime("a point query on an index on a smaller table");
-            cout << endl;
-            airportNamePtr = airportsName + abs(rowIndex) - 2;
-            cout << "\"" << name << "\" Airport record query:" << endl;
-            cout << "Returns: " << rowIndex << ((rowIndex < 0) ? " (Missing)" : " (Existing)") << endl;
-            cout << std::string(165, '-') << endl;
-            printIndex(airportNamePtr, count);
-            cout << std::string(165, '-') << endl;
-        };
-
-        printAirports("La Guardia Airport");
-        cout << endl;
-        printAirports("La Nunca Airport");
-
-        cout << endl << "Second, let's execute a range query lambda on the routesAirlineId index, printing all Allegiant Airlines (AAY, ID=35) routes." << endl << endl;
-
-        int rangeLowRowIndex;
-        int rangeHighRowIndex;
-
-        auto printRoutesAirlinesRange = [&] (string name)
-        {
-            start = high_resolution_clock::now();
-            rangeLowRowIndex = binarySearchRangeLow(routesAirlineId, routesCount, name.c_str());
-            routesAirlinePtr = routesAirlineId + abs(rangeLowRowIndex);
-            rangeHighRowIndex = binarySearchRangeHigh(routesAirlineId, routesCount, name.c_str());
-            testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
-            totalTime += testTime;
-            displayTime("a range query on an index on the biggest table (70K records)");
-            cout << endl;
-            cout << "\"" << name << "\" Routes record range query:" << endl;
-            cout << "Returns: " << rangeLowRowIndex << ((rangeLowRowIndex < 0) ? " (Missing)" : " (Existing)") << endl;
-            cout << std::string(35, '-') << endl;
-            printIndex(routesAirlinePtr, rangeHighRowIndex - rangeLowRowIndex + 1);
-            cout << std::string(35, '-') << endl;
-        };
-
-        printRoutesAirlinesRange("35");
-
-        cout << endl << "Third, let's make three relation vectors with 'from' and 'to' indexes for each, and see that we can print some table rows from there." << endl << endl;
-
+        // Creating the relations
         start = high_resolution_clock::now();
-        airportId2RouteSourceAirportIdType airportId2RouteSourceAirportId;
-        testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
-        cout << "Relation Vector airportId2RouteSourceAirportId.fromIndex[24]: " << endl << std::string(133, '-') << endl;
-        cout << ((airportId2RouteSourceAirportId.fromIndex())->row())[23];
-        cout << endl << std::string(133, '-') << endl;
-        cout << "Relation Vector airportId2RouteSourceAirportId byte size: " << sizeof(airportId2RouteSourceAirportId) << endl << endl;
 
-        start = high_resolution_clock::now();
+        airlineId2RouteAirlineIdType airlineId2RouteAirlineId;
+        routeSourceAirportId2AirportIdType routeSourceAirportId2AirportId;
         routeDestinationAirportId2AirportIdType routeDestinationAirportId2AirportId;
-
+        routeDestinationAirportId2RouteSourceAirportIdType routeDestinationAirportId2RouteSourceAirportId;
         routeAirlineId2AirlineIdType routeAirlineId2AirlineId;
-        testTime += duration_cast<duration<double>> (high_resolution_clock::now() - start);
-        totalTime += testTime;
-        cout << "Relation Vector routeAirlineId2AirlineId.toIndex[15]: " << endl << std::string(43, '-') << endl;
-        cout << ((routeAirlineId2AirlineId.toIndex())->row())[15];
-        cout << endl << std::string(43, '-') << endl;
-        displayTime("creating the three relation vectors");
 
-
-        cout << endl << "Fourth, let's make a tuple of three relation vectors that will form a join, and see that we can print the same table rows from there." << endl << endl;
-
-        start = high_resolution_clock::now();
-        routesJoinRelationsTupleType RoutesJoinRelationsTuple(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
         testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
         totalTime += testTime;
-        displayTime("creating the tuple containing the three relation vectors");
-        cout << endl;
-        cout << "Routes Join relation tuple<0> 'from' airportId2RouteSourceAirportId.fromIndex[24] (same as above): " << endl << std::string(133, '-') << endl;
-        cout << ((get<0>(RoutesJoinRelationsTuple).fromIndex())->row())[23];
-        cout << endl << std::string(133, '-') << endl << endl;
-        cout << "Routes Join relation tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above): " << endl << std::string(43, '-') << endl;
-        cout << ((get<2>(RoutesJoinRelationsTuple).toIndex())->row())[15];
-        cout << endl << std::string(43, '-') << endl;
-        cout << "Routes Join relation tuple byte size: " << sizeof(RoutesJoinRelationsTuple) << endl;
+        displayTime("creating the six relation vectors");
 
-        cout << endl << "Fifth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors (which makes a tuple called relVecsTuple), and see if we can access a madeup joined route (SJC->LAS) from the JoinedRow." << endl <<  endl;
-
+        // Creating the relation vector tuple
         start = high_resolution_clock::now();
-        routesQueryPlanType routesQueryPlan(airportId2RouteSourceAirportId, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
+
+        doubleRoutesJoinRelationsTupleType doubleRoutesJoinRelationsTuple(airlineId2RouteAirlineId, routeSourceAirportId2AirportId, routeDestinationAirportId2AirportId, routeDestinationAirportId2RouteSourceAirportId, routeAirlineId2AirlineId, routeDestinationAirportId2AirportId);
+
         testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
         totalTime += testTime;
-        displayTime("creating the query plan to join the three relation vectors");
-        cout << endl;
-        cout << "Query Plan for routes byte size: " << sizeof(routesQueryPlan) << endl << endl;
+        displayTime("creating the tuple containing the six relation vectors");
 
+        // Creating the query plan
         start = high_resolution_clock::now();
-        const std::size_t routesJoinedRowCount = 100;
-        routesJoinedRowType routesJoinedRow[routesJoinedRowCount];
-        routesJoinedRow[0].dropAnchor(&routesQueryPlan);
+
+        doubleRoutesQueryPlanType routesQueryPlan(airlineId2RouteAirlineId, routeSourceAirportId2AirportId, routeDestinationAirportId2AirportId, routeDestinationAirportId2RouteSourceAirportId, routeAirlineId2AirlineId, routeDestinationAirportId2AirportId);
+
+        testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
+        totalTime += testTime;
+        displayTime("creating the query plan to join the six relation vectors");
+
+        // Creating the joined row array for join output
+        start = high_resolution_clock::now();
+
+        const std::size_t doubleRoutesJoinedRowCount = 11000000;
+        doubleRoutesJoinedRowType doubleRoutesJoinedRow[doubleRoutesJoinedRowCount];
+        doubleRoutesJoinedRow[0].dropAnchor(&routesQueryPlan);
+
         testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
         totalTime += testTime;
         displayTime("creating the joined row array to contain the join output");
-        cout << endl;
 
-        cout << std::string(171, '-') << endl;
-        routesJoinedRow[0].joinedRowPrintTest();
-        cout << std::string(171, '-') << endl;
+        cout << std::string(80, '_') << endl << endl;
+        cout << "First, we do ten standard seven-table join queries listing the valid double routes (routes possessing valid airlines, from and to airports ... linking to a second route from the first destination airport on to any second airport on any airline) for the ten lowest-to-highest route carriers to show the effects of scale." << endl << endl;
 
-        cout << "Routes JoinedRow byte size: " << sizeof(routesJoinedRow[0]) << endl;
+        int standardTotalRoutes = 0;
+        double standardRangeQueries = 0;
 
-        cout << endl << "Sixth, let's try a nested loop join listing all the valid air routes (having valid airlines, in or out airports) out of the Fresno Yosemite Airport" << endl <<  endl;
-
+        // Lambda for standard joins
+        auto doStandardJoin = [&] (char selectTerm[], char displayText[], bool print=false)
         {
             start = high_resolution_clock::now();
-            char selectTerm[] = "3687";
+            rangeQueriesStart = rangeQueries;
             int retVal;
             if (!routesQueryPlan.startJoin(selectTerm))
-                cout << "Couldn't initialize the validated query." << endl << endl;
+                cout << "Couldn't initialize the validated query for " << displayText << "." << endl << endl;
             else
             {
-                retVal = routesJoinedRow[0].join(routesJoinedRowCount);
+                retVal = doubleRoutesJoinedRow[0].join(doubleRoutesJoinedRowCount);
                 testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
+                standardJoinTime += testTime;
                 totalTime += testTime;
-                displayTime("doing the four table join");
-                cout << endl;
+                displayTime(displayText);
+                displayRangeQueries();
+                standardRangeQueries += rangeQueries - rangeQueriesStart;
                 if (retVal >= 0)
                 {
-                    cout << "return count = " << retVal << endl;
-                    printJoin(routesJoinedRow, retVal);
+                    cout << "Reporting " << retVal << " valid double air routes." << endl << endl;
+                    standardTotalRoutes += retVal;
+                    if (print) printJoin(doubleRoutesJoinedRow, retVal);
                 }
                 else
-                    cout << "Array size not big enough for output: more JoinedRows than " << -retVal << endl << endl;
+                    cout << "Array size not big enough for " << displayText
+                         << " output: more JoinedRows than " << -retVal << endl << endl;
             }
+        };
+
+        doStandardJoin((char*)"109", (char*)" Alaska Central Express join query");
+        doStandardJoin((char*)"9784", (char*)"Yangon Airways join query");
+        doStandardJoin((char*)"426", (char*)"Air Armenia join query");
+        doStandardJoin((char*)"338", (char*)"Airnorth join query");
+        doStandardJoin((char*)"9828", (char*)"Ciel Canadien join query");
+        doStandardJoin((char*)"4897", (char*)"Thomas Cook Airlines join query");
+        doStandardJoin((char*)"3290", (char*)"Lion Mentari Airlines join query");
+        doStandardJoin((char*)"4319", (char*)"Scandinavian Airlines System join query");
+        doStandardJoin((char*)"137", (char*)"Air France join query");
+	doStandardJoin((char*)"24", (char*)"American Airlines join query");
+	cout << "Total valid double air routes count for the ten lowest-to-highest route carriers = "
+             << standardTotalRoutes << "." << endl;
+
+        displayTime("all ten standard join queries, in total", standardJoinTime);
+        cout.precision(0);
+        cout << "Using a total of " << standardRangeQueries << " range queries." << endl;
+
+        cout << std::string(80, '_') << endl << endl;
+        cout << "Second, we create a full memoized seven-table join of all the valid double routes for each airline in very compact form." << endl << endl;
+
+        // create full memoized join for all routes on all airlines
+        start = high_resolution_clock::now();
+        rangeQueriesStart = rangeQueries;
+        int actualJoinCount;
+        if (!routesQueryPlan.startFullMemoizedJoin())
+            cout << "Couldn't initialize the validated query." << endl << endl;
+        else
+        {
+            actualJoinCount = doubleRoutesJoinedRow[0].join(doubleRoutesJoinedRowCount);
+            if (actualJoinCount < 0) throw Output_Array_Size_Not_Big_Enough();
+            mergeSortInvoke(doubleRoutesJoinedRow, actualJoinCount); // faster than quick sort for these ...
+            testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
+            totalTime += testTime;
+            displayTime("full memoized join creation");
+            displayRangeQueries();
+            if (actualJoinCount >= 0)
+            {
+                cout << "Full memoized join: valid routes count for all airlines = " << actualJoinCount << endl << endl;
+                //printJoin(doubleRoutesJoinedRow, actualJoinCount);
+            }
+            else
+                cout << "Memoized join array size not big enough for output: more JoinedRows than "
+                     << abs(actualJoinCount) << endl << endl;
         }
 
-        runTime = duration_cast<duration<double>> (high_resolution_clock::now() - runStart);
+        cout << std::string(80, '_') << endl << endl;
+        cout << "Third, we use that full memoized join to do ten memoized seven-table join queries listing the valid double routes for the ten lowest-to-highest route carriers to show the effects of scale, including the cost of moving the bytes although we don't need to (it's only for an apples to apples comparison.) Note that the numbers of double routes are the same as the nested loop joins, but take orders of magnitude less time, and only one range query for each." << endl << endl;
 
+        int memoizedTotalRoutes = 0;
+        double memoizedRangeQueries = 0;
+        memoizedJoinTime = duration<double, nano> (0);
+
+        // Lambda for memoized joins
+        auto doMemoizedJoin = [&] (char selectTerm[], char displayText[], bool print=false)
+        {
+            start = high_resolution_clock::now();
+            rangeQueriesStart = rangeQueries;
+            int rangeLow = binarySearchRangeLow(doubleRoutesJoinedRow, actualJoinCount, selectTerm);
+            if (rangeLow < 0)
+                cout << "No valid double air routes for " << displayText << "." << endl << endl;
+            else
+            {
+                int rangeHigh = binarySearchRangeHigh(doubleRoutesJoinedRow, actualJoinCount, selectTerm);
+                if (rangeHigh < 0) throw Range_Query_Consistency_Failure();
+                int arraySize = rangeHigh - rangeLow + 1;
+                doubleRoutesJoinedRowType outputJoinedRows[arraySize];
+                outputJoinedRows[0].dropAnchor(&routesQueryPlan);
+                int j = 0;
+                for (int i = rangeLow; i <= rangeHigh; i++) outputJoinedRows[j++] = doubleRoutesJoinedRow[i];
+                testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
+                memoizedJoinTime += testTime;
+                totalTime += testTime;
+                displayTime(displayText);
+                displayRangeQueries();
+                memoizedRangeQueries += rangeQueries - rangeQueriesStart;
+                if (arraySize >= 0)
+                {
+                    cout << "Reporting " << arraySize << " valid double air routes." << endl << endl;
+                    memoizedTotalRoutes += arraySize;
+                    if (print) printJoin(outputJoinedRows, arraySize);
+                }
+                else throw Logic_Error();
+            }
+        };
+
+        doMemoizedJoin((char*)"109", (char*)" Alaska Central Express join query");
+        doMemoizedJoin((char*)"9784", (char*)"Yangon Airways join query");
+        doMemoizedJoin((char*)"426", (char*)"Air Armenia join query");
+        doMemoizedJoin((char*)"338", (char*)"Airnorth join query");
+        doMemoizedJoin((char*)"9828", (char*)"Ciel Canadien join query");
+        doMemoizedJoin((char*)"4897", (char*)"Thomas Cook Airlines join query");
+        doMemoizedJoin((char*)"3290", (char*)"Lion Mentari Airlines join query");
+        doMemoizedJoin((char*)"4319", (char*)"Scandinavian Airlines System join query");
+        doMemoizedJoin((char*)"137", (char*)"Air France join query");
+	doMemoizedJoin((char*)"24", (char*)"American Airlines join query");
+ 	cout << "Total valid double air routes count for the ten lowest-to-highest route carriers = "
+             << memoizedTotalRoutes << "." << endl;
+
+        displayTime("all ten memoized join queries, in total", memoizedJoinTime);
+        cout.precision(0);
+        cout << "Using a total of " << memoizedRangeQueries << " range queries." << endl << endl;
+
+        cout << std::string(80, '_') << endl << endl;
+        cout << "Fourth, let's execute a range query boundary lambda from the airlineId index, for all double routes from each airline using the memoized join, to find out the average cost of getting the low and high range query boundaries." << endl << endl;
+
+        int rangeLowRowIndex;
+
+        start = high_resolution_clock::now();
+        rangeQueriesStart = rangeQueries;
+
+        for (int i = 0; i < (int)airlinesCount; i++)
+        {
+            rangeLowRowIndex = binarySearchRangeLow(doubleRoutesJoinedRow, actualJoinCount, airlinesId[i].c_str());
+            if (rangeLowRowIndex >= 0)
+                if (binarySearchRangeHigh(doubleRoutesJoinedRow, actualJoinCount, airlinesId[i].c_str()) < 0)
+                    throw Range_Query_Consistency_Failure();
+        };
+
+        testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
+        rangeQueryTime += testTime;
+        totalTime += testTime;
+        displayTime("determining all airlines range query boundaries (not touching the rows) on the routes table");
+        cout.precision(0);
+        cout << "Using a total of " << rangeQueries - rangeQueriesStart << " range queries (number of airlines.)" << endl;
+        cout.precision(3);
+        cout << "Yielding an average time of "
+             << fixed << chrono::duration <double, micro> (rangeQueryTime / (rangeQueries - rangeQueriesStart)).count()
+             << " microseconds to find one range query boundary pair." << endl << endl;
+
+        cout << std::string(80, '_') << endl << endl;
+        cout << "Finally, we use that full memoized join to do ten memoized seven-table join queries listing the valid double routes for the ten lowest-to-highest route carriers to show the effects of scale: however, without the unnecessary byte moves (this is an apples to oranges comparison, but you can access the bytes from the memoized join and don't need to output them.) Note that the numbers of these double routes are the same as the nested loop joins, but take effectively constant time in comparison, and only one range query for each. We do two runs for comparison, because the measurement is so small that the second run is different in an interesting way." << endl << endl;
+
+
+
+        // Lambda for memoized joins
+        auto doMemoizedJoinNoMoves = [&] (char selectTerm[], char displayText[], bool print=false)
+        {
+            start = high_resolution_clock::now();
+            rangeQueriesStart = rangeQueries;
+            int rangeLow = binarySearchRangeLow(doubleRoutesJoinedRow, actualJoinCount, selectTerm);
+            if (rangeLow < 0)
+                cout << "No valid double air routes for " << displayText << "." << endl << endl;
+            else
+            {
+                int rangeHigh = binarySearchRangeHigh(doubleRoutesJoinedRow, actualJoinCount, selectTerm);
+                if (rangeHigh < 0) throw Range_Query_Consistency_Failure();
+                int arraySize = rangeHigh - rangeLow + 1;
+                testTime = duration_cast<duration<double>> (high_resolution_clock::now() - start);
+                memoizedJoinTime += testTime;
+                totalTime += testTime;
+                displayTime(displayText);
+                displayRangeQueries();
+                memoizedRangeQueries += rangeQueries - rangeQueriesStart;
+                if (arraySize >= 0)
+                {
+                    cout << "Reporting " << arraySize << " valid double air routes." << endl << endl;
+                    memoizedTotalRoutes += arraySize;
+                    if (print) printJoin(doubleRoutesJoinedRow + rangeLow, arraySize);
+                }
+                else throw Logic_Error();
+            }
+        };
+
+        cout << std::string(80, '_') << endl << endl;
+	cout << "First run." << endl << endl;
+
+        memoizedTotalRoutes = 0;
+        memoizedRangeQueries = 0;
+        memoizedJoinTime = duration<double, nano> (0);
+
+        doMemoizedJoinNoMoves((char*)"109", (char*)" Alaska Central Express join query");
+        doMemoizedJoinNoMoves((char*)"9784", (char*)"Yangon Airways join query");
+        doMemoizedJoinNoMoves((char*)"426", (char*)"Air Armenia join query");
+        doMemoizedJoinNoMoves((char*)"338", (char*)"Airnorth join query");
+        doMemoizedJoinNoMoves((char*)"9828", (char*)"Ciel Canadien join query");
+        doMemoizedJoinNoMoves((char*)"4897", (char*)"Thomas Cook Airlines join query");
+        doMemoizedJoinNoMoves((char*)"3290", (char*)"Lion Mentari Airlines join query");
+        doMemoizedJoinNoMoves((char*)"4319", (char*)"Scandinavian Airlines System join query");
+        doMemoizedJoinNoMoves((char*)"137", (char*)"Air France join query");
+	doMemoizedJoinNoMoves((char*)"24", (char*)"American Airlines join query");
+        cout << "Total valid double air routes count for the ten lowest-to-highest route carriers = "
+             << memoizedTotalRoutes << "." << endl;
+
+        displayTime("all ten memoized join queries, in total", memoizedJoinTime);
+        cout.precision(0);
+        cout << "Using a total of " << memoizedRangeQueries << " range queries." << endl << endl;
+
+        cout << std::string(80, '_') << endl << endl;
+	cout << "Second run." << endl << endl;
+
+        memoizedTotalRoutes = 0;
+        memoizedRangeQueries = 0;
+        memoizedJoinTime = duration<double, nano> (0);
+
+        doMemoizedJoinNoMoves((char*)"109", (char*)" Alaska Central Express join query");
+        doMemoizedJoinNoMoves((char*)"9784", (char*)"Yangon Airways join query");
+        doMemoizedJoinNoMoves((char*)"426", (char*)"Air Armenia join query");
+        doMemoizedJoinNoMoves((char*)"338", (char*)"Airnorth join query");
+        doMemoizedJoinNoMoves((char*)"9828", (char*)"Ciel Canadien join query");
+        doMemoizedJoinNoMoves((char*)"4897", (char*)"Thomas Cook Airlines join query");
+        doMemoizedJoinNoMoves((char*)"3290", (char*)"Lion Mentari Airlines join query");
+        doMemoizedJoinNoMoves((char*)"4319", (char*)"Scandinavian Airlines System join query");
+        doMemoizedJoinNoMoves((char*)"137", (char*)"Air France join query");
+	doMemoizedJoinNoMoves((char*)"24", (char*)"American Airlines join query");
+        cout << "Total valid double air routes count for the ten lowest-to-highest route carriers = "
+             << memoizedTotalRoutes << "." << endl;
+
+        displayTime("all ten memoized join queries, in total", memoizedJoinTime);
+        cout.precision(0);
+        cout << "Using a total of " << memoizedRangeQueries << " range queries." << endl << endl;
+
+
+
+	runTime = duration_cast<duration<double>> (high_resolution_clock::now() - runStart);
         displayStats();
-
-        cout << "Finally, let's make a linked (and checked) QueryPlan of the joined row tables with one extra relation vector, that violates the linkage rule: that every from-index (after the first one) has a preceding to-indexed or initial from-indexed table to link from. The query plan checker should throw  an exception (exception name at end of error string)." << endl <<  endl;
-
-        airlineCountry2airportCountryType airlineCountry2airportCountry;
-
-        routesQueryPlanFailType routesQueryPlanFail(airportId2RouteSourceAirportId, airlineCountry2airportCountry, routeDestinationAirportId2AirportId, routeAirlineId2AirlineId);
 
     }
     catch (...)

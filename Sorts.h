@@ -1,7 +1,7 @@
 #ifndef SORTS_H_INCLUDED
 #define SORTS_H_INCLUDED
 
-// typical sorting code ...
+// typical sorting and searching code ...
 
 class Sort_Bounds_Error : public runtime_error
 {
@@ -19,6 +19,7 @@ public:
 
 double compares;
 double swaps;
+double rangeQueries;
 
 template<typename T>
 void selectionSortInvoke(T arr[], int size)
@@ -212,7 +213,7 @@ void stlSortInvoke(T arr[], int size)
     // Can't seem to get past a const bug: "discards qualifiers"
     //std::sort(arr, arr + size - 1, [](T a, T b) {return (a < b);} );
 }
-
+// could use this one
 /*// negative result means not an exact match: negative index of where it would be
 template<typename T, typename U>
 int binarySearch(T arr[], std::size_t size, U value)
@@ -231,6 +232,8 @@ int binarySearch(T arr[], std::size_t size, U value)
         else if (arr[middle] > str) right = middle - 1;
         else left = middle + 1;
     }
+    // didn't find it
+    if (middle == 0) middle = 1; // close enough, but signed
     return -middle; // for range searches (inexact)
 }*/
 
@@ -248,6 +251,8 @@ int binarySearch(T arr[], std::size_t size, const T value)
         else if (arr[middle] > value) right = middle - 1;
         else left = middle + 1;
     }
+    // didn't find it
+    if (middle == 0) middle = 1; // close enough, but signed
     return -middle; // for range searches (inexact)
 }
 
@@ -265,6 +270,8 @@ int binarySearch(T arr[], std::size_t size, const char value[])
         else if (arr[middle] > value) right = middle - 1;
         else left = middle + 1;
     }
+    // didn't find it
+    if (middle == 0) middle = 1; // close enough, but signed
     return -middle; // for range searches (inexact)
 }
 
@@ -272,6 +279,7 @@ int binarySearch(T arr[], std::size_t size, const char value[])
 template<typename T>
 int binarySearchRangeLow(T arr[], std::size_t size, const T value)
 {
+    rangeQueries++;
     T belowValue(value);
     belowValue = value - 1;
     int returnIndex = binarySearch(arr, size, belowValue);
@@ -285,10 +293,11 @@ int binarySearchRangeLow(T arr[], std::size_t size, const T value)
 template<typename T>
 int binarySearchRangeLow(T arr[], std::size_t size, const char value[])
 {
-    const bool debugOutput = false;
+    rangeQueries++;
     int len = strlen(value);
     char belowValue[len + 1];
     strcpy(belowValue, value);
+
     if (value[len - 1] > CHAR_MIN) // could be a value ending in CHAR_MIN != 0
     {
         belowValue[len - 1] = value[len - 1] - 1;
@@ -300,35 +309,52 @@ int binarySearchRangeLow(T arr[], std::size_t size, const char value[])
         belowValue[len] = '!';
         belowValue[len + 1] = 0;
     }
+
     int returnIndex = binarySearch(arr, size, belowValue);
-    returnIndex = abs(returnIndex); // don't expect to find the precedent, but might
-    if (debugOutput) cout << endl << "Range low for: " << belowValue << ", moving back, starting at: " << arr[returnIndex].c_str() << ":" << returnIndex;
-    for (; arr[returnIndex - 1] >= value; returnIndex--) // could be a set of value ending in CHAR_MIN
+
+    if (returnIndex > 0) // don't expect to find the belowValue, but might
     {
-        if (debugOutput) cout << ", " << arr[returnIndex].c_str() << ":" << returnIndex;
-    };
-    if (debugOutput) cout << endl << "Range low, moving up, starting at: " << arr[returnIndex].c_str() << ":" << returnIndex;
-    for (; arr[returnIndex + 1] < value; returnIndex++) // could be a set of belowValue
-    {
-        if (debugOutput) cout << ", " << arr[returnIndex].c_str() << ":" << returnIndex;
-    };
-    if (arr[returnIndex] != value)
-    {
-        if (debugOutput)
+        // in that unlikely event, just walk it forward: could be a set of belowValue ending in '~'
+        if (debugTrace)
         {
-            cout << ", failed ending at: " << arr[returnIndex].c_str() << ":" << returnIndex << endl;
-            cout << *((arr[returnIndex]).row()) << endl;
+            // NAME_OF(variable)
+            cout << endl << "Range low on index number " << (int)(arr[abs(returnIndex)].enumColumn())
+                 << " for: " << value << ": belowValue = " << belowValue << ", [found belowValue!] starting at: "
+                 << arr[returnIndex].c_str() << ":" << returnIndex << endl ;
         }
-        returnIndex = -returnIndex; // didn't find the value
-    }
-    else
-    {
-        if (debugOutput)
+        for (; arr[returnIndex] <= belowValue; returnIndex++);
+        if (arr[returnIndex] == value)
         {
-            cout << ", ending at: " << arr[returnIndex].c_str() << ":" << returnIndex << endl;
-            cout << *((arr[returnIndex]).row()) << endl;
+            returnIndex = abs(returnIndex);
         }
     }
+    else // may be pointing above it, maybe below it
+    {
+        returnIndex = abs(returnIndex);
+        if (debugTrace)
+        {
+            cout << endl << "Range low on index number " << (int)(arr[returnIndex].enumColumn())
+                 << " for: " << value << ": belowValue = " << belowValue << ", starting at: "
+                 << arr[returnIndex].c_str() << ":" << returnIndex << endl ;
+        }
+
+        if (arr[returnIndex - 1] == value) returnIndex--;
+        else if ((arr[returnIndex]) == value);
+        else if ((arr[returnIndex + 1]) == value) returnIndex++;
+        else returnIndex = -returnIndex; // failed to find one
+    }
+
+    if (debugTrace)
+    {
+        if (returnIndex < 0)
+            cout << endl << "Range low for: " << belowValue << ", FAILED at: "
+                 << arr[abs(returnIndex)].c_str() << ":" << returnIndex << endl ;
+        else
+            cout << endl << "Range low for: " << belowValue << ", SUCCEEDED at: "
+                 << arr[returnIndex].c_str() << ":" << returnIndex << endl ;
+        cout << *((arr[abs(returnIndex)]).row()) << endl;
+    }
+
     return returnIndex;
 }
 
@@ -349,54 +375,47 @@ int binarySearchRangeHigh(T arr[], std::size_t size, const T value)
 template<typename T>
 int binarySearchRangeHigh(T arr[], std::size_t size, const char value[])
 {
-    const bool debugOutput = false;
     int len = strlen(value);
     char aboveValue[len + 1];
     strcpy(aboveValue, value);
-    if (value[len - 1] < CHAR_MAX) // could be a value ending in CHAR_MAX
-    {
-        aboveValue[len] = '!';
-        aboveValue[len + 1] = 0;
-    }
-    else
-    {
-        aboveValue[len] = '!';
-        aboveValue[len + 1] = 0;
-    }
+    aboveValue[len] = '!';
+    aboveValue[len + 1] = 0;
+
     int returnIndex = binarySearch(arr, size, aboveValue);
-    returnIndex = abs(returnIndex); // don't expect to find the successor, but might
-    if (debugOutput) cout << endl << "Range high for: " << aboveValue << ", moving up, starting at: " << arr[returnIndex].c_str() << ":" << returnIndex;
-    for (; arr[returnIndex + 1] <= value; returnIndex++) // could be a set of value ending in CHAR_MAX
+
+    if (returnIndex > 0) // don't expect to find the aboveValue, but might
     {
-        if (debugOutput) cout << ", " << arr[returnIndex].c_str() << ":" << returnIndex;
-    };
-    if (debugOutput) cout << endl << "Range high, moving back, starting at: " << arr[returnIndex].c_str() << ":" << returnIndex;
-    for (; arr[returnIndex - 1] >= value; returnIndex--) // could be a set of aboveValue
-    {
-        if (arr[returnIndex - 1] == value)
+        // in that unlikely event, just walk it back: could be a set of aboveValue ending in '!'
+        if (debugTrace) cout << endl << "Range high for: " << value << ": aboveValue = " << aboveValue << ", [found aboveValue!] starting at: "
+                                 << arr[returnIndex].c_str() << ":" << returnIndex << endl ;
+        for (; arr[returnIndex] >= aboveValue; returnIndex--);
+        if (arr[returnIndex] == value)
         {
-            returnIndex--;
-            break;
-        }
-        if (debugOutput) cout << ", " << arr[returnIndex].c_str() << ":" << returnIndex;
-    };
-    if (arr[returnIndex] != value)
-    {
-        if (debugOutput)
-        {
-            cout << ", failed ending at: " << arr[returnIndex].c_str() << ":" << returnIndex << endl;
-            cout << *((arr[returnIndex]).row()) << endl;
-        }
-        returnIndex = -returnIndex; // didn't find the value
-    }
-    else
-    {
-        if (debugOutput)
-        {
-            cout << ", ending at: " << arr[returnIndex].c_str() << ":" << returnIndex << endl;
-            cout << *((arr[returnIndex]).row()) << endl;
+            returnIndex = abs(returnIndex);
         }
     }
+    else // may be pointing above it, maybe below it
+    {
+        returnIndex = abs(returnIndex);
+        if (debugTrace) cout << endl << "Range high for: " << value << ": aboveValue = " << aboveValue
+                                 << ", starting at: " << arr[returnIndex].c_str() << ":" << returnIndex << endl ;
+        if (arr[returnIndex + 1] == value) returnIndex++;
+        else if ((arr[returnIndex]) == value);
+        else if ((arr[returnIndex - 1]) == value) returnIndex--;
+        else returnIndex = -returnIndex; // failed to find one
+    }
+
+    if (debugTrace)
+    {
+        if (returnIndex < 0)
+            cout << endl << "Range high for: " << aboveValue << ", FAILED at: "
+                 << arr[abs(returnIndex)].c_str() << ":" << returnIndex << endl ;
+        else
+            cout << endl << "Range high for: " << aboveValue << ", SUCCEEDED at: "
+                 << arr[returnIndex].c_str() << ":" << returnIndex << endl ;
+        cout << *((arr[abs(returnIndex)]).row()) << endl;
+    }
+
     return returnIndex;
 }
 

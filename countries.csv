@@ -4,7 +4,7 @@
 #
 # Columns
 # -------
-# Country - Country or territory where airport is located. 
+# Country - Country or territory where airport is located.
 # First alternate 2 digit country code (ISO 3166-1)
 # Second alternate 2 digit country code (ISO 3166-1) or \N none
 # DST - Daylight savings time. One of E (Europe), A (US/Canada), S (South America), O (Australia), Z (New Zealand), N or \N (None) or U (Unknown).

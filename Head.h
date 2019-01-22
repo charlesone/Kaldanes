@@ -55,21 +55,19 @@ Head.h - header file for Kaldane Head string, which are variable-length (with an
 */
 
 #include <iostream>
+#include <cstring>
 #include "Direct.h"
 
 using namespace std;
 
 static char *tailAnchor = 0;
-static std::size_t tailElementSize = -1;
-static std::size_t tailStructSize = -1;
+static int tailElementSize = -1;
+static int tailStructSize = -1;
 
 template <std::size_t maxStringSize, std::size_t maxPmnkSize = 7, std::size_t switchoverPmnkSize = 16>
 class Head
 {
 protected:
-
-    //static_assert(maxStringSize > 0, "maxStringSize must be positive"); // can't get this to work
-    //static_assert(maxPmnkSize <= maxStringSize, "maxPmnkSize must be <= maxStringSize"); // can't get this to work
 
     static const std::size_t headPlusTailLen = maxStringSize;
     // if maxStringSize <= switchoverPmnkSize, the pmnk will contain the whole string
@@ -171,7 +169,7 @@ public:
 
     Head& assign(const char* str)
     {
-        int len = strlen(str);
+        std::size_t len = strlen(str);
         if (len > headPlusTailLen) throw Assign_String_Too_Long();
         h.pmnk[0] = 0;
         // Now we get our (Head) array index and index into the Tail array
@@ -179,7 +177,7 @@ public:
         tailStr[0] = 0;
         if (len > pmnkSize)
         {
-            strncpy(h.pmnk, str, pmnkSize);
+            memcpy(h.pmnk, str, pmnkSize);
             h.pmnk[pmnkSize] = 0;
             strcpy(tailStr, str+pmnkSize);
         }
@@ -316,7 +314,7 @@ public:
         tailAnchor = (char*)tailArr;
         tailElementSize = tailArr[0].size();
         tailStructSize = tailArr[0].structSize();
-        for (int i = 0; i < size; ++i) headArr[i].h.k = i;
+        for (std::size_t i = 0; i < size; ++i) headArr[i].h.k = i;
     }
 
     friend ostream& operator<< (ostream &os, const Head& rhs)

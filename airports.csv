@@ -8,7 +8,7 @@
 # Airport ID - Unique OpenFlights identifier for this airport.
 # Name - Name of airport. May or may not contain the City name.
 # City - Main city served by airport. May be spelled differently from Name.
-# Country - Country or territory where airport is located. 
+# Country - Country or territory where airport is located.
 # IATA - 3-letter IATA code. Null if not assigned/unknown.
 # ICAO - 4-letter ICAO code. Null if not assigned.
 # Latitude - Decimal degrees, usually to six significant digits. Negative is South, positive is North.
@@ -18,13 +18,13 @@
 # DST - Daylight savings time. One of E (Europe), A (US/Canada), S (South America), O (Australia), Z (New Zealand), N (None) or U (Unknown).
 # Tz database time zone - Timezone in "tz" (Olson) format, eg. "America/Los_Angeles".
 # Type - Type of the airport. Value "airport" for air terminals. In airports.csv, only type=airport is included.
-# Source - Source of this data. 
+# Source - Source of this data.
 # -------
 #
 # The data was modified to remove quotes from pair-quoted text: ,"text", -> ,text,
 # The data was further modified to change entries from pair-quoted text: ,"te, xt", -> ,te; xt,
 # The csv contains 7,184 non-commented lines of data
-# The longest data, at non-commented line number 2,435 for 184 bytes is:
+# The longest data, at non-commented line number 2,435 for 186 bytes (special character font) is:
 # 2564,Guarulhos - Governador AndrĂ© Franco Montoro International Airport,Sao Paulo,Brazil,GRU,SBGR,-23.435556411743164,-46.47305679321289,2459,-3,S,America/Sao_Paulo,airport,OurAirports
 # Using "#" here to denote comments is an R language standard for csv files
 #

@@ -23,28 +23,73 @@
     added to the Application during this compilation process under terms of your choice,
     provided you also meet the terms and conditions of the Application license.
 
-RowString.h - header file for RowString type, which are variable-length (with an upper bound)
-  null-terminated byte strings that have their bytes moved as a single body when they are swapped
-  as in sorting, not just moving their pointers (following the Sort Benchmark rules.) These might
-  be a candidate for the Indy Sort. RowString has "value-string semantics" as Stroustrup defined for
-  his String type (C++11, chapter 19.3) RowString are the fastest for short strings: linear
-  for quick sort AND merge sort (as opposed to the type <string> which is slower for quick sort
-  and quadratic for merge sort.) However, even for longer strings RowString are sub-linear in time
-  complexity for string length due to cache pre-fetch (that means when you double the length of
-  the strings being sorted, the time taken is quite a bit less than double.) They are designed
-  to be used  with slab allocation/deallocation on the stack, as opposed to fine-grained allocators.
-  Since the allocated slab never needs to contain pointers, the slab data structure is base+offset
-  and can be mmapped to a file or /dev/shm and shared locally or across  a memory fabric like Gen-Z,
-  or stored and transmitted, or mmapped over an NFS: consistency considerations are an issue for
-  sharing, of course (caveat participem).
+RowString.h - header file for RowString class (variation of Direct) in simple arrays for tables
+
+  Both the RowString template class and its accessing IndexString template class share the same 5
+  basic template parameters and operate on character <typename T> strings, although the current
+  implementation is unabashedly char typed and won’t work for other string types (yet.) Both classes
+  are completely base + offset, accessible under virtual addressing, and the objects are portable
+  individually as elements or as slabs: for ease of replication. The variable format is the log record
+  format. The current demo code base does not use mmap for accessing these objects, but that will work
+  just fine in future.
+
+  RowString variables are variable-length (with an upper bound) collections of null-terminated byte
+  strings that have their bytes moved as a single body when they are swapped as in sorting, not just
+  moving their pointers (following the Sort Benchmark rules.) RowString has "value-string semantics"
+  as Stroustrup defined for his String type (The C++11 Programming Language, 4th edition, chapter 19.3).
+
+  Imitating the b-tree block there is an offset, in the front of the RowString object, to the column
+  count and column offsets at the end. This allows quick loading from simple .csv files (these
+  “comma-separated-value” files are loaded using one of three member functions named assignColumns)
+  without commented or escape characters, by copying in each string after the initial offset and
+  simply converting the commas to nulls as you build the column count and offsets. That’s very fast
+  for loading.
+
+  There are three assignment functions provided for moving char strings into a RowString:
+	•	assign (const char* str): which is for a simple one column RowString.
+	•	assign (const char* str, std::size_t size): for which the user has preformatted the RowString
+		correctly with columns, nulls, counters and offsets.
+	•	assignColumns (const char* str, const char delimiter = ','): described in the paragraph above.
+
+  An effort is made to provide as many constexpr member functions as possible, to supply type
+  information at compile time for generic programming. That effort pays off during the variadic
+  template parameter pack recursion later (QueryPlan and JoinedRow), which is effectively an exercise
+  in manufacturing arrays of constants and a little bit of code from typed parameter constants at
+  compile time.
+
+  Both RowString and IndexString make extensive use of static global constants and the enum class
+  constants Table (identifying all the table arrays of RowString) and Column (identifying all the
+  index arrays of IndexString.)
+
+  Accessor Member Functions and Dropping the Anchor
+
+  Two accessor functions were found to be necessary on the RowString class, which are used heavily in
+  join operations:
+
+	•	char* columnStr(Column columnEnum): This returns a char pointer into the column inside the row
+		element being operated on.
+	•	rowType row(): This returns a typed pointer on the row itself.
+
+  After supplying the basic comparison operators for the RowString class (which are there for
+  convenience, since tables are not for sorting, that’s what indexes are for) and the input and output
+  ostream operators >> and <<, a member function called dropAnchor(RowString rowArr[], std::size_t
+  size) is specified, for the purpose of storing the “base” of the base + offset for the table array
+  (slab) of RowString elements and its size.
+
+  This anchor allows the RowString element of an array (slab) of RowString elements to know
+  information about the array that is not passed or is lost in successive calls or use of constexpr.
+  That allows every RowString element to know where it fits in the original table structure, even when
+  it is copied out by reference as a (PMNK, K-value) element (where the K-value is the array index of
+  the original element) in an IndexString into a pivot element, or temporary variable or array during
+  sorting. The anchors, where they are required in these classes, are the source of all base + offset
+  referencing by other classes in this relational database system.
 */
 
 #include <iostream>
 #include <stddef.h>
 #include <algorithm>
 #include <string.h>
-
-typedef char* ColumnStr;
+#include <cstring>
 
 using namespace std;
 
@@ -114,6 +159,13 @@ public:
             runtime_error("input stream ended") {}
     };
 
+    class Bad_String_Delimiter : public runtime_error
+    {
+    public:
+        Bad_String_Delimiter() :
+            runtime_error("null delimiters are illegal") {}
+    };
+
     class Input_Stream_Bad : public runtime_error
     {
     public:
@@ -142,28 +194,28 @@ public:
             runtime_error("index fields MUST BE null terminated within the row array") {}
     };
 
-    std::size_t size() const noexcept
+    constexpr std::size_t size() const noexcept
     {
         return rowLength;
     }
 
-    std::size_t structSize() const noexcept
+    constexpr std::size_t structSize() const noexcept
     {
         return sizeof(r);
     }
 
-    void checkUnitLength(std::size_t size) // parameter size should be (array length/array count)
+    constexpr void checkUnitLength(std::size_t size) // parameter size should be (array length/array count)
     {
         if (sizeof(r) != size) throw Item_Size_Mismatch();
     }
 
-    std::size_t count()
+    constexpr std::size_t count()
     {
         return rowCounts[(int)tableEnum];
     }
 
     // for a simple one column rowString
-    RowString& assign (const char* str)
+    constexpr RowString& assign (const char* str)
     {
         r.columnsCountOffset = offsetof(struct Struct,r.columnsCount);
         r.columnsCount = 1; // Only one column.
@@ -177,23 +229,24 @@ public:
     }
 
     // for a DIY rowString with preset nulls, counters and offsets
-    RowString& assign (const char* str, std::size_t size)
+    constexpr RowString& assign (const char* str, std::size_t size)
     {
         if (size > sizeof(r)) throw Assign_String_Too_Long();
-        strncpy(r, str, size);
-        // pads out the RowString with nulls: short rows will have zero length columns at the end.
+        memcpy(r, str, size);
         return *this;
     }
 
     // You delimit the  columns (optional non-null delimiters) of a null terminated string, we fix it up
-    RowString& assignColumns (const char* str, const char delimiter = ',')
+    inline RowString& assignColumns (const char* str, const char delimiter = ',')
     {
-        strncpy(r.b.arr, str, rowLength);
+        if (delimiter == 0) throw Bad_String_Delimiter();
+        std::size_t len = strlen(str);
+        if (len > rowLength) throw Assign_String_Too_Long();
+        strcpy(r.b.arr, str);
         r.columnsCountOffset = offsetof(struct Struct,columnsCount);
         r.columnsCount = 1; // Start off with one column
         r.columnOffset[0] = {offsetof(struct Struct,b)};
-        // Nulls other than those from strncpy end the rowString, WE DO THE NULLING!
-        for (int i = 0; r.b.arr[i] != 0 && i < rowLength && r.columnsCount < maxColumnsCount; i++)
+        for (std::size_t i = 0; r.b.arr[i] != 0 && i < rowLength && r.columnsCount < maxColumnsCount; i++)
         {
             if (r.b.arr[i] == delimiter)
             {
@@ -205,49 +258,49 @@ public:
         return *this;
     }
 
-    ColumnStr columnStr(Column columnEnum) // returns a pointer into the column inside the row
+    inline char* columnStr(Column columnEnum) // returns a pointer into the column inside the row
     {
         if (charRowAnchors[(int)tableEnum] == 0) throw Bad_RowString_Anchor(); // no table to index
         if (column2Table(columnEnum) != tableEnum) throw Wrong_Column_For_This_Table();
-        char *lhsColumnStr = (char*)r + r.columnOffset[columnId[(int)columnEnum]];
+        char *lhsColumnStr = r.b.arr - offsetof(struct Struct,b) + r.columnOffset[columnId[(int)columnEnum]];
 
-        int len = strlen(lhsColumnStr);
+        std::size_t len = strlen(lhsColumnStr);
         if (len > maxColumnSize) throw Bad_IndexString_Field_Null_Termination();
         return lhsColumnStr;
     }
 
-    rowType row()
+    constexpr rowType row()
     {
         return *this;
     }
 
     // All rowString comparisons default to the first null-terminated column
-    bool operator < (const RowString& rhs)
+    constexpr bool operator < (const RowString& rhs)
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) < 0);
     }
 
-    bool operator <= (const RowString& rhs)
+    constexpr bool operator <= (const RowString& rhs)
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) < 1);
     }
 
-    bool operator == (const RowString& rhs)
+    constexpr bool operator == (const RowString& rhs)
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) == 0);
     }
 
-    bool operator != (const RowString& rhs)
+    constexpr bool operator != (const RowString& rhs)
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) != 0);
     }
 
-    bool operator >= (const RowString& rhs)
+    constexpr bool operator >= (const RowString& rhs)
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) > -1);
     }
 
-    bool operator > (const RowString& rhs)
+    constexpr bool operator > (const RowString& rhs)
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) > 0);
     }
@@ -272,7 +325,7 @@ public:
         return os;
     }
 
-    void dropAnchor(RowString rowArr[], std::size_t size)
+    constexpr void dropAnchor(RowString rowArr[], std::size_t size)
     // parameters should look like (rowArray, array count)
     {
         if (charRowAnchors[(int)tableEnum] != 0) throw Already_Array_Anchor();
@@ -283,7 +336,7 @@ public:
         rowCounts[(int)tableEnum] = size;
     }
 
-    void reserve(int i) { } // no-op
+    constexpr void reserve(int i) { } // no-op
 };
 
 #endif // ROWSTRING_H_INCLUDED

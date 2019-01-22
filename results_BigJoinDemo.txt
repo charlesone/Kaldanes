@@ -1,0 +1,252 @@
+[charles@localhost Kaldanes]$ ./BigJoinDemo
+
+
+[Note: Remember to set the C++11 switch in the IDE or compiler!
+
+ Remember to use release builds if you are analyzing performance,
+   otherwise Index builds will be very slow!
+
+ Remember to set the "ulimit -s" soft and hard stack limits to unlimited,
+   otherwise it can die!]
+
+
+Time for space allocating and loading the three tables from CSV files = 29990.409 microseconds.
+Time for space allocating the ten indexes = 0.728 microseconds.
+Time for copying the keys and sorting the ten indexes = 87376.175 microseconds.
+Time for each index on the average = 8737.618 microseconds.
+Time for creating the six relation vectors = 0.467 microseconds.
+Time for creating the tuple containing the six relation vectors = 0.459 microseconds.
+Time for creating the query plan to join the six relation vectors = 5.024 microseconds.
+Time for creating the joined row array to contain the join output = 0.625 microseconds.
+________________________________________________________________________________
+
+First, we do ten standard seven-table join queries listing the valid double routes (routes possessing valid airlines, from and to airports ... linking to a second route from the first destination airport on to any second airport on any airline) for the ten lowest-to-highest route carriers to show the effects of scale.
+
+Time for  Alaska Central Express join query = 109.252 microseconds.
+Using 128 range queries.
+Reporting 60 valid double air routes.
+
+Time for Yangon Airways join query = 1455.412 microseconds.
+Using 2660 range queries.
+Reporting 1310 valid double air routes.
+
+Time for Air Armenia join query = 1687.652 microseconds.
+Using 3090 range queries.
+Reporting 1512 valid double air routes.
+
+Time for Airnorth join query = 678.123 microseconds.
+Using 1467 range queries.
+Reporting 682 valid double air routes.
+
+Time for Ciel Canadien join query = 4296.249 microseconds.
+Using 8840 range queries.
+Reporting 4267 valid double air routes.
+
+Time for Thomas Cook Airlines join query = 17421.524 microseconds.
+Using 37178 range queries.
+Reporting 18210 valid double air routes.
+
+Time for Lion Mentari Airlines join query = 11036.945 microseconds.
+Using 26346 range queries.
+Reporting 12694 valid double air routes.
+
+Time for Scandinavian Airlines System join query = 73939.499 microseconds.
+Using 181933 range queries.
+Reporting 89503 valid double air routes.
+
+Time for Air France join query = 244547.142 microseconds.
+Using 668397 range queries.
+Reporting 331632 valid double air routes.
+
+Time for American Airlines join query = 415044.200 microseconds.
+Using 1135710 range queries.
+Reporting 562148 valid double air routes.
+
+Total valid double air routes count for the ten lowest-to-highest route carriers = 1022018.
+Time for all ten standard join queries, in total = 770215.998 microseconds.
+Using a total of 2065749 range queries.
+________________________________________________________________________________
+
+Second, we create a full memoized seven-table join of all the valid double routes for each airline in very compact form.
+
+Time for full memoized join creation = 11011065.170 microseconds.
+Using 22048008 range queries.
+Full memoized join: valid routes count for all airlines = 10817108
+
+________________________________________________________________________________
+
+Third, we use that full memoized join to do ten memoized seven-table join queries listing the valid double routes for the ten lowest-to-highest route carriers to show the effects of scale, including the cost of moving the bytes although we don't need to (it's only for an apples to apples comparison.) Note that the numbers of double routes are the same as the nested loop joins, but take orders of magnitude less time, and only one range query for each.
+
+Time for  Alaska Central Express join query = 8.446 microseconds.
+Using 1 range query.
+Reporting 60 valid double air routes.
+
+Time for Yangon Airways join query = 19.081 microseconds.
+Using 1 range query.
+Reporting 1310 valid double air routes.
+
+Time for Air Armenia join query = 15.925 microseconds.
+Using 1 range query.
+Reporting 1512 valid double air routes.
+
+Time for Airnorth join query = 9.417 microseconds.
+Using 1 range query.
+Reporting 682 valid double air routes.
+
+Time for Ciel Canadien join query = 37.729 microseconds.
+Using 1 range query.
+Reporting 4267 valid double air routes.
+
+Time for Thomas Cook Airlines join query = 134.998 microseconds.
+Using 1 range query.
+Reporting 18210 valid double air routes.
+
+Time for Lion Mentari Airlines join query = 83.494 microseconds.
+Using 1 range query.
+Reporting 12694 valid double air routes.
+
+Time for Scandinavian Airlines System join query = 660.048 microseconds.
+Using 1 range query.
+Reporting 89503 valid double air routes.
+
+Time for Air France join query = 2561.105 microseconds.
+Using 1 range query.
+Reporting 331632 valid double air routes.
+
+Time for American Airlines join query = 4320.658 microseconds.
+Using 1 range query.
+Reporting 562148 valid double air routes.
+
+Total valid double air routes count for the ten lowest-to-highest route carriers = 1022018.
+Time for all ten memoized join queries, in total = 7850.901 microseconds.
+Using a total of 10 range queries.
+
+________________________________________________________________________________
+
+Fourth, let's execute a range query boundary lambda from the airlineId index, for all double routes from each airline using the memoized join, to find out the average cost of getting the low and high range query boundaries.
+
+Time for determining all airlines range query boundaries (not touching the rows) on the routes table = 4808.405 microseconds.
+Using a total of 6162 range queries (number of airlines.)
+Yielding an average time of 0.780 microseconds to find one range query boundary pair.
+
+________________________________________________________________________________
+
+Finally, we use that full memoized join to do ten memoized seven-table join queries listing the valid double routes for the ten lowest-to-highest route carriers to show the effects of scale: however, without the unnecessary byte moves (this is an apples to oranges comparison, but you can access the bytes from the memoized join and don't need to output them.) Note that the numbers of these double routes are the same as the nested loop joins, but take effectively constant time in comparison, and only one range query for each. We do two runs for comparison, because the measurement is so small that the second run is different in an interesting way.
+
+________________________________________________________________________________
+
+First run.
+
+Time for  Alaska Central Express join query = 2.736 microseconds.
+Using 1 range query.
+Reporting 60 valid double air routes.
+
+Time for Yangon Airways join query = 2.032 microseconds.
+Using 1 range query.
+Reporting 1310 valid double air routes.
+
+Time for Air Armenia join query = 2.454 microseconds.
+Using 1 range query.
+Reporting 1512 valid double air routes.
+
+Time for Airnorth join query = 2.264 microseconds.
+Using 1 range query.
+Reporting 682 valid double air routes.
+
+Time for Ciel Canadien join query = 1.682 microseconds.
+Using 1 range query.
+Reporting 4267 valid double air routes.
+
+Time for Thomas Cook Airlines join query = 2.424 microseconds.
+Using 1 range query.
+Reporting 18210 valid double air routes.
+
+Time for Lion Mentari Airlines join query = 2.425 microseconds.
+Using 1 range query.
+Reporting 12694 valid double air routes.
+
+Time for Scandinavian Airlines System join query = 2.102 microseconds.
+Using 1 range query.
+Reporting 89503 valid double air routes.
+
+Time for Air France join query = 2.479 microseconds.
+Using 1 range query.
+Reporting 331632 valid double air routes.
+
+Time for American Airlines join query = 2.620 microseconds.
+Using 1 range query.
+Reporting 562148 valid double air routes.
+
+Total valid double air routes count for the ten lowest-to-highest route carriers = 1022018.
+Time for all ten memoized join queries, in total = 23.218 microseconds.
+Using a total of 10 range queries.
+
+________________________________________________________________________________
+
+Second run.
+
+Time for  Alaska Central Express join query = 1.785 microseconds.
+Using 1 range query.
+Reporting 60 valid double air routes.
+
+Time for Yangon Airways join query = 2.005 microseconds.
+Using 1 range query.
+Reporting 1310 valid double air routes.
+
+Time for Air Armenia join query = 2.000 microseconds.
+Using 1 range query.
+Reporting 1512 valid double air routes.
+
+Time for Airnorth join query = 1.901 microseconds.
+Using 1 range query.
+Reporting 682 valid double air routes.
+
+Time for Ciel Canadien join query = 1.707 microseconds.
+Using 1 range query.
+Reporting 4267 valid double air routes.
+
+Time for Thomas Cook Airlines join query = 1.975 microseconds.
+Using 1 range query.
+Reporting 18210 valid double air routes.
+
+Time for Lion Mentari Airlines join query = 1.830 microseconds.
+Using 1 range query.
+Reporting 12694 valid double air routes.
+
+Time for Scandinavian Airlines System join query = 1.819 microseconds.
+Using 1 range query.
+Reporting 89503 valid double air routes.
+
+Time for Air France join query = 1.997 microseconds.
+Using 1 range query.
+Reporting 331632 valid double air routes.
+
+Time for American Airlines join query = 1.944 microseconds.
+Using 1 range query.
+Reporting 562148 valid double air routes.
+
+Total valid double air routes count for the ten lowest-to-highest route carriers = 1022018.
+Time for all ten memoized join queries, in total = 18.963 microseconds.
+Using a total of 10 range queries.
+
+________________________________________________________________________________
+
+Statistics for the run of the program, including:
+   1. Allocating and loading three tables from CSV files on disk, around 80K rows.
+   2. Allocating, copying the keys and sorting ten indexes on those three tables.
+   3. Creating six relation vectors, each containing a from-index and a to-index.
+   4. Creating a tuple from those six relation vectors to store the query objects.
+   5. Creating and optimizing a database seven-table double-route join query plan for those six relation vectors.
+   6. Creating a joined row output array and doing ten nested loop join queries into it for the double-routes of the ten lowest-to-highest route carriers.
+   7. Doing a full memoized loop join double-route query for all airlines into the joined row output array.
+   8. Doing ten memoized join double-route queries into arrays for the ten lowest-to-highest route carriers (apples to apples comparison.)
+   9. Doing ten memoized join double-route queries for the ten lowest-to-highest route carriers (apples to oranges comparison.)
+
+Total run time spent in main() procedure thus far = 11.91265 seconds
+
+Total relational database system time spent in main() procedure thus far, including I/O = 11.91136 seconds
+
+Total display output time spent in main() procedure thus far = 0.00129 seconds
+________________________________________________________________________________
+
+[charles@localhost Kaldanes]$

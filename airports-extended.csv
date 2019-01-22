@@ -8,7 +8,7 @@
 # Airport, Train Station or Ferry Terminal ID - Unique OpenFlights identifier for this facility.
 # Airport, Train Station or Ferry Terminal Name - May or may not contain the City name.
 # City - Main city served by airport, train station or ferry terminal. May be spelled differently from Name.
-# Country - Country or territory where airport, train station or ferry terminal is located. 
+# Country - Country or territory where airport, train station or ferry terminal is located.
 # IATA - 3-letter IATA code. Null if not assigned/unknown.
 # ICAO - 4-letter ICAO code. Null if not assigned.
 # Latitude - Decimal degrees, usually to six significant digits. Negative is South, positive is North.
@@ -18,7 +18,7 @@
 # DST - Daylight savings time. One of E (Europe), A (US/Canada), S (South America), O (Australia), Z (New Zealand), N (None) or U (Unknown).
 # Tz database time zone - Timezone in "tz" (Olson) format, eg. "America/Los_Angeles".
 # Type - Type of the airport. Value "airport" for air terminals, "station" for train stations, "port" for ferry terminals and "unknown" if not known.
-# Source - Source of this data. 
+# Source - Source of this data.
 # -------
 #
 # The data was modified to remove quotes from pair-quoted text: ,"text", -> ,text,

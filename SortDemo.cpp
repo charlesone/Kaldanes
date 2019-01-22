@@ -22,15 +22,66 @@
     added to the Application during this compilation process under terms of your choice,
     provided you also meet the terms and conditions of the Application license.
 
+  Caveat: these are single-threaded sorting comparisons. Multi-threading,
+  distribution, and best sorting algorithm are a separate exercise. Having the
+  fastest strings on the fastest containers makes for the fastest single threaded
+  sorting, independent of the algorithm, distribution and the parallelization. Slow
+  components are not worthy of fast algorithms and excellent distributed
+  parallelization.
+
+  SortDemo is a program in the Kaldanes GitHub code base:
+  https://github.com/charlesone/Kaldanes
+
+  All files concerned are located in there and can be built by the “make all”
+  command (including the header files Direct.h, Symbiont.h, Head.h, and Sorts.h).
+
+  SortDemo is a C++11 Linux console program churning out performance output
+  statistics line-by-line to the console. It does performance analysis using the
+  precision nanosecond clock support from C++11 on Linux. SortDemo has not yet
+  been run on Windows.
+
+  Four types of 8-byte strings are tested against the same template quick sort
+  functions, and next plot, merge sort: (1) std::string class objects are provided
+  by C++ libraries and have the ability to be shared with copy-on-write support for
+  threading, so moving them is by pointer, (2) Direct template class strings, which
+  move as a single element during sorting, (3) Symbiont template class strings,
+  which are stored in a block with a head and a body, such that during sorting the
+  heads move and the bodies stay in place, and (4) Head template class strings
+  which have their heads stored in a separate array, and which declare a Direct
+  array internally to store the bodies which don’t move.
+
+  A generically interesting thing is how random strings are generated for the
+  SortDemo program. The number of calls to the random bits generation is reduced
+  by an average of four across different string lengths. This was done by
+  generating them 64 bits wide at a time into a char overlay. No comparisons were
+  done, but it is mighty fast.
+
+  Whereas the SortBench program can take days to execute a run of benchmark
+  tests, SortDemo executes in much less time. It gives a warning when the
+  std::string merge sort tests for a million strings are about to run (they take
+  a half-hour each), and it is thought that most users will get the picture and
+  hit ctrl-c at that point. Unlike SortBench, which generates new random strings
+  for each test, SortDemo copies the identical set of random strings into all
+  four string data structures, for apples to apples comparison. The number of
+  compares and swaps taken by the quick sort and merge sort are measured, and
+  these must be the same across all four string classes for the same number of
+  same length strings, so compares and swaps are printed out as well.
+
 */
 
+#define __STDC_WANT_LIB_EXT1__ 1
 #include <iostream>
+#include <random>
 #include <chrono>
 #include <string.h>
 #include <algorithm>
+#include <climits>
 #include "Direct.h"
 #include "Symbiont.h"
 #include "Head.h"
+
+static const bool debugTrace = false;
+
 #include "Sorts.h"
 
 using namespace std;
@@ -260,13 +311,13 @@ int main()
 {
     cout << endl << endl << "Three different string types, identical in content and" << endl
          << "sorting logic, but not in timings." << endl << endl
-         << "Note that the number of swaps and compares for identical arrays," << endl
+         << "[Note that the number of swaps and compares for identical arrays," << endl
          << "   using the identical code: these statistics should be identical." << endl << endl
-         << "Remember to set the C++11 switch in the IDE or compiler!" << endl << endl
-         << "Remember to use release builds if you are analyzing performance," << endl
-         << "otherwise Symbionts will be very slow!" << endl << endl
-         << "Remember to set the \"ulimit -s\" soft and hard stack limits to unlimited," <<endl
-         << "otherwise it can die!]" << endl << endl;
+         << " Remember to set the C++11 switch in the IDE or compiler!" << endl << endl
+         << " Remember to use release builds if you are analyzing performance," << endl
+         << "   otherwise Symbionts will be very slow!" << endl << endl
+         << " Remember to set the \"ulimit -s\" soft and hard stack limits to unlimited," <<endl
+         << "   otherwise it can die!]" << endl << endl;
     try // so you can see the exception names in release code execution
     {
         doFour10ByteQuick(array100);

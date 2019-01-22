@@ -1,0 +1,604 @@
+[charles@localhost Kaldanes]$ ./TableDemo
+
+
+[Note: Remember to set the C++11 switch in the IDE or compiler!
+
+ Remember to use release builds if you are analyzing performance,
+   otherwise Index builds will be very slow!
+
+ Remember to set the "ulimit -s" soft and hard stack limits to unlimited,
+   otherwise it can die!]
+
+
+Time for space allocating and loading the three tables from CSV files = 29748.446 microseconds
+Time for space allocating the ten indexes = 0.676 microseconds
+Time for copying the keys and sorting the ten indexes = 91222.293 microseconds
+Time for each index on the average = 9122.229 microseconds
+
+First, let's execute a point query lambda on the airportsName index, for an airport that exists, and one that is imaginary.
+
+Time for a point query on an index on a smaller table = 5.976 microseconds
+
+"La Guardia Airport" Airport record query:
+Returns: 3360 (Existing)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+11743,La Grande-4 Airport,La Grande-4,Canada,YAH,CYAH,53.754699707,-73.6753005981,1005,\N,\N,\N,airport,OurAirports
+11102,La Grande/Union County Airport,La Grande,United States,LGD,KLGD,45.2901992798,-118.007003784,2717,-7,A,\N,airport,OurAirports
+3697,La Guardia Airport,New York,United States,LGA,KLGA,40.77719879,-73.87259674,21,-5,A,America/New_York,airport,OurAirports
+5811,La Isabela International Airport,La Isabela,Dominican Republic,JBQ,MDJB,18.572500228881836,-69.98560333251953,98,-4,U,America/Santo_Domingo,airport,OurAirports
+6050,La Jagua Airport,GarzĂ³n,Colombia,GLJ,SKGZ,2.1464,-75.6944,2620,-5,U,America/Bogota,airport,OurAirports
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Time for a point query on an index on a smaller table = 0.959 microseconds
+
+"La Nunca Airport" Airport record query:
+Returns: -3368 (Missing)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+5786,La MĂ´le Airport,La MĂ´le,France,LTT,LFTZ,43.20539855957031,6.48199987411499,59,1,E,Europe/Paris,airport,OurAirports
+2733,La Nubia Airport,Manizales,Colombia,MZL,SKMZ,5.0296,-75.4647,6871,-5,U,America/Bogota,airport,OurAirports
+2847,La Orchila Airport,La Orchila,Venezuela,\N,SVLO,11.80720043182373,-66.17960357666016,5,-4,U,America/Caracas,airport,OurAirports
+1053,La Palma Airport,Santa Cruz De La Palma,Spain,SPC,GCLA,28.62649917602539,-17.755599975585938,107,0,E,Atlantic/Canary,airport,OurAirports
+6052,La Pedrera Airport,La Pedrera,Colombia,LPD,SKLP,-1.32861,-69.5797,590,-5,U,America/Bogota,airport,OurAirports
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Second, let's execute a range query lambda on the routesAirlineId index, printing all Allegiant Airlines (AAY, ID=35) routes.
+
+Time for a range query on an index on the biggest table (70K records) = 2.493 microseconds
+
+"35" Routes record range query:
+Returns: 36680 (Existing)
+-----------------------------------
+G4,35,AZA,6505,BZN,4020,,0,M80
+G4,35,AZA,6505,CID,4043,,0,M80 319
+G4,35,AZA,6505,DLH,3598,,0,M80
+G4,35,AZA,6505,BLI,3777,,0,M80
+G4,35,AVL,4007,PIE,3617,,0,320
+G4,35,AVL,4007,PGD,7056,,0,M80
+G4,35,AZA,6505,BIS,4083,,0,M80
+G4,35,AZA,6505,EUG,4099,,0,M80
+G4,35,AZA,6505,GRI,5740,,0,M80
+G4,35,AZA,6505,GRR,3685,,0,319
+G4,35,AZA,6505,GTF,3880,,0,M80
+G4,35,AZA,6505,GFK,3442,,0,M80
+G4,35,AZA,6505,FAR,4292,,0,M80 319
+G4,35,AZA,6505,FSD,4009,,0,M80 319
+G4,35,AZA,6505,FWA,4041,,0,319
+G4,35,AVL,4007,SFB,4167,,0,M80
+G4,35,BLI,3777,LAX,3484,,0,M80
+G4,35,BLI,3777,LAS,3877,,0,M80 757
+G4,35,BLI,3777,AZA,6505,,0,M80
+G4,35,BLI,3777,OAK,3453,,0,M80
+G4,35,BLV,3790,SFB,4167,,0,M80
+G4,35,BLI,3777,SAN,3731,,0,M80
+G4,35,BLI,3777,PSP,3839,,0,M80
+G4,35,BIS,4083,SFB,4167,,0,320
+G4,35,AZA,6505,BIL,4021,,0,319
+G4,35,AZA,6505,ATW,4047,,0,M80
+G4,35,AVP,4286,SFB,4167,,0,M80
+G4,35,BOI,3495,LAS,3877,,0,M80
+G4,35,BIS,4083,LAS,3877,,0,M80
+G4,35,BIS,4083,AZA,6505,,0,M80
+G4,35,BMI,4037,SFB,4167,,0,320
+G4,35,AZA,6505,RFD,4028,,0,319
+G4,35,AZA,6505,RAP,4087,,0,M80
+G4,35,AZA,6505,PVU,7579,,0,319
+G4,35,AZA,6505,RST,4048,,0,319
+G4,35,AZA,6505,STC,4271,,0,319
+G4,35,AZA,6505,SGF,4348,,0,M80
+G4,35,AZA,6505,SBN,4359,,0,M80
+G4,35,AZA,6505,PSC,6133,,0,M80
+G4,35,AZA,6505,MOT,3498,,0,M80
+G4,35,AZA,6505,MLI,4072,,0,319
+G4,35,AZA,6505,LAS,3877,,0,M80
+G4,35,AZA,6505,MSO,4216,,0,M80
+G4,35,AZA,6505,PIA,4046,,0,M80
+G4,35,AZA,6505,OGD,9543,,0,319
+G4,35,AZA,6505,OAK,3453,,0,M80
+G4,35,BGR,3463,PIE,3617,,0,320
+G4,35,ABE,4355,PGD,7056,,0,M80
+G4,35,ABE,4355,PIE,3617,,0,M80 320
+G4,35,ABE,4355,SFB,4167,,0,320 M80
+G4,35,ABE,4355,MYR,3515,,0,M80
+G4,35,AZA,6505,ICT,3457,,0,M80
+G4,35,AZA,6505,IDA,4100,,0,M80
+G4,35,BTV,3711,SFB,4167,,0,M80
+G4,35,ATW,4047,AZA,6505,,0,M80
+G4,35,BIL,4021,LAS,3877,,0,M80
+G4,35,BIL,4021,AZA,6505,,0,319
+G4,35,BGR,3463,SFB,4167,,0,320
+G4,35,AVL,4007,FLL,3533,,0,M80
+G4,35,ATW,4047,LAS,3877,,0,M80
+G4,35,ATW,4047,SFB,4167,,0,320
+G4,35,AUS,3673,LAS,3877,,0,M80 757
+G4,35,PIE,3617,FAR,4292,,0,M80
+G4,35,PIE,3617,FSD,4009,,0,320
+G4,35,PIE,3617,ELM,3946,,0,M80
+G4,35,PIE,3617,CID,4043,,0,320
+G4,35,PIE,3617,DSM,3729,,0,M80
+G4,35,PIE,3617,FWA,4041,,0,M80 320
+G4,35,PIE,3617,HTS,5742,,0,320
+G4,35,PIE,3617,IAG,3630,,0,M80
+G4,35,PIE,3617,GSP,4034,,0,M80 320
+G4,35,PIE,3617,GRR,3685,,0,320
+G4,35,PIE,3617,GSO,4008,,0,320
+G4,35,PIE,3617,CHA,3578,,0,320
+G4,35,PHF,3633,SFB,4167,,0,320
+G4,35,PIA,4046,AZA,6505,,0,M80
+G4,35,PGD,7056,YNG,3881,,0,M80
+G4,35,PGD,7056,TOL,4040,,0,M80
+G4,35,PGD,7056,TYS,3676,,0,M80
+G4,35,PIA,4046,LAS,3877,,0,M80
+G4,35,PIE,3617,AVL,4007,,0,320
+G4,35,PIE,3617,BGR,3463,,0,320
+G4,35,PIE,3617,ABE,4355,,0,M80 320
+G4,35,PIA,4046,PGD,7056,,0,M80
+G4,35,PIA,4046,PIE,3617,,0,M80 320
+G4,35,PIE,3617,YNG,3881,,0,M80
+G4,35,PSC,6133,AZA,6505,,0,M80
+G4,35,PIE,3617,TYS,3676,,0,M80 320
+G4,35,PIE,3617,TOL,4040,,0,320
+G4,35,PIE,3617,TRI,4116,,0,M80
+G4,35,PSC,6133,LAS,3877,,0,M80
+G4,35,PVU,7579,LAX,3484,,0,319
+G4,35,PVU,7579,OAK,3453,,0,319
+G4,35,PVU,7579,AZA,6505,,0,319
+G4,35,PSM,5763,SFB,4167,,0,M80
+G4,35,PSP,3839,BLI,3777,,0,M80
+G4,35,PIE,3617,SYR,3745,,0,320
+G4,35,PIE,3617,MLI,4072,,0,M80
+G4,35,PIE,3617,PBG,3771,,0,320
+G4,35,PIE,3617,MDT,3542,,0,M80
+G4,35,PIE,3617,LCK,3674,,0,320
+G4,35,PIE,3617,LEX,4017,,0,320
+G4,35,PIE,3617,PIA,4046,,0,M80 320
+G4,35,PIE,3617,SGF,4348,,0,320
+G4,35,PIE,3617,SWF,3661,,0,M80
+G4,35,PIE,3617,SBN,4359,,0,M80
+G4,35,PIE,3617,RFD,4028,,0,320
+G4,35,PIE,3617,ROA,4016,,0,M80
+G4,35,MSO,4216,AZA,6505,,0,M80
+G4,35,MSO,4216,LAS,3877,,0,M80
+G4,35,MRY,3948,LAS,3877,,0,M80
+G4,35,MOT,3498,AZA,6505,,0,M80
+G4,35,MOT,3498,LAS,3877,,0,M80
+G4,35,MYR,3515,ABE,4355,,0,M80
+G4,35,OAK,3453,AZA,6505,,0,M80
+G4,35,OAK,3453,BLI,3777,,0,M80
+G4,35,MYR,3515,YNG,3881,,0,M80
+G4,35,MYR,3515,FWA,4041,,0,M80
+G4,35,MYR,3515,HTS,5742,,0,M80
+G4,35,MLI,4072,SFB,4167,,0,320
+G4,35,MDT,3542,PIE,3617,,0,M80
+G4,35,MDT,3542,SFB,4167,,0,M80
+G4,35,LRD,3691,LAS,3877,,0,M80
+G4,35,LEX,4017,SFB,4167,,0,M80 320
+G4,35,LIT,3660,SFB,4167,,0,M80
+G4,35,MFE,3826,LAS,3877,,0,757 M80
+G4,35,MLI,4072,LAS,3877,,0,M80
+G4,35,MLI,4072,PIE,3617,,0,M80
+G4,35,MLI,4072,AZA,6505,,0,319
+G4,35,MFR,4101,LAS,3877,,0,M80
+G4,35,MFR,4101,LAX,3484,,0,M80
+G4,35,PGD,7056,IAG,3630,,0,M80
+G4,35,PGD,7056,ISP,3857,,0,M80
+G4,35,PGD,7056,GSP,4034,,0,M80
+G4,35,PGD,7056,DSM,3729,,0,M80
+G4,35,PGD,7056,FWA,4041,,0,M80
+G4,35,PGD,7056,LEX,4017,,0,M80
+G4,35,PGD,7056,SGF,4348,,0,M80
+G4,35,PGD,7056,SPI,4336,,0,M80
+G4,35,PGD,7056,SBN,4359,,0,M80
+G4,35,PGD,7056,PIA,4046,,0,M80
+G4,35,PGD,7056,RFD,4028,,0,M80
+G4,35,PGD,7056,CVG,3488,,0,M80
+G4,35,OKC,3863,SFB,4167,,0,320
+G4,35,OWB,5758,SFB,4167,,0,M80
+G4,35,OGD,9543,AZA,6505,,0,319
+G4,35,OAK,3453,EUG,4099,,0,M80
+G4,35,OAK,3453,PVU,7579,,0,319
+G4,35,PBG,3771,FLL,3533,,0,M80
+G4,35,PGD,7056,AVL,4007,,0,M80
+G4,35,PGD,7056,CID,4043,,0,M80
+G4,35,PGD,7056,ABE,4355,,0,M80
+G4,35,PBG,3771,PIE,3617,,0,320
+G4,35,PBG,3771,SFB,4167,,0,M80
+G4,35,SFB,4167,TUL,3855,,0,320
+G4,35,SFB,4167,TYS,3676,,0,M80 320
+G4,35,SFB,4167,TRI,4116,,0,M80
+G4,35,SFB,4167,SPI,4336,,0,M80
+G4,35,SFB,4167,TOL,4040,,0,M80
+G4,35,SFB,4167,XNA,4356,,0,320
+G4,35,SGF,4348,PGD,7056,,0,M80
+G4,35,SGF,4348,PIE,3617,,0,320
+G4,35,SGF,4348,LAS,3877,,0,M80
+G4,35,SFB,4167,YNG,3881,,0,M80
+G4,35,SGF,4348,AZA,6505,,0,M80
+G4,35,SFB,4167,SGF,4348,,0,M80
+G4,35,SFB,4167,OKC,3863,,0,320
+G4,35,SFB,4167,OWB,5758,,0,M80
+G4,35,SFB,4167,MLI,4072,,0,320
+G4,35,SFB,4167,LIT,3660,,0,M80
+G4,35,SFB,4167,MDT,3542,,0,M80
+G4,35,SFB,4167,PBG,3771,,0,M80
+G4,35,SFB,4167,ROA,4016,,0,320
+G4,35,SFB,4167,SBN,4359,,0,320
+G4,35,SFB,4167,RFD,4028,,0,320
+G4,35,SFB,4167,PHF,3633,,0,320
+G4,35,SFB,4167,PSM,5763,,0,M80
+G4,35,TYS,3676,SFB,4167,,0,M80 320
+G4,35,XNA,4356,LAS,3877,,0,M80
+G4,35,TYS,3676,PIE,3617,,0,M80 320
+G4,35,TYS,3676,FLL,3533,,0,M80
+G4,35,TYS,3676,PGD,7056,,0,M80
+G4,35,XNA,4356,SFB,4167,,0,320
+G4,35,YNG,3881,SFB,4167,,0,M80
+G4,35,BZN,4020,AZA,6505,,0,M80
+G4,35,YNG,3881,PIE,3617,,0,M80
+G4,35,YNG,3881,MYR,3515,,0,M80
+G4,35,YNG,3881,PGD,7056,,0,M80
+G4,35,TUL,3855,SFB,4167,,0,320
+G4,35,STC,4271,AZA,6505,,0,319
+G4,35,SWF,3661,PIE,3617,,0,M80
+G4,35,SMX,5772,LAS,3877,,0,M80
+G4,35,SGF,4348,SFB,4167,,0,M80
+G4,35,SHV,3609,LAS,3877,,0,M80
+G4,35,SYR,3745,PIE,3617,,0,320
+G4,35,TRI,4116,PIE,3617,,0,M80
+G4,35,TRI,4116,SFB,4167,,0,M80
+G4,35,TOL,4040,SFB,4167,,0,M80
+G4,35,TOL,4040,PGD,7056,,0,M80
+G4,35,TOL,4040,PIE,3617,,0,320
+G4,35,SBN,4359,PIE,3617,,0,M80
+G4,35,SBN,4359,SFB,4167,,0,320
+G4,35,SBN,4359,PGD,7056,,0,M80
+G4,35,SBN,4359,AZA,6505,,0,M80
+G4,35,SBN,4359,LAS,3877,,0,M80
+G4,35,SCK,3805,LAS,3877,,0,M80
+G4,35,SFB,4167,AVP,4286,,0,M80
+G4,35,SFB,4167,BGR,3463,,0,320
+G4,35,SFB,4167,AVL,4007,,0,M80
+G4,35,SFB,4167,ABE,4355,,0,320 M80
+G4,35,SFB,4167,ATW,4047,,0,320
+G4,35,SAN,3731,BLI,3777,,0,M80
+G4,35,RFD,4028,LAS,3877,,0,M80
+G4,35,RFD,4028,PGD,7056,,0,M80
+G4,35,RFD,4028,AZA,6505,,0,319
+G4,35,RAP,4087,AZA,6505,,0,M80
+G4,35,RAP,4087,LAS,3877,,0,M80
+G4,35,RFD,4028,PIE,3617,,0,320
+G4,35,ROA,4016,SFB,4167,,0,320
+G4,35,RST,4048,AZA,6505,,0,319
+G4,35,ROA,4016,PIE,3617,,0,M80
+G4,35,RFD,4028,SFB,4167,,0,320
+G4,35,RNO,3807,LAS,3877,,0,M80
+G4,35,SFB,4167,GSO,4008,,0,M80
+G4,35,SFB,4167,GSP,4034,,0,320
+G4,35,SFB,4167,GRR,3685,,0,M80
+G4,35,SFB,4167,FWA,4041,,0,M80
+G4,35,SFB,4167,GFK,3442,,0,320
+G4,35,SFB,4167,HGR,6739,,0,M80
+G4,35,SFB,4167,LCK,3674,,0,M80
+G4,35,SFB,4167,LEX,4017,,0,M80 320
+G4,35,SFB,4167,LAN,3544,,0,M80
+G4,35,SFB,4167,HTS,5742,,0,M80
+G4,35,SFB,4167,IAG,3630,,0,320
+G4,35,SFB,4167,FSD,4009,,0,320
+G4,35,SFB,4167,BTV,3711,,0,M80
+G4,35,SFB,4167,CHA,3578,,0,M80
+G4,35,SFB,4167,BMI,4037,,0,320
+G4,35,SFB,4167,BIS,4083,,0,320
+G4,35,SFB,4167,BLV,3790,,0,M80
+G4,35,SFB,4167,CID,4043,,0,M80
+G4,35,SFB,4167,ELM,3946,,0,320 M80
+G4,35,SFB,4167,FAR,4292,,0,320
+G4,35,SFB,4167,DSM,3729,,0,M80
+G4,35,SFB,4167,CKB,5730,,0,320
+G4,35,SFB,4167,CVG,3488,,0,320
+G4,35,LEX,4017,PIE,3617,,0,320
+G4,35,FWA,4041,SFB,4167,,0,M80
+G4,35,GFK,3442,AZA,6505,,0,M80
+G4,35,FWA,4041,PGD,7056,,0,M80
+G4,35,FWA,4041,PIE,3617,,0,M80 320
+G4,35,GJT,4063,LAS,3877,,0,M80
+G4,35,GRI,5740,AZA,6505,,0,M80
+G4,35,GFK,3442,LAS,3877,,0,M80
+G4,35,GFK,3442,SFB,4167,,0,320
+G4,35,FSD,4009,AZA,6505,,0,M80 319
+G4,35,FSD,4009,LAS,3877,,0,M80
+G4,35,FLL,3533,PBG,3771,,0,M80
+G4,35,FLL,3533,TYS,3676,,0,M80
+G4,35,FWA,4041,AZA,6505,,0,319
+G4,35,FWA,4041,MYR,3515,,0,M80
+G4,35,FSD,4009,PIE,3617,,0,320
+G4,35,FSD,4009,SFB,4167,,0,320
+G4,35,GRI,5740,LAS,3877,,0,M80
+G4,35,GTF,3880,AZA,6505,,0,M80
+G4,35,GTF,3880,LAS,3877,,0,M80
+G4,35,GSP,4034,PIE,3617,,0,M80 320
+G4,35,GSP,4034,SFB,4167,,0,320
+G4,35,HNL,3728,LAX,3484,,0,757
+G4,35,HTS,5742,MYR,3515,,0,M80
+G4,35,HGR,6739,SFB,4167,,0,M80
+G4,35,HNL,3728,LAS,3877,,0,757
+G4,35,GRR,3685,PIE,3617,,0,320
+G4,35,GRR,3685,SFB,4167,,0,M80
+G4,35,GRR,3685,AZA,6505,,0,319
+G4,35,GRR,3685,LAS,3877,,0,M80
+G4,35,GSP,4034,FLL,3533,,0,M80
+G4,35,GSP,4034,PGD,7056,,0,M80
+G4,35,GSO,4008,PIE,3617,,0,320
+G4,35,GSO,4008,SFB,4167,,0,M80
+G4,35,FLL,3533,LEX,4017,,0,M80
+G4,35,CPR,3872,LAS,3877,,0,M80
+G4,35,CVG,3488,PGD,7056,,0,M80
+G4,35,CKB,5730,SFB,4167,,0,320
+G4,35,COS,3819,LAS,3877,,0,M80
+G4,35,DLH,3598,LAS,3877,,0,M80
+G4,35,DSM,3729,LAS,3877,,0,M80
+G4,35,CVG,3488,SFB,4167,,0,320
+G4,35,DLH,3598,AZA,6505,,0,M80
+G4,35,CHA,3578,SFB,4167,,0,M80
+G4,35,CID,4043,AZA,6505,,0,M80 319
+G4,35,BZN,4020,LAS,3877,,0,M80
+G4,35,CHA,3578,PIE,3617,,0,320
+G4,35,CID,4043,PIE,3617,,0,320
+G4,35,CID,4043,SFB,4167,,0,M80
+G4,35,CID,4043,LAS,3877,,0,M80
+G4,35,CID,4043,PGD,7056,,0,M80
+G4,35,DSM,3729,PGD,7056,,0,M80
+G4,35,FAR,4292,PIE,3617,,0,M80
+G4,35,FAR,4292,SFB,4167,,0,320
+G4,35,FAR,4292,AZA,6505,,0,M80 319
+G4,35,FAR,4292,LAS,3877,,0,M80
+G4,35,FLL,3533,AVL,4007,,0,M80
+G4,35,FLL,3533,GSP,4034,,0,M80
+G4,35,FAT,3687,LAS,3877,,0,M80
+G4,35,FCA,4127,LAS,3877,,0,M80
+G4,35,ELM,3946,PIE,3617,,0,M80
+G4,35,ELM,3946,SFB,4167,,0,320 M80
+G4,35,DSM,3729,PIE,3617,,0,M80
+G4,35,DSM,3729,SFB,4167,,0,M80
+G4,35,EUG,4099,LAX,3484,,0,M80
+G4,35,EUG,4099,OAK,3453,,0,M80
+G4,35,EUG,4099,AZA,6505,,0,M80
+G4,35,EUG,4099,LAS,3877,,0,M80
+G4,35,HTS,5742,PIE,3617,,0,320
+G4,35,LAS,3877,MOT,3498,,0,M80
+G4,35,LAS,3877,MRY,3948,,0,M80
+G4,35,LAS,3877,MFR,4101,,0,M80
+G4,35,LAS,3877,MLI,4072,,0,M80
+G4,35,LAS,3877,PSC,6133,,0,M80
+G4,35,LAS,3877,RAP,4087,,0,M80
+G4,35,LAS,3877,MSO,4216,,0,M80
+G4,35,LAS,3877,PIA,4046,,0,M80
+G4,35,LAS,3877,GTF,3880,,0,M80
+G4,35,LAS,3877,HNL,3728,,0,757
+G4,35,LAS,3877,GRI,5740,,0,M80
+G4,35,LAS,3877,GRR,3685,,0,M80
+G4,35,LAS,3877,LRD,3691,,0,M80
+G4,35,LAS,3877,MFE,3826,,0,757 M80
+G4,35,LAS,3877,ICT,3457,,0,M80
+G4,35,LAS,3877,IDA,4100,,0,M80
+G4,35,LAS,3877,RFD,4028,,0,M80
+G4,35,LAX,3484,MFR,4101,,0,M80
+G4,35,LAX,3484,PVU,7579,,0,319
+G4,35,LAX,3484,EUG,4099,,0,M80
+G4,35,LAX,3484,HNL,3728,,0,757
+G4,35,LEX,4017,FLL,3533,,0,M80
+G4,35,LEX,4017,PGD,7056,,0,M80
+G4,35,LCK,3674,PIE,3617,,0,320
+G4,35,LCK,3674,SFB,4167,,0,M80
+G4,35,LAS,3877,SCK,3805,,0,M80
+G4,35,LAS,3877,SGF,4348,,0,M80
+G4,35,LAS,3877,RNO,3807,,0,M80
+G4,35,LAS,3877,SBN,4359,,0,M80
+G4,35,LAS,3877,XNA,4356,,0,M80
+G4,35,LAX,3484,BLI,3777,,0,M80
+G4,35,LAS,3877,SHV,3609,,0,M80
+G4,35,LAS,3877,SMX,5772,,0,M80
+G4,35,LAS,3877,AUS,3673,,0,M80 757
+G4,35,LAS,3877,AZA,6505,,0,M80
+G4,35,LAN,3544,SFB,4167,,0,M80
+G4,35,LAS,3877,ATW,4047,,0,M80
+G4,35,LAS,3877,BLI,3777,,0,757 M80
+G4,35,LAS,3877,BOI,3495,,0,M80
+G4,35,LAS,3877,BIL,4021,,0,M80
+G4,35,LAS,3877,BIS,4083,,0,M80
+G4,35,ISP,3857,PGD,7056,,0,M80
+G4,35,IAG,3630,PIE,3617,,0,M80
+G4,35,IAG,3630,SFB,4167,,0,320
+G4,35,HTS,5742,SFB,4167,,0,M80
+G4,35,IAG,3630,PGD,7056,,0,M80
+G4,35,IDA,4100,AZA,6505,,0,M80
+G4,35,IDA,4100,LAS,3877,,0,M80
+G4,35,ICT,3457,AZA,6505,,0,M80
+G4,35,ICT,3457,LAS,3877,,0,M80
+G4,35,LAS,3877,GFK,3442,,0,M80
+G4,35,LAS,3877,GJT,4063,,0,M80
+G4,35,LAS,3877,FAR,4292,,0,M80
+G4,35,LAS,3877,FCA,4127,,0,M80
+G4,35,LAS,3877,FSD,4009,,0,M80
+G4,35,LAS,3877,FAT,3687,,0,M80
+G4,35,LAS,3877,EUG,4099,,0,M80
+G4,35,LAS,3877,COS,3819,,0,M80
+G4,35,LAS,3877,CID,4043,,0,M80
+G4,35,LAS,3877,BZN,4020,,0,M80
+G4,35,LAS,3877,CPR,3872,,0,M80
+G4,35,LAS,3877,DSM,3729,,0,M80
+G4,35,LAS,3877,DLH,3598,,0,M80
+-----------------------------------
+
+Third, let's make three relation vectors with 'from' and 'to' indexes for each, and see that we can print some table rows from there.
+
+Relation Vector airportId2RouteSourceAirportId.fromIndex[24]:
+-------------------------------------------------------------------------------------------------------------------------------------
+24,St. Anthony Airport,St. Anthony,Canada,YAY,CYAY,51.3918991089,-56.083099365200006,108,-3.5,A,America/St_Johns,airport,OurAirports
+-------------------------------------------------------------------------------------------------------------------------------------
+Relation Vector airportId2RouteSourceAirportId byte size: 16
+
+Relation Vector routeAirlineId2AirlineId.toIndex[15]:
+-------------------------------------------
+15,Abelag Aviation,\N,W9,AAB,ABG,Belgium,N
+-------------------------------------------
+Time for creating the three relation vectors = 0.909 microseconds
+
+Fourth, let's make a tuple of three relation vectors that will form a join, and see that we can print the same table rows from there.
+
+Time for creating the tuple containing the three relation vectors = 0.448 microseconds
+
+Routes Join relation tuple<0> 'from' airportId2RouteSourceAirportId.fromIndex[24] (same as above):
+-------------------------------------------------------------------------------------------------------------------------------------
+24,St. Anthony Airport,St. Anthony,Canada,YAY,CYAY,51.3918991089,-56.083099365200006,108,-3.5,A,America/St_Johns,airport,OurAirports
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Routes Join relation tuple<2> 'to' routeAirlineId2AirlineId.toIndex[15] (same as above):
+-------------------------------------------
+15,Abelag Aviation,\N,W9,AAB,ABG,Belgium,N
+-------------------------------------------
+Routes Join relation tuple byte size: 48
+
+Fifth, let's make a linked (and checked) QueryPlan of the joined row tables from the relation vectors (which makes a tuple called relVecsTuple), and see if we can access a madeup joined route (SJC->LAS) from the JoinedRow.
+
+Time for creating the query plan to join the three relation vectors = 2.561 microseconds
+
+Query Plan for routes byte size: 8
+
+Time for creating the joined row array to contain the join output = 0.520 microseconds
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+AA,24,FAT,3687,PHX,3462,Y,0,CR9 CRJ
+3462,Phoenix Sky Harbor International Airport,Phoenix,United States,PHX,KPHX,33.43429946899414,-112.01200103759766,1135,-7,N,America/Phoenix,airport,OurAirports
+24,American Airlines,\N,AA,AAL,AMERICAN,United States,Y
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Routes JoinedRow byte size: 16
+
+Sixth, let's try a nested loop join listing all the valid air routes (having valid airlines, in or out airports) out of the Fresno Yosemite Airport
+
+Time for doing the four table join = 42.293 microseconds
+
+return count = 20
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+AA,24,FAT,3687,PHX,3462,Y,0,CR9 CRJ
+3462,Phoenix Sky Harbor International Airport,Phoenix,United States,PHX,KPHX,33.43429946899414,-112.01200103759766,1135,-7,N,America/Phoenix,airport,OurAirports
+24,American Airlines,\N,AA,AAL,AMERICAN,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+AA,24,FAT,3687,LAX,3484,Y,0,CRJ
+3484,Los Angeles International Airport,Los Angeles,United States,LAX,KLAX,33.94250107,-118.4079971,125,-8,A,America/Los_Angeles,airport,OurAirports
+24,American Airlines,\N,AA,AAL,AMERICAN,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+AA,24,FAT,3687,DFW,3670,,0,M80
+3670,Dallas Fort Worth International Airport,Dallas-Fort Worth,United States,DFW,KDFW,32.89680099487305,-97.03800201416016,607,-6,A,America/Chicago,airport,OurAirports
+24,American Airlines,\N,AA,AAL,AMERICAN,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+AS,439,FAT,3687,SEA,3577,,0,CR7
+3577,Seattle Tacoma International Airport,Seattle,United States,SEA,KSEA,47.44900131225586,-122.30899810791016,433,-8,A,America/Los_Angeles,airport,OurAirports
+439,Alaska Airlines,\N,AS,ASA, Inc.,ALASKA,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+AS,439,FAT,3687,SAN,3731,Y,0,DH4
+3731,San Diego International Airport,San Diego,United States,SAN,KSAN,32.7336006165,-117.190002441,17,-8,A,America/Los_Angeles,airport,OurAirports
+439,Alaska Airlines,\N,AS,ASA, Inc.,ALASKA,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+UA,5209,FAT,3687,LAS,3877,Y,0,EM2
+3877,McCarran International Airport,Las Vegas,United States,LAS,KLAS,36.08010101,-115.1520004,2181,-8,A,America/Los_Angeles,airport,OurAirports
+5209,United Airlines,\N,UA,UAL,UNITED,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+UA,5209,FAT,3687,DEN,3751,Y,0,CR7 CRJ
+3751,Denver International Airport,Denver,United States,DEN,KDEN,39.861698150635,-104.672996521,5431,-7,A,America/Denver,airport,OurAirports
+5209,United Airlines,\N,UA,UAL,UNITED,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+AS,439,FAT,3687,PDX,3720,Y,0,DH4
+3720,Portland International Airport,Portland,United States,PDX,KPDX,45.58869934,-122.5979996,31,-8,A,America/Los_Angeles,airport,OurAirports
+439,Alaska Airlines,\N,AS,ASA, Inc.,ALASKA,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+F9,2468,FAT,3687,DEN,3751,,0,319
+3751,Denver International Airport,Denver,United States,DEN,KDEN,39.861698150635,-104.672996521,5431,-7,A,America/Denver,airport,OurAirports
+2468,Frontier Airlines,\N,F9,FFT,FRONTIER FLIGHT,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+Y4,5325,FAT,3687,GDL,1804,,0,320
+1804,Don Miguel Hidalgo Y Costilla International Airport,Guadalajara,Mexico,GDL,MMGL,20.521799087524414,-103.31099700927734,5016,-6,S,America/Mexico_City,airport,OurAirports
+5325,Volaris,\N,Y4,VOI,VOLARIS,Mexico,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+AS,439,FAT,3687,LAX,3484,Y,0,CRJ
+3484,Los Angeles International Airport,Los Angeles,United States,LAX,KLAX,33.94250107,-118.4079971,125,-8,A,America/Los_Angeles,airport,OurAirports
+439,Alaska Airlines,\N,AS,ASA, Inc.,ALASKA,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+G4,35,FAT,3687,LAS,3877,,0,M80
+3877,McCarran International Airport,Las Vegas,United States,LAS,KLAS,36.08010101,-115.1520004,2181,-8,A,America/Los_Angeles,airport,OurAirports
+35,Allegiant Air,\N,G4,AAY,ALLEGIANT,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+UA,5209,FAT,3687,LAX,3484,Y,0,CR7 EM2
+3484,Los Angeles International Airport,Los Angeles,United States,LAX,KLAX,33.94250107,-118.4079971,125,-8,A,America/Los_Angeles,airport,OurAirports
+5209,United Airlines,\N,UA,UAL,UNITED,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+DL,2009,FAT,3687,SLC,3536,Y,0,CR9 CRJ
+3536,Salt Lake City International Airport,Salt Lake City,United States,SLC,KSLC,40.78839874267578,-111.97799682617188,4227,-7,A,America/Denver,airport,OurAirports
+2009,Delta Air Lines,\N,DL,DAL,DELTA,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+US,5265,FAT,3687,PHX,3462,Y,0,CR9 CRJ
+3462,Phoenix Sky Harbor International Airport,Phoenix,United States,PHX,KPHX,33.43429946899414,-112.01200103759766,1135,-7,N,America/Phoenix,airport,OurAirports
+5265,US Airways,\N,US,USA,U S AIR,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+DL,2009,FAT,3687,GDL,1804,Y,0,738
+1804,Don Miguel Hidalgo Y Costilla International Airport,Guadalajara,Mexico,GDL,MMGL,20.521799087524414,-103.31099700927734,5016,-6,S,America/Mexico_City,airport,OurAirports
+2009,Delta Air Lines,\N,DL,DAL,DELTA,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+US,5265,FAT,3687,LAX,3484,Y,0,CRJ
+3484,Los Angeles International Airport,Los Angeles,United States,LAX,KLAX,33.94250107,-118.4079971,125,-8,A,America/Los_Angeles,airport,OurAirports
+5265,US Airways,\N,US,USA,U S AIR,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+UA,5209,FAT,3687,SFO,3469,Y,0,EM2 CRJ
+3469,San Francisco International Airport,San Francisco,United States,SFO,KSFO,37.61899948120117,-122.375,13,-8,A,America/Los_Angeles,airport,OurAirports
+5209,United Airlines,\N,UA,UAL,UNITED,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+AM,321,FAT,3687,GDL,1804,,0,738
+1804,Don Miguel Hidalgo Y Costilla International Airport,Guadalajara,Mexico,GDL,MMGL,20.521799087524414,-103.31099700927734,5016,-6,S,America/Mexico_City,airport,OurAirports
+321,AeroMĂ„â€�Ă‚Â©xico,\N,AM,AMX,AEROMEXICO,Mexico,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+3687,Fresno Yosemite International Airport,Fresno,United States,FAT,KFAT,36.77619934082031,-119.71800231933594,336,-8,A,America/Los_Angeles,airport,OurAirports
+US,5265,FAT,3687,DFW,3670,,0,M80
+3670,Dallas Fort Worth International Airport,Dallas-Fort Worth,United States,DFW,KDFW,32.89680099487305,-97.03800201416016,607,-6,A,America/Chicago,airport,OurAirports
+5265,US Airways,\N,US,USA,U S AIR,United States,Y
+-------------------------------------------------------------------------------------------------------------------------------------
+
+________________________________________________________________________________
+Statistics for the run of the program, including:
+   1. Allocating and loading three tables from CSV files on disk, around 80K rows.
+   2. Allocating, copying the keys and sorting ten indexes on those three tables.
+   3. Executing multiple point and range query lambdas on the indexes, as a test.
+   4. Creating three relation vectors, each containing a from-index and a to-index.
+   5. Creating a tuple from those three relation vectors to store the query objects.
+   6. Creating and optimizing a database join query plan for those three relation vectors.
+   7. Creating a joined row output array and doing a query plan nested loop join into it.
+
+Total run time spent in main() procedure thus far = 0.12830 seconds
+
+Total relational database system time spent in main() procedure thus far, including I/O = 0.12103 seconds
+
+Total display output time spent in main() procedure thus far = 0.00727 seconds
+________________________________________________________________________________
+
+Finally, let's make a linked (and checked) QueryPlan of the joined row tables with one extra relation vector, that violates the linkage rule: that every from-index (after the first one) has a preceding to-indexed or initial from-indexed table to link from. The query plan checker should throw  an exception (exception name at end of error string).
+
+Exception: N9QueryPlanII14RelationVectorI11IndexStringIL6Column0EcLm186EL5Table0ELm14ELm1024ELm7EES1_ILS2_27EcLm65ELS3_2ELm9ELm1024ELm7EEES0_IS1_ILS2_21EcLm404ELS3_1ELm8ELm1024ELm7EES1_ILS2_3EcLm186ELS3_0ELm14ELm1024ELm7EEES0_IS1_ILS2_29EcLm65ELS3_2ELm9ELm1024ELm7EES4_ES0_IS1_ILS2_25EcLm65ELS3_2ELm9ELm1024ELm7EES1_ILS2_15EcLm404ELS3_1ELm8ELm1024ELm7EEEEE38Relation_Vector_Linkage_Rule_ViolationE
+Segmentation fault (core dumped)
+[charles@localhost Kaldanes]$
