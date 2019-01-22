@@ -1,6 +1,21 @@
 # Kaldanes
 Kaldanes are a set of families of data structures and programming methods for a different kind of relational database system.
 
+To build on Linux, you must have a c++11 compiler 4.8.5 or later:
+
+	make clean
+	make all
+
+To run programs do this command to allow the stack to grow:
+
+	ulimit -s unlimited
+
+To look at the Technical White Paper explaining all the gory details, it is better to download it (the github viewer cuts it short), first click here, then download the pdf:
+https://github.com/charlesone/Kaldanes/blob/master/Technical%20White%20Paper.pdf
+
+See the wiki for more information:
+https://github.com/charlesone/Kaldanes/wiki
+
     [Valverde Computing copyright notice]
 
     This program is free software: you can redistribute it and/or modify
