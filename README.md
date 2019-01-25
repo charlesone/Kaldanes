@@ -10,7 +10,7 @@ To run programs do this command to allow the stack to grow:
 
 	ulimit -s unlimited
 
-To look at the Technical White Paper explaining all the gory details, it is better to download it (the github viewer cuts it short and the URLs and pdf links don't connect), first click below, then download the pdf:
+To look at the Technical White Paper explaining all the gory details, it is better to download it (the github viewer cuts it short and the URLs and pdf links don't connect), first click below, then click the "download" button to get the pdf file:
 
 https://github.com/charlesone/Kaldanes/blob/master/Technical%20White%20Paper.pdf
 
@@ -318,7 +318,7 @@ There are currently six C++ source code files and eight C++ header files in this
   https://en.wikipedia.org/wiki/Kaldane
 ______________________________________________________________________________________
 
-To look at the Technical White Paper explaining all the gory details, it is better to download it (the github viewer cuts it short and the URLs and pdf links don't connect), first click below, then download the pdf:
+To look at the Technical White Paper explaining all the gory details, it is better to download it (the github viewer cuts it short and the URLs and pdf links don't connect), first click below, then click the "download" button to get the pdf file:
 
 https://github.com/charlesone/Kaldanes/blob/master/Technical%20White%20Paper.pdf
 
