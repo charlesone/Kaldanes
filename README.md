@@ -10,7 +10,7 @@ To run programs do this command to allow the stack to grow:
 
 	ulimit -s unlimited
 
-To look at the Technical White Paper explaining all the gory details, it is better to download it (the github viewer cuts it short), first click here, then download the pdf:
+To look at the Technical White Paper explaining all the gory details, it is better to download it (the github viewer cuts it short and the URLs and pdf links don't connect), first click here, then download the pdf:
 https://github.com/charlesone/Kaldanes/blob/master/Technical%20White%20Paper.pdf
 
 See the wiki for more information:
