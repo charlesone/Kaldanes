@@ -10,7 +10,7 @@ To run programs do this command to allow the stack to grow:
 
 	ulimit -s unlimited
 
-To look at the "Technical White Paper" explaining all the gory details, or a tutorial on "Distributed Resilience & High Availability" it is better to download them (the github viewer cuts them short and the URLs and pdf links don't connect), first click below, then click the "download" button to get the pdf file:
+To look at the "Technical White Paper" explaining all the gory details, or a tutorial on "Distributed Resilience & High Availability" it is better to download them (the github viewer cuts them short and the URLs and navigation links don't connect), first click below, then click the "download" button to get the pdf file:
 
 https://github.com/charlesone/Kaldanes/blob/master/Technical%20White%20Paper.pdf
 
@@ -322,7 +322,7 @@ There are currently six C++ source code files and eight C++ header files in this
   https://en.wikipedia.org/wiki/Kaldane
 ______________________________________________________________________________________
 
-Once again, to look at the "Technical White Paper" explaining all the gory details, or a tutorial on "Distributed Resilience & High Availability" it is better to download them (the github viewer cuts them short and the URLs and pdf links don't connect), first click below, then click the "download" button to get the pdf file:
+Once again, to look at the "Technical White Paper" explaining all the gory details, or a tutorial on "Distributed Resilience & High Availability" it is better to download them (the github viewer cuts them short and the URLs and navigation links don't connect), first click below, then click the "download" button to get the pdf file:
 
 https://github.com/charlesone/Kaldanes/blob/master/Technical%20White%20Paper.pdf
 
