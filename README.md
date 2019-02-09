@@ -18,6 +18,10 @@ or
 
 https://github.com/charlesone/Kaldanes/blob/master/Tutorial%20-%20Distributed%20Resilience%20%26%20High%20Availability.pdf
 
+Here is a posting on stackoverflow.com concerning just one of the reasons behind this work:
+
+https://stackoverflow.com/questions/54562770/performance-of-big-slabs-due-to-allocation-initialization-and-deallocation-over
+
 See the wiki for more information:
 https://github.com/charlesone/Kaldanes/wiki
 
