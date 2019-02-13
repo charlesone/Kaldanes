@@ -22,7 +22,7 @@ Here is a discussion on stackoverflow.com concerning just one of the reasons beh
 
 https://stackoverflow.com/questions/54562770/performance-of-big-slabs-due-to-allocation-initialization-and-deallocation-over
 
-Here is a discussion on Chris Date and Hugh Darwen's Third Manifesto Forum discussing this work:
+Here is a discussion on Chris Date and Hugh Darwen's Third Manifesto Forum around the issues of this work:
 
 https://forum.thethirdmanifesto.com/forum/topic/kaldanes-and-high-speed-joins/
 
