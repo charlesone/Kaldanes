@@ -18,9 +18,13 @@ or
 
 https://github.com/charlesone/Kaldanes/blob/master/Tutorial%20-%20Distributed%20Resilience%20%26%20High%20Availability.pdf
 
-Here is a posting on stackoverflow.com concerning just one of the reasons behind this work:
+Here is a discussion on stackoverflow.com concerning just one of the reasons behind this work:
 
 https://stackoverflow.com/questions/54562770/performance-of-big-slabs-due-to-allocation-initialization-and-deallocation-over
+
+Here is a discussion on Chris Date and Hugh Darwen's Third Manifesto Forum discussing this work:
+
+https://forum.thethirdmanifesto.com/forum/topic/kaldanes-and-high-speed-joins/
 
 See the wiki for more information:
 https://github.com/charlesone/Kaldanes/wiki
