@@ -119,10 +119,10 @@ IndexString.h - header file for Kaldane IndexString string, which are variable-l
   programs, and they will disappear if they are allocated in a procedure and that procedure 
   returns. That is what mmap is for: to manage virtual address space against a large memory system.
   
-*/papers/2017/
+*/
 
 #include <iostream>
-#include <typeinfo>papers/2017/
+#include <typeinfo>
 #include <cstring>
 #include "RowString.h"
 #include "Sorts.h"
@@ -356,7 +356,7 @@ public:
         char *lhsColumnStr = lhsRowStr + lhsRow->r.columnOffset[columnId[indexAnchorOffset]];
 
         std::size_t len = strlen(lhsColumnStr);
-        if (len > maxColumnSize) throw Bad_IndexString_Field_Null_Termination();papers/2017/
+        if (len > maxColumnSize) throw Bad_IndexString_Field_Null_Termination();
         return lhsColumnStr;
     }
 
@@ -416,7 +416,7 @@ public:
             return state;
         }
     }
-papers/2017/
+
     inline bool operator <= (const IndexString& rhs)
     {
         if (h.k == rhs.h.k) return true; // pivot, temp or external array identity optimization
@@ -455,7 +455,7 @@ papers/2017/
         }
     }
 
-    inline bool operator != (const IndexString& rhs)papers/2017/
+    inline bool operator != (const IndexString& rhs)
     {
         if (h.k == rhs.h.k) return false; // pivot, temp or external array identity optimization
         if (noPmnk)
@@ -483,7 +483,7 @@ papers/2017/
             return state;
         }
         int pmnkCompare = strcmp(h.pmnk, rhs.h.pmnk);
-        if (pmnkCompare > 0 || (pmnkCompare == 0 && strlen(rhs.h.pmnk) < adjustedPmnkSize))papers/2017/
+        if (pmnkCompare > 0 || (pmnkCompare == 0 && strlen(rhs.h.pmnk) < adjustedPmnkSize))
             return true; // independent of the tail
         else if (pmnkCompare < 0 ) return false; // don't check tail
         else // the pmnk are identical, need to look at tails
