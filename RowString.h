@@ -204,18 +204,18 @@ public:
         return sizeof(r);
     }
 
-    constexpr void checkUnitLength(std::size_t size) // parameter size should be (array length/array count)
+    constexpr void checkUnitLength(std::size_t size) const // parameter size should be (array length/array count)
     {
         if (sizeof(r) != size) throw Item_Size_Mismatch();
     }
 
-    constexpr std::size_t count()
+    constexpr std::size_t count() const
     {
         return rowCounts[(int)tableEnum];
     }
 
     // for a simple one column rowString
-    constexpr RowString& assign (const char* str)
+    constexpr RowString& assign (const char* str) const
     {
         r.columnsCountOffset = offsetof(struct Struct,r.columnsCount);
         r.columnsCount = 1; // Only one column.
@@ -229,7 +229,7 @@ public:
     }
 
     // for a DIY rowString with preset nulls, counters and offsets
-    constexpr RowString& assign (const char* str, std::size_t size)
+    constexpr RowString& assign (const char* str, std::size_t size) const
     {
         if (size > sizeof(r)) throw Assign_String_Too_Long();
         memcpy(r, str, size);
@@ -269,38 +269,38 @@ public:
         return lhsColumnStr;
     }
 
-    constexpr rowType row()
+    constexpr rowType row() const
     {
         return *this;
     }
 
     // All rowString comparisons default to the first null-terminated column
-    constexpr bool operator < (const RowString& rhs)
+    constexpr bool operator < (const RowString& rhs) const
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) < 0);
     }
 
-    constexpr bool operator <= (const RowString& rhs)
+    constexpr bool operator <= (const RowString& rhs) const
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) < 1);
     }
 
-    constexpr bool operator == (const RowString& rhs)
+    constexpr bool operator == (const RowString& rhs) const
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) == 0);
     }
 
-    constexpr bool operator != (const RowString& rhs)
+    constexpr bool operator != (const RowString& rhs) const
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) != 0);
     }
 
-    constexpr bool operator >= (const RowString& rhs)
+    constexpr bool operator >= (const RowString& rhs) const
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) > -1);
     }
 
-    constexpr bool operator > (const RowString& rhs)
+    constexpr bool operator > (const RowString& rhs) const
     {
         return (strcmp(r.b.arr, rhs.r.b.arr) > 0);
     }
@@ -325,7 +325,7 @@ public:
         return os;
     }
 
-    constexpr void dropAnchor(RowString rowArr[], std::size_t size)
+    constexpr void dropAnchor(RowString rowArr[], std::size_t size) const
     // parameters should look like (rowArray, array count)
     {
         if (charRowAnchors[(int)tableEnum] != 0) throw Already_Array_Anchor();
@@ -334,9 +334,10 @@ public:
         charRowAnchors[(int)tableEnum] = (char*)rowArr;
         rowAnchors[(int)tableEnum] = &rowArr[0];
         rowCounts[(int)tableEnum] = size;
+        cout << "Table (" << rowArr <<") element size = " << sizeof(rowArr[0]) << " bytes, total size = " << sizeof(rowArr[0])*size << " bytes." <<  endl;
     }
 
-    constexpr void reserve(int i) { } // no-op
+    constexpr void reserve(int i) const { } // no-op
 };
 
 #endif // ROWSTRING_H_INCLUDED

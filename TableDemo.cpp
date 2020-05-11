@@ -220,9 +220,9 @@ is needed for generic programming (compile-time)
 
 // Order is critical ...
 
-// Needed to reinterpret_cast later
 static const std::size_t maxColumnSizeDefault = 1024;
-static const std::size_t pmnkSizeDefault = 7;
+static const std::size_t pmnkSizeDefault = 0;
+typedef int indexIntegerTypeDefault;
 
 enum class Table
 {
@@ -375,16 +375,16 @@ constexpr decltype((columnEnum < Column::airportsDivider) ? (airportRow*)0
            : (void*)0;
 }
 
-typedef IndexString<Column::airportId, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportIdType;
-typedef IndexString<Column::airportName, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportNameType;
-typedef IndexString<Column::airportCountry, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportCountryType;
-typedef IndexString<Column::airportIATA, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportIATAType;
-typedef IndexString<Column::airportICAO, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault> airportICAOType;
-typedef IndexString<Column::airlineId, char, airlinesMaxLen, Table::airlines, airlinesColumns, maxColumnSizeDefault, pmnkSizeDefault> airlineIdType;
-typedef IndexString<Column::airlineCountry, char, airlinesMaxLen, Table::airlines, airlinesColumns, maxColumnSizeDefault, pmnkSizeDefault> airlineCountryType;
-typedef IndexString<Column::routeAirlineId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeAirlineIdType;
-typedef IndexString<Column::routeSourceAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeSourceAirportIdType;
-typedef IndexString<Column::routeDestinationAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault> routeDestinationAirportIdType;
+typedef IndexString<Column::airportId, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault, indexIntegerTypeDefault> airportIdType;
+typedef IndexString<Column::airportName, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault, indexIntegerTypeDefault> airportNameType;
+typedef IndexString<Column::airportCountry, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault, indexIntegerTypeDefault> airportCountryType;
+typedef IndexString<Column::airportIATA, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault, indexIntegerTypeDefault> airportIATAType;
+typedef IndexString<Column::airportICAO, char, airportsMaxLen, Table::airports, airportsColumns, maxColumnSizeDefault, pmnkSizeDefault, indexIntegerTypeDefault> airportICAOType;
+typedef IndexString<Column::airlineId, char, airlinesMaxLen, Table::airlines, airlinesColumns, maxColumnSizeDefault, pmnkSizeDefault, indexIntegerTypeDefault> airlineIdType;
+typedef IndexString<Column::airlineCountry, char, airlinesMaxLen, Table::airlines, airlinesColumns, maxColumnSizeDefault, pmnkSizeDefault, indexIntegerTypeDefault> airlineCountryType;
+typedef IndexString<Column::routeAirlineId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault, indexIntegerTypeDefault> routeAirlineIdType;
+typedef IndexString<Column::routeSourceAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault, indexIntegerTypeDefault> routeSourceAirportIdType;
+typedef IndexString<Column::routeDestinationAirportId, char, routesMaxLen, Table::routes, routesColumns, maxColumnSizeDefault, pmnkSizeDefault, indexIntegerTypeDefault> routeDestinationAirportIdType;
 
 #include "RelationVector.h"
 

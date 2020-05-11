@@ -243,7 +243,6 @@ static bool arrayFull;
 static char firstTerm[50];
 static char* firstSearchTerm = firstTerm; // used by the join recursion routine
 static char emptyChars[] = "";
-static ostream* osPtr;
 static std::size_t arraySize;
 static std::size_t arrayOffset;
 
@@ -352,69 +351,19 @@ public:
             runtime_error("Join context frame not initialized.") {}
     };
 
-    constexpr void emptyFunc()
+    constexpr void emptyFunc() const
     {
         return;
     };
 
-    template<typename... packRemaining>
-    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type joinedRow2osPtr() {} // SFINAE terminated.
-
-    template<typename packFirst, typename... packRemaining>
-    constexpr void joinedRow2osPtr()
-    {
-        const std::size_t packDepth = sizeof...(classPack) - sizeof...(packRemaining) -1;
-        if (debugTrace) cout << endl << "joinedRow2osPtr() packDepth = " << packDepth << endl << endl;
-
-        // these are compile-time only, no runtime cost
-        typedef decltype(((packFirst*)0)->r.from) fromColumnType;
-        typedef decltype(((fromColumnType)0)->rowAnchor()) fromTableType;
-        const Column fromColumn = ((fromColumnType)0)->enumColumn();
-        const Table fromTable = column2Table(fromColumn);
-        const int fromOffset = (int)fromTable;
-        typedef decltype(((packFirst*)0)->r.to) toColumnType;
-        typedef decltype(((toColumnType)0)->rowAnchor()) toTableType;
-        const Column toColumn = ((toColumnType)0)->enumColumn();
-        const Table toTable = column2Table(toColumn);
-        const int toOffset = (int)toTable;
-
-        auto fromRow2osPtr = [&] ()
-        {
-            *osPtr << reinterpret_cast<fromTableType>((fromTableType)rowAnchors[fromOffset])[callerJoinedRow.k[0]];
-        };
-
-        auto toRow2osPtr = [&] ()
-        {
-            *osPtr << reinterpret_cast<toTableType>((toTableType)rowAnchors[toOffset])[callerJoinedRow.k[packDepth + 1]];
-        };
-
-        if (packDepth == 0)
-        {
-            fromRow2osPtr();
-            toRow2osPtr();
-        }
-        else toRow2osPtr();
-
-        joinedRow2osPtr<packRemaining...>();
-
-        return;
-    };
-
-    constexpr void joinedRow2osPtr(JoinedRowStruct* j)
-    {
-        callerJoinedRow = j;
-        joinedRow2osPtr<classPack...>();
-        callerJoinedRow = 0;
-    };
-
-    constexpr bool startJoin(char term[])
+    constexpr bool startJoin(char term[]) const
     {
         strcpy(firstTerm, term);
         initJoin<classPack...>();
         return true;
     }
 
-    constexpr bool startFullMemoizedJoin()
+    constexpr bool startFullMemoizedJoin() const
     {
         firstTerm[0] = '*';
         firstTerm[1] = 0;
@@ -434,10 +383,10 @@ public:
     }
 
     template<typename... packRemaining>
-    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type initJoin() {} // SFINAE terminated.
+    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type initJoin() const {} // SFINAE terminated.
 
     template<typename packFirst, typename... packRemaining>
-    constexpr void initJoin()
+    constexpr void initJoin() const
     {
         const std::size_t packDepth = sizeof...(classPack) - sizeof...(packRemaining) -1;
         if (debugTrace) cout << endl << "initJoin() packDepth = " << packDepth << endl << endl;
@@ -508,7 +457,7 @@ public:
     };
 
     template<typename... packRemaining>
-    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type join() {} // SFINAE terminated.
+    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type join() const {} // SFINAE terminated.
 
     template<typename packFirst, typename... packRemaining>
     void join()
@@ -641,7 +590,7 @@ public:
     constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type queryPlanChecker() {} // SFINAE terminated.
 
     template<typename packFirst, typename... packRemaining>
-    constexpr void queryPlanChecker()
+    constexpr void queryPlanChecker() const
     {
         const std::size_t packDepth = sizeof...(classPack) - sizeof...(packRemaining) -1;
         if (debugTrace) cout << endl << "queryPlanChecker() index = " << joinedRowIndex << ", packDepth = " << packDepth << endl << endl;
@@ -667,7 +616,7 @@ public:
         return;
     };
 
-    constexpr void checkQueryPlan()
+    constexpr void checkQueryPlan() const
     {
         for (std::size_t i = 0; i < arrayCount; ++i) tablesIndexed[i] = false;
         for (std::size_t i = 0; i < arrayCount; ++i)
@@ -687,10 +636,10 @@ public:
     }
 
     template<typename... packRemaining>
-    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type searchRangeLowFrom() {} // SFINAE terminated.
+    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type searchRangeLowFrom() const {} // SFINAE terminated.
 
     template<typename packFirst, typename... packRemaining>
-    constexpr void searchRangeLowFrom()
+    constexpr void searchRangeLowFrom() const
     {
         const std::size_t packDepth = sizeof...(classPack) - sizeof...(packRemaining) -1;
         if (debugTrace && packCursor == packDepth)
@@ -705,7 +654,7 @@ public:
         return;
     };
 
-    constexpr int searchRangeLowFrom(int relVecOff, char term[])
+    constexpr int searchRangeLowFrom(int relVecOff, char term[]) const
     {
         packCursor = relVecOff;
         searchTerm = term;
@@ -715,10 +664,10 @@ public:
     }
 
     template<typename... packRemaining>
-    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type searchRangeLowTo() {} // SFINAE terminated.
+    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type searchRangeLowTo() const {} // SFINAE terminated.
 
     template<typename packFirst, typename... packRemaining>
-    constexpr void searchRangeLowTo()
+    constexpr void searchRangeLowTo() const
     {
         const std::size_t packDepth = sizeof...(classPack) - sizeof...(packRemaining) -1;
         if (debugTrace && packCursor == packDepth)
@@ -733,7 +682,7 @@ public:
         return;
     };
 
-    constexpr int searchRangeLowTo(int relVecOff, char term[])
+    constexpr int searchRangeLowTo(int relVecOff, char term[]) const
     {
         packCursor = relVecOff;
         searchTerm = term;
@@ -743,10 +692,10 @@ public:
     }
 
     template<typename... packRemaining>
-    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type searchRangeHighFrom() {} // SFINAE terminated.
+    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type searchRangeHighFrom() const {} // SFINAE terminated.
 
     template<typename packFirst, typename... packRemaining>
-    constexpr void searchRangeHighFrom()
+    constexpr void searchRangeHighFrom() const
     {
         const std::size_t packDepth = sizeof...(classPack) - sizeof...(packRemaining) -1;
         if (debugTrace && packCursor == packDepth)
@@ -761,7 +710,7 @@ public:
         return;
     };
 
-    constexpr int searchRangeHighFrom(int relVecOff, char term[])
+    constexpr int searchRangeHighFrom(int relVecOff, char term[]) const
     {
         packCursor = relVecOff;
         searchTerm = term;
@@ -771,10 +720,10 @@ public:
     }
 
     template<typename... packRemaining>
-    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type searchRangeHighTo() {} // SFINAE terminated.
+    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type searchRangeHighTo() const {} // SFINAE terminated.
 
     template<typename packFirst, typename... packRemaining>
-    constexpr void searchRangeHighTo()
+    constexpr void searchRangeHighTo() const
     {
         const std::size_t packDepth = sizeof...(classPack) - sizeof...(packRemaining) -1;
         if (debugTrace && packCursor == packDepth)
@@ -789,29 +738,13 @@ public:
         return;
     };
 
-    constexpr int searchRangeHighTo(int relVecOff, char term[])
+    constexpr int searchRangeHighTo(int relVecOff, char term[]) const
     {
         packCursor = relVecOff;
         searchTerm = term;
         returnValue = 0;
         searchRangeHighTo<classPack...>();
         return returnValue;
-    }
-
-    // prints the joined rows
-    friend ostream& operator<< (ostream &os, const QueryPlan& rhs)
-    {
-        for (int i = 0; i < (int)Table::table_Count; i++)
-        {
-            // this means all tables must be allocated and anchored before the first join is accessed this way
-            if (rowAnchors[i] == 0)
-                throw Bad_RowString_Anchor(); // no index for this table
-        }
-        // nothing to print here yet. tablesIndexed array? Query predicates? Other metadata?
-        osPtr = &os;
-        //joinedRow2osPtr<classPack...>();
-        osPtr = 0;
-        return os;
     }
 
 };
@@ -843,23 +776,23 @@ public:
             runtime_error("somehow, the counting of JoinedRow elements is wrong versus relational vectors.") {}
     };
 
-    constexpr std::size_t tableCount()
+    constexpr std::size_t tableCount() const
     {
         return arrayCount;
     }
 
-    constexpr std::size_t structSize()
+    constexpr std::size_t structSize() const
     {
         return sizeof(j);
     }
 
-    constexpr void emptyFunc()
+    constexpr void emptyFunc() const
     {
         return;
     };
 
     template<typename... packRemaining>
-    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type joinedRowTupleOutput() {} // SFINAE terminated.
+    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type joinedRowTupleOutput() const {} // SFINAE terminated.
 
     template<typename packFirst, typename... packRemaining>
     void joinedRowTupleOutput()
@@ -898,10 +831,10 @@ public:
     }
 
     template<typename... packRemaining>
-    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type joinedRowOutput() {} // SFINAE terminated.
+    constexpr typename std::enable_if<sizeof...(packRemaining) == 0>::type joinedRowOutput() const {} // SFINAE terminated.
 
     template<typename packFirst, typename... packRemaining>
-    constexpr void joinedRowOutput()
+    constexpr void joinedRowOutput() const
     {
         const std::size_t packDepth = sizeof...(classPack) - sizeof...(packRemaining) -1;
         //cout << endl << "index = " << joinedRowIndex << ", row = " << joinedRowRow << ", packDepth = " << packDepth << endl << endl;
@@ -1034,7 +967,7 @@ public:
         return (compare > 0);
     };
 
-    constexpr void dropAnchor(queryPlanType* queryPlan)
+    constexpr void dropAnchor(queryPlanType* queryPlan) const
     // just the queryPlan object
     {
         if ((get<0>(relVecsTuple).fromIndex())->rowAnchor() == 0) throw Bad_RowString_Anchor(); // no tables to index
@@ -1042,83 +975,6 @@ public:
         queryPlanAnchor = queryPlan;
     }
 
-    // prints the joined rows
-    // can't get this to work in any fashion. Don't invoke it.
-    // Use the print function above, call it at runtime.
-    // ostream seems to not cut any slack at all on deferred binding of objects.
-    friend ostream& operator<< (ostream &os, const JoinedRow& rhs)
-    {
-        // this means all tables must be allocated and anchored before the first join is accessed this way
-        for (int i =0; i < (int)Table::table_Count; i++) if (rowAnchors[i] == 0) throw Bad_RowString_Anchor();
-        osPtr = &os;
-
-        typename queryPlanType::JoinedRowStruct mine;
-        mine = rhs.j;
-
-        queryPlanType::joinedRow2osPtr(mine);
-
-        osPtr = 0;
-        return os;
-    }
-
 };
-
-/*  // Can't seem to get this struct method to work :(
-    template<typename... packRemaining>
-    struct calls
-    {
-        relsTupleType structRelsTuple;
-
-        static int structQueryPlanTupleOutput(std::size_t index, std::size_t row)
-        {
-            const std::size_t packDepth = sizeof...(classPack) - sizeof...(packRemaining) -1;
-            //cout << endl << "index = " << index << ", row = " << row << ", packDepth = " << packDepth << endl << endl;
-            return packDepth;
-        }
-    };
-
-    template<typename packFirst, typename... packRemaining>
-    struct calls<packFirst, packRemaining...>
-    {
-        relsTupleType structRelsTuple;
-
-        int structEmptyFunc()
-        {
-            return 0;
-        };
-
-        int structQueryPlanTupleOutput(std::size_t index, std::size_t row)
-        {
-            const std::size_t packDepth = sizeof...(classPack) - sizeof...(packRemaining) -1;
-            //cout << endl << "index = " << index << ", row = " << row << ", packDepth = " << packDepth << endl << endl;
-            (index < packDepth) ? throw Variadic_Parameter_Pack_Logic_Failed() : ((void)0); // seriously out of whack.
-
-            (index == 0 && packDepth == 0) ?
-            cout << ((get<packDepth>(structRelsTuple).fromIndex())->row())[row] << endl
-                 : (index == packDepth + 1) ?
-                 cout << ((get<packDepth>(structRelsTuple).toIndex())->row())[row] << endl
-                 : cout;
-
-            // if neither of those -> call deeper or just fall through and return
-            (!((index == 0 && packDepth == 0) || (index == packDepth + 1))) ? calls<packRemaining...>::structQueryPlanTupleOutput(index, row)
-            : structEmptyFunc();
-
-            return packDepth;
-        }
-    };
-
-    typedef calls<classPack ...> callsType;
-
-    callsType c;
-
-    void printQueryPlanTest2()
-    {
-        for (int i = 0; i < arrayCount; ++i)
-        {
-            c.calls<classPack...>::structQueryPlanTupleOutput(i, j.k[i]);
-        }
-    }
-*/
-// c.calls<classPack...>::structRelsTuple = std::make_tuple(args...); // Can't seem to get this struct method to work for tuple :(
 
 #endif // JOINEDROW_H

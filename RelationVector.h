@@ -131,7 +131,7 @@ public:
 
     RelationStruct r;
 
-    constexpr void emptyFunc()
+    constexpr void emptyFunc() const
     {
         return;
     };
