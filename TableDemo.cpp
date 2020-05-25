@@ -1,6 +1,9 @@
 // Building a table with indexes using Kaldanes
 
-// Please build for release to get good performance
+/* Please build for release to get good performance
+   Remember to set 'ulimit -s unlimited' to set the soft and hard stack limits to unlimited,
+   otherwise programs will die in startup!
+*/
 
 /*
     [Valverde Computing copyright notice]
@@ -577,8 +580,8 @@ int main()
     cout << endl << endl << "[Note: Remember to set the C++11 switch in the IDE or compiler!" << endl << endl
          << " Remember to use release builds if you are analyzing performance," << endl
          << "   otherwise Index builds will be very slow!" << endl << endl
-         << " Remember to set the \"ulimit -s\" soft and hard stack limits to unlimited," <<endl
-         << "   otherwise it can die!]" << endl;
+         << " Remember to set 'ulimit -s unlimited'" <<endl
+         << "   to set the soft and hard stack limits to unlimited, otherwise it can die!]" << endl;
 
     //airports, airlines, routes
     try

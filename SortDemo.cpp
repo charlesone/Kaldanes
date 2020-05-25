@@ -1,5 +1,10 @@
 // sorting time comparison for three different string types
 
+/* Please build for release to get good performance
+   Remember to set 'ulimit -s unlimited' to set the soft and hard stack limits to unlimited,
+   otherwise programs will die in startup!
+*/
+
 /*
     [Valverde Computing copyright notice]
 

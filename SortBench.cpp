@@ -2,6 +2,11 @@
 // Various sorts of various sizes and types (and lengths) measured with precision for comparison
 // Controls should be obvious in the main and the four #defines just below the #includes
 
+/* Please build for release to get good performance
+   Remember to set 'ulimit -s unlimited' to set the soft and hard stack limits to unlimited,
+   otherwise programs will die in startup!
+*/
+
 /*
     [Valverde Computing copyright notice]
 
