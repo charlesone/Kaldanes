@@ -20,7 +20,7 @@
 # which is the preliminary version of gcc -std=c++20 standard.
 #
 CXX = g++
-CPPFLAGS = -std=c++11 -Ofast # put pre-processor settings (-I, -D, etc) here
+CPPFLAGS = -std=c++11 -O3 # put pre-processor settings (-I, -D, etc) here
 CXXFLAGS = -Wall  # put compiler settings here
 LDFLAGS =         # put linker settings here
 SOURCES=$(wildcard *.cpp)
